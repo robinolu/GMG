@@ -211,6 +211,12 @@ const GRIPPERS = {
   tentra: {
     id: 'tentra', code: 'Tentra T3', name: 'Tentakelgreifer, 3 Finger', note: 'Testmodell in Originalgröße (Ø 104 mm, 166 mm hoch)',
     ready: false, range: { aussen: [16, 78], innen: null }, reach: 100, length: 166, word: 'Die Finger liegen',
+    load: () => loadTentra(),
+  },
+  pinza: {
+    id: 'pinza', code: 'Pinza adattiva', name: 'Adaptiver 2-Finger-Parallelgreifer', note: 'Testmodell in Originalgröße (ca. 180 mm hoch, Hub bis 85 mm)',
+    ready: false, range: { aussen: [0, 85], innen: [60, 140] }, reach: 74, length: 180, word: 'Beide Finger liegen',
+    load: () => loadPinza(),
   },
 };
 let A = GRIPPERS.capit;   // aktiver Greifer
@@ -278,12 +284,68 @@ async function loadTentra() {
   g.ready = true;
 }
 
+// Adaptiver Parallelgreifer: je Seite ein Parallelogramm aus zwei Hebeln (Drehpunkte A, B am Gehäuse),
+// das Fingerglied wird parallel verschoben. Winkel −20° = ganz offen (85 mm), +26° = Finger berühren sich.
+async function loadPinza() {
+  const data = await (await fetch(BASE + 'data/3d/pinza-adattiva.json')).json();
+  const g = GRIPPERS.pinza, root = new THREE.Group(), lift = new THREE.Group(), orient = new THREE.Group();
+  orient.rotation.set(0, Math.PI / 2, Math.PI);   // Finger zeigen nach unten, schließen entlang Z
+  lift.position.y = 149;                           // Fingerspitzen (offen) auf Höhe 0
+  lift.add(orient); root.add(lift);
+  const mat = {
+    gehaeuse: new THREE.MeshStandardMaterial({ color: 0x23292f, metalness: 0.4, roughness: 0.5 }),
+    hebel: new THREE.MeshStandardMaterial({ color: 0xa8b0ba, metalness: 0.85, roughness: 0.3 }),
+    finger: new THREE.MeshStandardMaterial({ color: 0x5b636c, metalness: 0.6, roughness: 0.4 }),
+  };
+  const parts = {};
+  for (const [name, d] of Object.entries(data.groups)) {
+    let geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(d.v, 3));
+    geo.setIndex(d.i);
+    geo = toCreasedNormals(geo, THREE.MathUtils.degToRad(35));
+    geo.boundsTree = new MeshBVH(geo);
+    const mesh = new THREE.Mesh(geo, mat[name.split('_')[0]]);
+    mesh.castShadow = mesh.receiveShadow = true;
+    mesh.matrixAutoUpdate = false;
+    orient.add(mesh);
+    parts[name] = mesh;
+  }
+  const Pv = data.pivots, OPEN = THREE.MathUtils.degToRad(-20), SHUT = THREE.MathUtils.degToRad(26);
+  const aboutZ = (px, py, a) => new THREE.Matrix4().makeTranslation(px, py, 0)
+    .multiply(new THREE.Matrix4().makeRotationZ(a)).multiply(new THREE.Matrix4().makeTranslation(-px, -py, 0));
+  g.set = (t) => {
+    const th = OPEN + (SHUT - OPEN) * t;
+    for (const [sfx, sg] of [['_r', 1], ['_l', -1]]) {
+      const a = sg * th;
+      const A = [sg * Pv.A[0], Pv.A[1]], B = [sg * Pv.B[0], Pv.B[1]];
+      const v = [sg * Pv.A2[0] - A[0], Pv.A2[1] - A[1]];
+      parts['hebel_a' + sfx].matrix.copy(aboutZ(A[0], A[1], a));
+      parts['hebel_b' + sfx].matrix.copy(aboutZ(B[0], B[1], a));
+      const dx = v[0] * Math.cos(a) - v[1] * Math.sin(a) - v[0], dy = v[0] * Math.sin(a) + v[1] * Math.cos(a) - v[1];
+      parts['finger' + sfx].matrix.makeTranslation(dx, dy, 0);
+    }
+    parts.gehaeuse.matrix.identity();
+    root.updateMatrixWorld(true);
+  };
+  const fingers = [parts.finger_r, parts.finger_l];
+  const plain = mat.finger;
+  g.paint = (st) => { for (const m of fingers) m.material = st === 'gegriffen' ? padContact : st === 'kollision' ? padCollide : plain; };
+  g.root = root; g.meshes = Object.values(parts); g.contact = fingers;
+  // Greifbereich aus den Fingern messen (entlang Z): innen = Abstand, außen = Gesamtbreite
+  const span = (t) => { g.set(t); const a = new THREE.Box3().setFromObject(parts.finger_r), b = new THREE.Box3().setFromObject(parts.finger_l);
+    const [lo, hi] = a.min.z < b.min.z ? [a, b] : [b, a]; return { gap: hi.min.z - lo.max.z, outer: hi.max.z - lo.min.z }; };
+  const o = span(0), c = span(1);
+  g.range = { aussen: [Math.max(0, c.gap), o.gap], innen: [c.outer, o.outer] };
+  g.set(0);
+  g.ready = true;
+}
+
 async function selectGripper(id) {
   const g = GRIPPERS[id];
   if (!g.ready) {
     $('#kfg-status').className = 'kfg__status is-info';
     $('#kfg-status').textContent = `${g.code} wird geladen …`;
-    try { await loadTentra(); } catch (e) { $('#kfg-status').textContent = `${g.code} konnte nicht geladen werden.`; return; }
+    try { await g.load(); } catch (e) { $('#kfg-status').textContent = `${g.code} konnte nicht geladen werden.`; return; }
   }
   if (A.root) scene.remove(A.root);
   A = g;

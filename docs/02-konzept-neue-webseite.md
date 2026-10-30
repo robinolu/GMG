@@ -47,4 +47,4 @@ barrierearm, einfach pflegbares CMS.
 - **Einsatzszene beim Drüberfahren:** nur am Startbild, nur per Maus; Umgebung in hellen Graustufen, Greifer farbig. KI-Szene (Roboter + Halle) ohne Karton, echter Greifer wird pixelgenau darübergelegt.
 - **Veröffentlichung:** ausschließlich unter https://robinolu.github.io/GMG/
 - **Greifer-Konfigurator:** auf der Startseite direkt unter dem 3D-Greifer und als eigene Seite. STEP/STL bis 100 MB (bleibt im Browser), Grundformen Zylinder, Quader, Rohr/Ring, Kasten offen mit eigenen Maßen, Drehen um alle Achsen, Greifer verfahren (hoch/runter, links/rechts, vorne/hinten), außen und innen greifen, Greifer in echter Größe.
-- **Greifer mit 3D-Modell im Konfigurator:** Capit (Gelenk-Parallelgreifer) und Tentra T3 (Tentakelgreifer), beide Testmodelle. GMG-Greifer folgen mit deren STEP-Dateien.
+- **Greifer mit 3D-Modell im Konfigurator:** Capit (Gelenk-Parallelgreifer), Tentra T3 (Tentakelgreifer) und Pinza adattiva (adaptiver 2-Finger-Parallelgreifer), alles Testmodelle. GMG-Greifer folgen mit deren STEP-Dateien.
