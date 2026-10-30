@@ -254,16 +254,6 @@ def video_grid(videos, fallback):
             '<p class="video__hint">Die Videos werden erst nach Klick von YouTube geladen.</p>')
 
 
-def gripper(r):
-    """Hero-Greifer B02 aus Ebenen; main.js öffnet ihn beim Scrollen (siehe tools/hero_layers.py)."""
-    geo = (ROOT / "assets" / "img" / "hero" / "geometrie.json").read_text(encoding="utf-8")
-    layers = ["gehaeuse", "schiene-oben", "schiene-unten", "hebel-1", "hebel-2", "hebel-3"]
-    images = "".join(f'<image data-part="{n}" href="{r}assets/img/hero/{n}.webp" x="0" y="0" width="1024" height="768"/>'
-                     for n in layers)
-    return (f'<svg class="gripper" viewBox="190 78 680 690" role="img" aria-label="GMG-Greifer B02 öffnet sich" '
-            f"data-geo='{geo}'>{images}</svg>")
-
-
 def build_home():
     r = ""
     fams = "".join(family_card(r, f) for f in FAMILIES)
@@ -286,7 +276,7 @@ def build_home():
         <span>{icon('check')}Kundenspezifische Lösungen</span>
       </div>
     </div>
-    <div class="hero__visual">{gripper(r)}</div>
+    <div class="hero__visual"><img src="{img(r, 'b02')}" alt="GMG-Greifer B02"></div>
   </div>
 </section>
 

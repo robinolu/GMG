@@ -36,8 +36,6 @@ def rewrite(fragment, page_dir):
         return f'{"data-img" if attr == "src" else "data-img-full"}="{name}"'
 
     fragment = re.sub(r'href="([^"]*)"', href, fragment)
-    fragment = re.sub(r'(?<=<image )([^>]*?)href="(?:\.\./)*assets/img/hero/([\w.-]+)\.webp"',
-                      lambda m: f'{m.group(1)}data-img-href="{m.group(2)}"', fragment)
     return re.sub(r'(src|data-src)="(?:\.\./)*assets/(?:img|logo)/(?:produkte/)?([\w.-]+)\.(?:png|svg|webp)"', img, fragment)
 
 
@@ -70,7 +68,6 @@ var GMG_TITLES = {json.dumps(titles, ensure_ascii=False)};
 function gmgImages(root) {{
   root.querySelectorAll('[data-img]').forEach(function (el) {{ el.src = GMG_IMG[el.dataset.img] || ''; }});
   root.querySelectorAll('[data-img-full]').forEach(function (el) {{ el.dataset.src = GMG_IMG[el.dataset.imgFull] || ''; }});
-  root.querySelectorAll('[data-img-href]').forEach(function (el) {{ el.setAttribute('href', GMG_IMG[el.dataset.imgHref] || ''); }});
 }}
 function gmgRoute() {{
   var route = decodeURIComponent(location.hash.replace(/^#\\/?/, '').split('?')[0]).replace(/\\/$/, '');
