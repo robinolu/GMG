@@ -93,7 +93,7 @@ def chips(p):
     return out
 
 
-def page(path, title, body, active="", description=""):
+def page(path, title, body, active="", description="", scripts=()):
     depth = path.count("/") + 1 if path else 0
     r = "../" * depth
     nav = [("Produkte", "produkte/index.html", "produkte"), ("Über GMG", "ueber-gmg/index.html", "ueber"),
@@ -177,7 +177,7 @@ def page(path, title, body, active="", description=""):
   <a class="btn btn--ghost" href="{PHONE_LINK}">{icon('phone')}Anrufen</a>
   <a class="btn btn--primary" href="{r}kontakt/index.html">{icon('mail')}Anfrage</a>
 </div>
-<script src="{r}assets/js/main.js"></script>
+<script src="{r}assets/js/main.js"></script>{"".join(f'<script src="{r}{s}" defer></script>' for s in scripts)}
 </body>
 </html>
 """
@@ -276,7 +276,13 @@ def build_home():
         <span>{icon('check')}Kundenspezifische Lösungen</span>
       </div>
     </div>
-    <div class="hero__visual"><img src="{img(r, 'b02')}" alt="GMG-Greifer B02"></div>
+    <div class="hero__visual">
+      <div class="hero3d" data-greifer3d>
+        <img class="hero3d__fallback" src="{img(r, 'b02')}" alt="GMG-Greifer B02">
+        <canvas aria-label="3D-Modell eines Greifers, öffnet sich beim Scrollen"></canvas>
+      </div>
+      <p class="hero3d__note">3D-Platzhaltermodell (Test) – wird durch einen GMG-Greifer ersetzt</p>
+    </div>
   </div>
 </section>
 
@@ -336,7 +342,7 @@ def build_home():
 
 {cta_band(r)}
 """
-    page("", "", body)
+    page("", "", body, scripts=["assets/js/greifer3d.js"])
 
 
 def build_overview():
