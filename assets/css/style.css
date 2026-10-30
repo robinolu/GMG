@@ -392,4 +392,8 @@ button.kfg__card { font: inherit; text-align: left; cursor: pointer; width: 100%
   .footer__grid { grid-template-columns: 1fr; }
 }
 .hero3d.is-loading .hero3d__fallback { visibility: hidden; }
-.hero3d[data-roboter3d] { background: #e6e8eb; border-radius: var(--radius); overflow: hidden; }
+/* Roboter-Szene ohne Rahmen, läuft zu den Rändern weich in den Gitter-Hintergrund aus */
+.hero3d[data-roboter3d] canvas {
+  -webkit-mask-image: radial-gradient(ellipse 72% 70% at 50% 46%, #000 62%, transparent 100%);
+  mask-image: radial-gradient(ellipse 72% 70% at 50% 46%, #000 62%, transparent 100%);
+}

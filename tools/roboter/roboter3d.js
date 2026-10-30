@@ -1,6 +1,6 @@
 // Startseite: Roboter (ABB IRB 120) mit Testgreifer Tentra T3 setzt ein Kugellager (Kurvenrolle) von einem
 // Tisch auf den anderen. Der Ablauf folgt dem Scrollen: runter = greifen, heben, umsetzen, loslassen;
-// hoch = alles rückwärts. Raum, Tische und Roboter in Weiß/Grau, damit der Blick auf Greifer und Teil fällt.
+// hoch = alles rückwärts. Tische und Roboter in Weiß/Grau vor dem Seitenhintergrund, damit der Blick auf Greifer und Teil fällt.
 // Roboter-Koordinaten wie im STEP (mm, Y oben, Arm zeigt in −X), siehe tools/roboter/export.py.
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
@@ -11,23 +11,20 @@ const box = document.querySelector('[data-roboter3d]');
 if (!box) throw new Error('kein 3D-Bereich');
 const BASE = box.dataset.base || '';
 const canvas = box.querySelector('canvas');
-const renderer = new THREE.WebGLRenderer({ canvas, antialias: true });
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 renderer.toneMapping = THREE.ACESFilmicToneMapping;
 renderer.toneMappingExposure = 1.0;
 renderer.shadowMap.enabled = true;
 renderer.shadowMap.type = THREE.PCFSoftShadowMap;
 
-const ROOM = 0xe6e8eb;
-const scene = new THREE.Scene();
-scene.background = new THREE.Color(ROOM);
-scene.fog = new THREE.Fog(ROOM, 2600, 5200);
+const scene = new THREE.Scene();      // durchsichtig: die Szene steht direkt vor dem Gitter-Hintergrund
 scene.environment = new THREE.PMREMGenerator(renderer).fromScene(new RoomEnvironment(renderer), 0.04).texture;
 scene.environmentIntensity = 0.8;
 const camera = new THREE.PerspectiveCamera(30, 1, 10, 10000);
 
 const sun = new THREE.DirectionalLight(0xffffff, 1.6);
-sun.position.set(-600, 2400, 800);
+sun.position.set(-900, 2400, -500);
 sun.castShadow = true;
 sun.shadow.mapSize.set(2048, 2048);
 Object.assign(sun.shadow.camera, { left: -900, right: 900, top: 900, bottom: -900, near: 100, far: 3500 });
@@ -37,8 +34,6 @@ scene.add(sun, new THREE.HemisphereLight(0xffffff, 0xcfd3d8, 0.55));
 
 // --- Raum und Tische (mm) ---
 const MAT = {
-  raum: new THREE.MeshStandardMaterial({ color: 0xe9ebee, roughness: 0.95 }),
-  boden: new THREE.MeshStandardMaterial({ color: 0xdfe2e6, roughness: 0.9 }),
   tisch: new THREE.MeshStandardMaterial({ color: 0xf1f2f4, roughness: 0.7 }),
   bein: new THREE.MeshStandardMaterial({ color: 0xc9cdd3, metalness: 0.3, roughness: 0.5 }),
   roboter: new THREE.MeshStandardMaterial({ color: 0xf3f4f5, metalness: 0.05, roughness: 0.42 }),
@@ -47,42 +42,35 @@ const MAT = {
   stahlMatt: new THREE.MeshStandardMaterial({ color: 0xbfc5cc, metalness: 1.0, roughness: 0.3 }),
   dichtung: new THREE.MeshStandardMaterial({ color: 0x1d2024, metalness: 0.0, roughness: 0.55 }),
 };
-const floor = new THREE.Mesh(new THREE.PlaneGeometry(8000, 8000), MAT.boden);
+// nur der Schatten auf dem Boden, kein Raum
+const floor = new THREE.Mesh(new THREE.PlaneGeometry(8000, 8000), new THREE.ShadowMaterial({ opacity: 0.12 }));
 floor.rotation.x = -Math.PI / 2;
 floor.receiveShadow = true;
-const wall = new THREE.Mesh(new THREE.PlaneGeometry(8000, 4000), MAT.raum);
-wall.position.set(650, 2000, 0);
-wall.rotation.y = -Math.PI / 2;
-wall.receiveShadow = true;
-const wall2 = wall.clone();
-wall2.position.set(0, 2000, -1300);
-wall2.rotation.y = 0;
-scene.add(floor, wall, wall2);
+scene.add(floor);
 
 const PED = 420;              // Sockel unter dem Roboter
 const TABLE_H = PED + 300;    // Tischhöhe
 const TOP = 30;               // Plattenstärke
 function table(x, z) {
   const g = new THREE.Group();
-  const top = new THREE.Mesh(new THREE.BoxGeometry(320, TOP, 260), MAT.tisch);
+  const top = new THREE.Mesh(new THREE.BoxGeometry(280, TOP, 300), MAT.tisch);
   top.position.y = TABLE_H - TOP / 2;
   g.add(top);
   for (const sx of [-1, 1]) for (const sz of [-1, 1]) {
     const leg = new THREE.Mesh(new THREE.BoxGeometry(24, TABLE_H - TOP, 24), MAT.bein);
-    leg.position.set(sx * 136, (TABLE_H - TOP) / 2, sz * 106);
+    leg.position.set(sx * 126, (TABLE_H - TOP) / 2, sz * 136);
     g.add(leg);
   }
   g.traverse((m) => { m.castShadow = m.receiveShadow = true; });
   g.position.set(x, 0, z);
-  g.lookAt(0, 0, 0);
   scene.add(g);
 }
 // Aufnahme- und Ablageplatz (Lagermitte auf der Tischplatte), links und rechts vor dem Roboter
-const R_PICK = 380, ANG = THREE.MathUtils.degToRad(42);
-const PICK = new THREE.Vector3(-R_PICK * Math.cos(ANG), TABLE_H, R_PICK * Math.sin(ANG));
-const PLACE = new THREE.Vector3(-R_PICK * Math.cos(ANG), TABLE_H, -R_PICK * Math.sin(ANG));
-table(PICK.x * 1.12, PICK.z * 1.12);
-table(PLACE.x * 1.12, PLACE.z * 1.12);
+// Tische gerade vor dem Roboter: links aufnehmen, rechts ablegen (+Z = rechts im Bild)
+const PICK = new THREE.Vector3(-320, TABLE_H, -285);
+const PLACE = new THREE.Vector3(-320, TABLE_H, 285);
+table(-330, -320);
+table(-330, 320);
 
 // --- Geometrie laden ---
 function mesh(v, i, mat, crease = 35) {
@@ -213,7 +201,7 @@ function pose(q) {
 
 const ease = (x) => x * x * (3 - 2 * x);
 const seg = (s, a, b) => ease(THREE.MathUtils.clamp((s - a) / (b - a), 0, 1));
-const LIFT = 120;
+const LIFT = 110;
 const tcp = new THREE.Vector3(), tmp = new THREE.Vector3();
 // Lage auf dem Bogen um den Roboter: Winkel und Abstand interpolieren, damit der Arm sauber herumschwenkt
 function arc(a, b, k, y) {
@@ -242,9 +230,9 @@ function resize() {
   const w = box.clientWidth, h = box.clientHeight;
   renderer.setSize(w, h, false);
   camera.aspect = w / h;
-  const dist = w / h < 1.2 ? 2150 : 1750;
-  camera.position.set(-dist * 0.93, TABLE_H + dist * 0.33, dist * 0.2);
-  camera.lookAt(-150, TABLE_H + 190, 0);
+  const dist = w / h < 1.2 ? 2350 : 1800;
+  camera.position.set(-dist, TABLE_H + dist * 0.22, 0);
+  camera.lookAt(-150, TABLE_H + 40, 0);
   camera.updateProjectionMatrix();
 }
 
@@ -277,11 +265,9 @@ const fromScroll = () => {
   const bearing = buildBearing(data.lager);
   scene.add(bearing);
   // weitere Lager als Vorrat auf Tisch A
-  for (const [dx, dz] of [[-90, 70], [-90, -60], [60, 95]]) {
+  for (const [dx, dz] of [[-85, -95], [85, -95], [-85, 60]]) {
     const b = bearing.clone();
-    const dir = new THREE.Vector3(-PICK.x, 0, -PICK.z).normalize();
-    const side = new THREE.Vector3(dir.z, 0, -dir.x);
-    b.position.copy(PICK).addScaledVector(dir, dx).addScaledVector(side, dz).setY(TABLE_H + 7);
+    b.position.set(PICK.x + dx, TABLE_H + 7, PICK.z + dz);
     scene.add(b);
   }
   resize();
