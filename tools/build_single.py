@@ -36,7 +36,9 @@ def rewrite(fragment, page_dir):
         return f'{"data-img" if attr == "src" else "data-img-full"}="{name}"'
 
     fragment = re.sub(r'href="([^"]*)"', href, fragment)
-    return re.sub(r'(src|data-src)="(?:\.\./)*assets/(?:img|logo)/(?:produkte/)?([\w.-]+)\.(?:png|svg)"', img, fragment)
+    fragment = re.sub(r'(?<=<image )([^>]*?)href="(?:\.\./)*assets/img/hero/([\w.-]+)\.webp"',
+                      lambda m: f'{m.group(1)}data-img-href="{m.group(2)}"', fragment)
+    return re.sub(r'(src|data-src)="(?:\.\./)*assets/(?:img|logo)/(?:produkte/)?([\w.-]+)\.(?:png|svg|webp)"', img, fragment)
 
 
 def main():
@@ -52,7 +54,10 @@ def main():
 
     shell = rewrite((ROOT / "index.html").read_text(encoding="utf-8"), ".")
     images = {p.stem: "data:image/png;base64," + base64.b64encode(p.read_bytes()).decode()
-              for p in sorted((ROOT / "assets" / "img").rglob("*.png"))}
+              for p in sorted((ROOT / "assets" / "img").rglob("*.png"))
+              if p.parent.name == "img"}
+    images.update({p.stem: "data:image/webp;base64," + base64.b64encode(p.read_bytes()).decode()
+                   for p in sorted((ROOT / "assets" / "img").rglob("*.webp"))})
     images.update({p.stem: "data:image/svg+xml;base64," + base64.b64encode(p.read_bytes()).decode()
                    for p in sorted((ROOT / "assets" / "logo").glob("gmg-3d-dezent*.svg"))})
     css = (ROOT / "assets" / "css" / "style.css").read_text(encoding="utf-8")
@@ -65,6 +70,7 @@ var GMG_TITLES = {json.dumps(titles, ensure_ascii=False)};
 function gmgImages(root) {{
   root.querySelectorAll('[data-img]').forEach(function (el) {{ el.src = GMG_IMG[el.dataset.img] || ''; }});
   root.querySelectorAll('[data-img-full]').forEach(function (el) {{ el.dataset.src = GMG_IMG[el.dataset.imgFull] || ''; }});
+  root.querySelectorAll('[data-img-href]').forEach(function (el) {{ el.setAttribute('href', GMG_IMG[el.dataset.imgHref] || ''); }});
 }}
 function gmgRoute() {{
   var route = decodeURIComponent(location.hash.replace(/^#\\/?/, '').split('?')[0]).replace(/\\/$/, '');

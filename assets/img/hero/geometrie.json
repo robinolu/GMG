@@ -1,0 +1,1 @@
+{"axis": [0.918, -0.397], "open_top": [0, -1], "open_bottom": [0, 1], "travel": 24, "axial": 10, "size": [1024, 768], "pivots": {"hebel-1": [466, 492], "hebel-2": [533, 500], "hebel-3": [727, 383]}, "arm_vectors": {"hebel-1": [-29, 66], "hebel-2": [-33, 77], "hebel-3": [-87, 107]}}

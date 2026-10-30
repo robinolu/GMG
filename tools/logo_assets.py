@@ -59,7 +59,7 @@ def main():
     logo = Image.open(IMG / "gmg-logo-3d.png").convert("RGBA")
     logo.thumbnail((300, 380), Image.LANCZOS)
     im.paste(logo, (90, (H - 72 - logo.height) // 2), logo)
-    prod = Image.open(IMG / "produkte" / "home-02.png").convert("RGBA")
+    prod = Image.open(IMG / "produkte" / "home-02.webp").convert("RGBA")
     prod.thumbnail((470, 380))
     im.paste(prod, (W - prod.width - 50, 150), prod)
     bold = ImageFont.truetype(str(FONTS / "Inter-Bold.otf"), 52)

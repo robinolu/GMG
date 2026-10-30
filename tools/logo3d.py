@@ -7,11 +7,10 @@ schlankere Module (leicht verdünnt), Licht von links oben, eine Materialstärke
 nach rechts unten und ein weicher Schatten. Schriftzug „GMG“ in Arial-ähnlicher
 Schrift (Liberation Sans Bold) als Pfad, M blau, wie im Original.
 
-Aufruf:  python3 tools/logo3d.py  →  assets/logo/gmg-3d-*.svg + logo-varianten/index.html
+Aufruf:  python3 tools/logo3d.py  →  assets/logo/gmg-*.svg
 Benötigt: numpy, pillow, potracer, fonttools.
 """
 import pathlib
-import re
 
 import numpy as np
 import potrace
@@ -136,37 +135,11 @@ def build(key, st, blue, stem):
 def main():
     OUT.mkdir(parents=True, exist_ok=True)
     blue, stem = masks()
-    results = {}
     for key, st in STYLES.items():
         stacked, only = build(key, st, blue, stem)
         (OUT / f"gmg-{key}.svg").write_text(stacked, encoding="utf-8")
         (OUT / f"gmg-{key}-bildmarke.svg").write_text(only, encoding="utf-8")
-        results[key] = (stacked, only)
-    page(results)
     print("Fertig:", ", ".join(f"gmg-{k}.svg" for k in STYLES))
-
-
-def page(results):
-    rows = [f"""<section class="lv"><div class="lv__head"><h2>Original (heute)</h2><p>Web-Grafik von gmg-system.com, 89 × 125 Pixel. Vergrößert wird sie unscharf.</p></div>
-<div class="lv__row"><div class="lv__box"><img src="../assets/img/gmg-logo-mark.png" alt="Original" style="height:260px;width:auto"><span>Original</span></div>
-<div class="lv__box"><img src="../assets/img/gmg-logo-mark.png" alt="" style="height:64px;width:auto"><img src="../assets/img/gmg-logo-mark.png" alt="" style="height:32px;width:auto"><span>klein</span></div></div></section>"""]
-    for key, st in STYLES.items():
-        stacked, only = results[key]
-        rows.append(f"""<section class="lv"><div class="lv__head"><h2>{st['name']}</h2><p>{st['desc']}</p></div>
-<div class="lv__row"><div class="lv__box"><div class="lv__svg" style="height:260px">{stacked}</div><span>Hochformat</span></div>
-<div class="lv__box lv__box--dark"><div class="lv__svg" style="height:260px">{stacked}</div><span>auf hellgrauem Grund</span></div>
-<div class="lv__box"><div class="lv__sizes"><div style="height:64px">{only}</div><div style="height:32px">{only}</div><div style="height:16px">{only}</div></div><span>klein</span></div></div></section>""")
-    old = (ROOT / "logo-varianten" / "index.html").read_text(encoding="utf-8")
-    style = re.search(r"<style>.*?</style>", old, re.S).group(0).replace(
-        ".lv__box--blue", ".lv__box--dark { background:#eef1f4; } .lv__box--blue")
-    html = f"""<!doctype html>
-<html lang="de"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
-<meta name="robots" content="noindex, nofollow"><title>Logo-Varianten | GMG Entwurf</title>{style}</head><body><div class="wrap">
-<h1>GMG-Logo: Original, schärfer und plastischer</h1>
-<p class="intro">Die Form bleibt exakt die des heutigen Logos. Sie wurde als Vektor nachgezeichnet und ist in jeder Größe gestochen scharf. Varianten 2 und 3 machen die Module schlanker und geben der Hand Tiefe, damit sie mehr nach Roboterhand aussieht.</p>
-{''.join(rows)}
-</div></body></html>"""
-    (ROOT / "logo-varianten" / "index.html").write_text(html, encoding="utf-8")
 
 
 if __name__ == "__main__":

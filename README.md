@@ -7,6 +7,9 @@ Statischer Entwurf der neuen Webseite für GMG Gesellschaft für modulare Greife
 - `data/produkte.json` – alle Produktdaten (Texte, Merkmale, Downloads, Videos)
 - `tools/build.py` – erzeugt alle Seiten neu: `python3 tools/build.py`
 - `tools/build_single.py` – packt alles in eine Vorschau-Datei: `python3 tools/build_single.py`
+- `tools/produktbilder.py` – Produktbilder in hoher Auflösung (Datenblatt-Renderings aus `data/renders/`, sonst hochgerechnet)
+- `tools/hero_layers.py` – zerlegt den B02 für die Scroll-Animation auf der Startseite
+- `tools/logo3d.py`, `tools/logo_assets.py` – Logo (Vektor, 3D) und daraus Favicon, App-Symbol, Link-Vorschaubild
 - `docs/` – Inhaltsinventar der alten Seite und Konzept
 
 ## Ansehen
