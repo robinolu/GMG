@@ -1,0 +1,1112 @@
+[
+ {
+  "slug": "hexagonal",
+  "name": "Hexagonale Bauform",
+  "teaser": "2- bis 6-Finger-Greifer mit kreisförmiger Anordnung der Greiferfinger.",
+  "image": "c03",
+  "series": [
+   {
+    "slug": "c03",
+    "code": "C03",
+    "title": "Hexagonale Bauform C03",
+    "subtitle": "Zwei- bis Sechsfinger Greifer",
+    "images": [
+     "c03"
+    ],
+    "features": [
+     "zentrische, axialverschiebungsfreie und parallele oder schwenkende Fingerbewegung, auch kombinierbar",
+     "variable Fingerlänge, -anzahl und -position",
+     "innen- und außengreifend",
+     "wartungs- und schmierungsfreie Gleitlager",
+     "keine Selbsthemmung",
+     "mehrfache Positionsabfrage durch Signalgeber (optional)"
+    ],
+    "notes": [],
+    "downloads": [
+     {
+      "label": "Technisches Datenblatt",
+      "file": "c03_technisches_datenblatt.pdf"
+     },
+     {
+      "label": "Ersatzteilliste",
+      "file": "c103_ersatzteilliste.pdf"
+     },
+     {
+      "label": "Betriebsanleitung",
+      "file": "c03_betriebsanleitung.pdf"
+     }
+    ],
+    "videos": [
+     {
+      "id": "nCQhSa9uJDI",
+      "label": "Bewegungsform A"
+     },
+     {
+      "id": "fPbdTDxr8ZE",
+      "label": "Bewegungsform B"
+     },
+     {
+      "id": "oqlQGDTYl3I",
+      "label": "Bewegungsform C"
+     }
+    ]
+   },
+   {
+    "slug": "c06",
+    "code": "C06",
+    "title": "Hexagonale Bauform C06",
+    "subtitle": "Zwei- bis Sechsfinger Hohlgreifer",
+    "images": [
+     "c06"
+    ],
+    "features": [
+     "zentrische, axialverschiebungsfreie und parallele oder schwenkende Fingerbewegung, auch kombinierbar",
+     "variable Fingerlänge, -anzahl und -position",
+     "innen- und außengreifend",
+     "wartungs- und schmierungsfreie Gleitlager",
+     "durchgehend hohle Mitte (Ø38mm)",
+     "keine Selbsthemmung",
+     "beidseitige stufenlose Hubeinstellung mit Endlagendämpfung",
+     "mehrfache Positionsabfrage durch Signalgeber (optional)"
+    ],
+    "notes": [],
+    "downloads": [
+     {
+      "label": "Technisches Datenblatt",
+      "file": "c06_technisches_datenblatt.pdf"
+     },
+     {
+      "label": "Ersatzteilliste",
+      "file": "c106_ersatzteilliste.pdf"
+     },
+     {
+      "label": "Betriebsanleitung",
+      "file": "c06_betriebsanleitung.pdf"
+     }
+    ],
+    "videos": [
+     {
+      "id": "hX1FWTwcJkA",
+      "label": "Bewegungsform A"
+     },
+     {
+      "id": "ljoyk9Sdd4E",
+      "label": "Bewegungsform B"
+     },
+     {
+      "id": "yIQOEefjkeQ",
+      "label": "Bewegungsform C"
+     }
+    ]
+   },
+   {
+    "slug": "c10",
+    "code": "C10",
+    "title": "Hexagonale Bauform C10",
+    "subtitle": "Zwei- bis Sechsfinger Hohlgreifer",
+    "images": [
+     "c10"
+    ],
+    "features": [
+     "zentrische, axialverschiebungsfreie und parallele oder schwenkende Fingerbewegung, auch kombinierbar",
+     "variable Fingerlänge, -anzahl und -position",
+     "innen- und außengreifend",
+     "wartungs- und schmierungsfreie Gleitlager",
+     "durchgehend hohle Mitte (Ø75mm)",
+     "keine Selbsthemmung",
+     "beidseitige stufenlose Hubeinstellung mit Endlagendämpfung oder",
+     "Objektsicherung bei Energieausfall durch Gasdruckfedern (optional)",
+     "mehrfache Positionsabfrage durch Signalgeber (optional)"
+    ],
+    "notes": [],
+    "downloads": [
+     {
+      "label": "Technisches Datenblatt",
+      "file": "c10_technisches_datenblatt.pdf"
+     },
+     {
+      "label": "Ersatzteilliste",
+      "file": "c110_ersatzteilliste.pdf"
+     },
+     {
+      "label": "Betriebsanleitung",
+      "file": "c10_betriebsanleitung.pdf"
+     }
+    ],
+    "videos": [
+     {
+      "id": "gd3U6iWeCus",
+      "label": "Bewegungsform A"
+     },
+     {
+      "id": "Q3WWYrlpArI",
+      "label": "Bewegungsform B"
+     },
+     {
+      "id": "P-hxgOTlRe4",
+      "label": "Bewegungsform C"
+     }
+    ]
+   },
+   {
+    "slug": "c16",
+    "code": "C16",
+    "title": "Hexagonale Bauform C16",
+    "subtitle": "Zwei- bis Sechsfinger Hohlgreifer",
+    "images": [
+     "c16"
+    ],
+    "features": [
+     "zentrische, axialverschiebungsfreie und parallele oder schwenkende Fingerbewegung, auch kombinierbar",
+     "variable Fingerlänge, -anzahl und -position",
+     "innen- und außengreifend",
+     "wartungs- und schmierungsfreie Gleitlager",
+     "durchgehend hohle Mitte (Ø80mm)",
+     "keine Selbsthemmung",
+     "beidseitige stufenlose Hubeinstellung mit Endlagendämpfung oder",
+     "Objektsicherung bei Energieausfall durch Gasdruckfedern (optional)",
+     "mehrfache Positionsabfrage durch Signalgeber (optional)"
+    ],
+    "notes": [],
+    "downloads": [
+     {
+      "label": "Technisches Datenblatt",
+      "file": "c16_technisches_datenblatt.pdf"
+     },
+     {
+      "label": "Ersatzteilliste",
+      "file": "c116_ersatzteilliste.pdf"
+     },
+     {
+      "label": "Betriebsanleitung",
+      "file": "c16_betriebsanleitung.pdf"
+     }
+    ],
+    "videos": [
+     {
+      "id": "4_dZttO-gds",
+      "label": "Bewegungsform A"
+     },
+     {
+      "id": "NYZ8HPp4cFg",
+      "label": "Bewegungsform B"
+     },
+     {
+      "id": "FuoUrJr8d-A",
+      "label": "Bewegungsform C"
+     }
+    ]
+   },
+   {
+    "slug": "cp",
+    "code": "CP",
+    "title": "Bewegungsform CP",
+    "subtitle": "Schwenkende Bewegungsform mit parallelgeführten Backen",
+    "images": [
+     "cp"
+    ],
+    "features": [
+     "schwenkende Fingerbewegung mit stetig parallel geführten Backen",
+     "verfügbar für alle hexagonalen und rechteckigen modularen Greifer",
+     "universeller Backenträger an den Fingerspitzen",
+     "kundenspezifische Backen auf Anfrage erhältlich",
+     "variable Fingerlänge, -anzahl und -position",
+     "innen- und außengreifend",
+     "wartungs- und schmierungsfreie Gleitlager",
+     "durchgehend hohle Mitte (ab Größe 06)",
+     "keine Selbsthemmung",
+     "beidseitige stufenlose Hubeinstellung mit Endlagendämpfung oder",
+     "Objektsicherung bei Energieausfall durch Gasdruckfedern (optional)"
+    ],
+    "notes": [],
+    "downloads": [
+     {
+      "label": "Technisches Datenblatt",
+      "file": "cp_technisches_datenblatt.pdf"
+     }
+    ],
+    "videos": [
+     {
+      "id": "DBI6CPamTFk",
+      "label": ""
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "slug": "rechteckig",
+  "name": "Rechteckige Bauform",
+  "teaser": "2- bis 6-Finger-Greifer mit rechtwinkliger Anordnung der Greiferfinger.",
+  "image": "b02",
+  "series": [
+   {
+    "slug": "b02",
+    "code": "B02",
+    "title": "Rechteckige Bauform B02",
+    "subtitle": "Zwei- bis Sechsfinger Greifer",
+    "images": [
+     "b02"
+    ],
+    "features": [
+     "zentrische, axialverschiebungsfreie und parallele oder schwenkende Fingerbewegung, auch kombinierbar",
+     "variable Fingerlänge, -anzahl und -position",
+     "innen- und außengreifend",
+     "wartungs- und schmierungsfreie Gleitlager",
+     "keine Selbsthemmung",
+     "mehrfache Positionsabfrage durch Signalgeber (optional)"
+    ],
+    "notes": [],
+    "downloads": [
+     {
+      "label": "Technisches Datenblatt",
+      "file": "b02_technisches_datenblatt.pdf"
+     },
+     {
+      "label": "Ersatzteilliste",
+      "file": "b102_ersatzteilliste.pdf"
+     },
+     {
+      "label": "Betriebsanleitung",
+      "file": "b02_betriebsanleitung.pdf"
+     }
+    ],
+    "videos": [
+     {
+      "id": "0h01UmiRgck",
+      "label": "Bewegungsform A"
+     },
+     {
+      "id": "24_tSj_zwEM",
+      "label": "Bewegungsform B"
+     },
+     {
+      "id": "Gou0VrLVI7M",
+      "label": "Bewegungsform C"
+     }
+    ]
+   },
+   {
+    "slug": "a06",
+    "code": "A06",
+    "title": "Quadratische Bauform A06",
+    "subtitle": "Zwei- bis Vierfinger Hohlgreifer",
+    "images": [
+     "a06"
+    ],
+    "features": [
+     "zentrische, axialverschiebungsfreie und parallele oder schwenkende Fingerbewegung, auch kombinierbar",
+     "variable Fingerlänge, -anzahl und -position",
+     "innen- und außengreifend",
+     "wartungs- und schmierungsfreie Gleitlager",
+     "durchgehend hohle Mitte (Ø38mm)",
+     "keine Selbsthemmung",
+     "beidseitige stufenlose Hubeinstellung mit Endlagendämpfung",
+     "mehrfache Positionsabfrage durch Signalgeber (optional)"
+    ],
+    "notes": [],
+    "downloads": [
+     {
+      "label": "Technisches Datenblatt",
+      "file": "a06_technisches_datenblatt.pdf"
+     },
+     {
+      "label": "Ersatzteilliste",
+      "file": "a106_ersatzteilliste.pdf"
+     },
+     {
+      "label": "Betriebsanleitung",
+      "file": "a06_betriebsanleitung.pdf"
+     }
+    ],
+    "videos": [
+     {
+      "id": "951SeoXTHbw",
+      "label": "Bewegungsform A"
+     },
+     {
+      "id": "HWuWBB-IMgk",
+      "label": "Bewegungsform B"
+     },
+     {
+      "id": "kQC3x1K8qe4",
+      "label": "Bewegungsform C"
+     }
+    ]
+   },
+   {
+    "slug": "b10",
+    "code": "B10",
+    "title": "Quadratische Bauform B10",
+    "subtitle": "Zwei- bis Sechsfinger Hohlgreifer",
+    "images": [
+     "b10"
+    ],
+    "features": [
+     "zentrische, axialverschiebungsfreie und parallele oder schwenkende Fingerbewegung, auch kombinierbar",
+     "variable Fingerlänge, -anzahl und -position",
+     "innen- und außengreifend",
+     "wartungs- und schmierungsfreie Gleitlager",
+     "durchgehend hohle Mitte (Ø75mm)",
+     "keine Selbsthemmung",
+     "beidseitige stufenlose Hubeinstellung mit Endlagendämpfung oder",
+     "Objektsicherung bei Energieausfall durch Gasdruckfedern (optional)",
+     "mehrfache Positionsabfrage durch Signalgeber (optional)"
+    ],
+    "notes": [],
+    "downloads": [
+     {
+      "label": "Technisches Datenblatt",
+      "file": "b10_technisches_datenblatt.pdf"
+     },
+     {
+      "label": "Ersatzteilliste",
+      "file": "b110_ersatzteilliste.pdf"
+     },
+     {
+      "label": "Betriebsanleitung",
+      "file": "b10_betriebsanleitung.pdf"
+     }
+    ],
+    "videos": [
+     {
+      "id": "dNqMxA7W3TU",
+      "label": "Bewegungsform A"
+     },
+     {
+      "id": "DV6kGmkrSn8",
+      "label": "Bewegungsform B"
+     },
+     {
+      "id": "BQlHzNxhspU",
+      "label": "Bewegungsform C"
+     }
+    ]
+   },
+   {
+    "slug": "cp-r",
+    "code": "CP",
+    "title": "Bewegungsform CP",
+    "subtitle": "Schwenkende Bewegungsform mit parallelgeführten Backen",
+    "images": [
+     "cp-r"
+    ],
+    "features": [
+     "schwenkende Fingerbewegung mit stetig parallel geführten Backen",
+     "verfügbar für alle hexagonalen und rechteckigen modularen Greifer",
+     "universeller Backenträger an den Fingerspitzen",
+     "kundenspezifische Backen auf Anfrage erhältlich",
+     "variable Fingerlänge, -anzahl und -position",
+     "innen- und außengreifend",
+     "wartungs- und schmierungsfreie Gleitlager",
+     "durchgehend hohle Mitte (ab Größe 06)",
+     "keine Selbsthemmung",
+     "beidseitige stufenlose Hubeinstellung mit Endlagendämpfung oder",
+     "Objektsicherung bei Energieausfall durch Gasdruckfedern (optional)"
+    ],
+    "notes": [],
+    "downloads": [
+     {
+      "label": "Technisches Datenblatt",
+      "file": "cp_technisches_datenblatt.pdf"
+     }
+    ],
+    "videos": [
+     {
+      "id": "DBI6CPamTFk",
+      "label": ""
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "slug": "einzelfinger",
+  "name": "Einzelfinger",
+  "teaser": "Greifer- und Spannmodul E03 – Maschinenelement für Eigenkonstruktionen.",
+  "image": "e03",
+  "product": {
+   "slug": "einzelfinger",
+   "code": "E03",
+   "title": "Einzelfinger-Greifer- und Spannmodul E03",
+   "subtitle": "",
+   "images": [
+    "e03"
+   ],
+   "features": [
+    "parallele und axialverschiebungsfreie oder schwenkende Fingerbewegung",
+    "variable Fingerlänge",
+    "wartungs- und schmierungsfreie Gleitlager",
+    "keine Selbsthemmung",
+    "beliebige Greifform gestaltbar",
+    "mehrfache Positionsabfrage durch Signalgeber (optional)"
+   ],
+   "notes": [],
+   "downloads": [
+    {
+     "label": "Technisches Datenblatt",
+     "file": "e03_technisches_datenblatt.pdf"
+    },
+    {
+     "label": "Ersatzteilliste",
+     "file": "e103_ersatzteilliste.pdf"
+    },
+    {
+     "label": "Betriebsanleitung",
+     "file": "e03_betriebsanleitung.pdf"
+    }
+   ],
+   "videos": [
+    {
+     "id": "hoJLPC-HOuQ",
+     "label": "Bewegungsform A"
+    },
+    {
+     "id": "r-s8VrYXWO4",
+     "label": "Bewegungsform B"
+    },
+    {
+     "id": "pHrVsTXriCs",
+     "label": "Bewegungsform C"
+    }
+   ]
+  }
+ },
+ {
+  "slug": "winkelgreifer",
+  "name": "Winkelgreifer",
+  "teaser": "Abgedichtete 180°-Winkelgreifer in extrem robuster Ausführung.",
+  "image": "w06",
+  "series": [
+   {
+    "slug": "w03-winkelgreifer",
+    "code": "W03",
+    "title": "Abgedichteter 180° Winkelgreifer",
+    "subtitle": "Größe WG03",
+    "images": [
+     "w03",
+     "w03_02",
+     "w03_03",
+     "w03_04"
+    ],
+    "features": [
+     "hohe Greifkräfte",
+     "kurze Zykluszeit",
+     "komplett abgedichtete Mechanik",
+     "beliebige Einbaulage",
+     "wartungsfrei bis 10 Mio. Hübe",
+     "kompakte Bauweise",
+     "modularer Aufbau",
+     "mehrfache Positionsabfrage durch Signalgeber (optional)",
+     "eingebaute Endlagendämpfung beim Öffnen"
+    ],
+    "notes": [
+     "Mit Hilfe eines gegebenen Drehmomentes M, kann bei geschlossenen und parallel stehenden Greiferfingern der erforderlicher Luftdruck p erf wie folgt ermittelt werden: 0,5 bar ≤ p erf = M bar / 1,25 Nm ≤ 6 bar"
+    ],
+    "downloads": [
+     {
+      "label": "Technisches Datenblatt",
+      "file": "w03_technisches_datenblatt.pdf"
+     },
+     {
+      "label": "Ersatzteilliste W103",
+      "file": "w103_ersatzteilliste.pdf"
+     },
+     {
+      "label": "Ersatzteilliste W203",
+      "file": "w203_ersatzteilliste.pdf"
+     },
+     {
+      "label": "Betriebsanleitung",
+      "file": "w03_betriebsanleitung.pdf"
+     }
+    ],
+    "videos": [
+     {
+      "id": "fT-Ck6hMXMs",
+      "label": "Fingeranordnung A"
+     },
+     {
+      "id": "hVmhcMeceKQ",
+      "label": "Fingeranordnung I"
+     }
+    ]
+   },
+   {
+    "slug": "w05-winkelgreifer",
+    "code": "W05",
+    "title": "Abgedichteter 180° Winkelgreifer",
+    "subtitle": "Größe WG05",
+    "images": [
+     "w105-a"
+    ],
+    "features": [
+     "hohe Greifkräfte",
+     "kurze Zykluszeit",
+     "komplett abgedichtete Mechanik",
+     "beliebige Einbaulage",
+     "wartungsfrei bis 10 Mio. Hübe",
+     "kompakte Bauweise",
+     "modularer Aufbau",
+     "mehrfache Positionsabfrage durch Signalgeber (optional)",
+     "eingebaute Endlagendämpfung beim Öffnen"
+    ],
+    "notes": [
+     "Mit Hilfe eines gegebenen Drehmomentes M, kann bei geschlossenen und parallel stehenden Greiferfingern der erforderlicher Luftdruck p erf wie folgt ermittelt werden: 0,5 bar ≤ p erf = M bar / 10 Nm ≤ 6 bar"
+    ],
+    "downloads": [
+     {
+      "label": "Technisches Datenblatt",
+      "file": "w05_technisches_datenblatt.pdf"
+     },
+     {
+      "label": "Betriebsanleitung",
+      "file": "w06_betriebsanleitung.pdf"
+     }
+    ],
+    "videos": [
+     {
+      "id": "-tbeWq6Vmq8",
+      "label": "Fingeranordnung A"
+     },
+     {
+      "id": "iPFH85NFK3Q",
+      "label": "Fingeranordnung A"
+     },
+     {
+      "id": "gJtyM16LjLs",
+      "label": "Fingeranordnung I"
+     },
+     {
+      "id": "GjHmK6SsewI",
+      "label": "Fingeranordnung I"
+     }
+    ]
+   },
+   {
+    "slug": "w06-winkelgreifer",
+    "code": "W06",
+    "title": "Abgedichteter 180° Winkelgreifer",
+    "subtitle": "Größe WG06",
+    "images": [
+     "w06"
+    ],
+    "features": [
+     "hohe Greifkräfte",
+     "kurze Zykluszeit",
+     "komplett abgedichtete Mechanik",
+     "beliebige Einbaulage",
+     "wartungsfrei bis 10 Mio. Hübe",
+     "kompakte Bauweise",
+     "modularer Aufbau",
+     "mehrfache Positionsabfrage durch Signalgeber (optional)",
+     "eingebaute Endlagendämpfung beim Öffnen"
+    ],
+    "notes": [
+     "Mit Hilfe eines gegebenen Drehmomentes M, kann bei geschlossenen und parallel stehenden Greiferfingern der erforderlicher Luftdruck p erf wie folgt ermittelt werden: 0,5 bar ≤ p erf = M bar / 30 Nm ≤ 6 bar"
+    ],
+    "downloads": [
+     {
+      "label": "Technisches Datenblatt",
+      "file": "w06_technisches_datenblatt.pdf"
+     },
+     {
+      "label": "Ersatzteilliste W106",
+      "file": "w106_ersatzteilliste.pdf"
+     },
+     {
+      "label": "Ersatzteilliste W206",
+      "file": "w206_ersatzteilliste.pdf"
+     },
+     {
+      "label": "Betriebsanleitung",
+      "file": "w06_betriebsanleitung.pdf"
+     }
+    ],
+    "videos": [
+     {
+      "id": "30zPjx6oBcQ",
+      "label": "Fingeranordnung A"
+     },
+     {
+      "id": "VEWL85If_qI",
+      "label": "Fingeranordnung I"
+     }
+    ]
+   },
+   {
+    "slug": "w10-winkelgreifer",
+    "code": "W10",
+    "title": "Abgedichteter 180° Winkelgreifer",
+    "subtitle": "Größe WG10",
+    "images": [
+     "w10"
+    ],
+    "features": [
+     "hohe Greifkräfte",
+     "kurze Zykluszeit",
+     "komplett abgedichtete Mechanik",
+     "beliebige Einbaulage",
+     "wartungsfrei bis 10 Mio. Hübe",
+     "kompakte Bauweise",
+     "modularer Aufbau",
+     "mehrfache Positionsabfrage durch Signalgeber (optional)",
+     "eingebaute Endlagendämpfung beim Öffnen"
+    ],
+    "notes": [
+     "Mit Hilfe eines gegebenen Drehmomentes M, kann bei geschlossenen und parallel stehenden Greiferfingern der erforderlicher Luftdruck p erf wie folgt ermittelt werden: 0,5 bar ≤ p erf = M bar / 76,7 Nm ≤ 6 bar"
+    ],
+    "downloads": [
+     {
+      "label": "Technisches Datenblatt",
+      "file": "w10_technisches_datenblatt.pdf"
+     },
+     {
+      "label": "Ersatzteilliste W110",
+      "file": "w110_ersatzteilliste.pdf"
+     },
+     {
+      "label": "Ersatzteilliste W210",
+      "file": "w210_ersatzteilliste.pdf"
+     },
+     {
+      "label": "Betriebsanleitung",
+      "file": "w10_betriebsanleitung.pdf"
+     }
+    ],
+    "videos": [
+     {
+      "id": "VzMcf2_ACnI",
+      "label": "Fingeranordnung A"
+     },
+     {
+      "id": "B96PtuJr2CQ",
+      "label": "Fingeranordnung I"
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "slug": "parallel-winkelgreifer",
+  "name": "Parallel-Winkelgreifer",
+  "teaser": "2- oder 3-Finger-Greifer mit maximaler Fingeröffnung und vier angetriebenen Armen pro Backe. Eine GMG-Erfindung.",
+  "image": "pw206",
+  "series": [
+   {
+    "slug": "pw106",
+    "code": "PW106",
+    "title": "Abgedichteter 2-Finger-Parallel-Winkel-Greifer",
+    "subtitle": "Größe PW106",
+    "images": [
+     "pw106"
+    ],
+    "features": [
+     "parallele Fingerbewegung",
+     "innen und außen greifend",
+     "Finger schwenken über 100° zur Seite",
+     "sehr großer Hub",
+     "hohe Greifkraft",
+     "kurze Zykluszeit",
+     "komplett abgedichtete Mechanik",
+     "beliebige Einbaulage",
+     "wartungs- und schmierungsfrei für mehrere Millionen Greifzyklen",
+     "kompakte und robuste Bauweise",
+     "mehrfache Positionsabfrage durch Signalgeber (optional)"
+    ],
+    "notes": [],
+    "downloads": [
+     {
+      "label": "Technisches Datenblatt",
+      "file": "pw106_technisches_datenblatt.pdf"
+     }
+    ],
+    "videos": []
+   },
+   {
+    "slug": "pw206",
+    "code": "PW206",
+    "title": "Abgedichteter 2-Finger-Parallel-Winkel-Greifer",
+    "subtitle": "Größe PW206",
+    "images": [
+     "pw206"
+    ],
+    "features": [
+     "parallele Fingerbewegung",
+     "aus Greifbereich wegschwenkende Finger",
+     "riesiger Hub",
+     "hohe Greifkräfte",
+     "kurze Zykluszeit",
+     "komplett abgedichtete Mechanik",
+     "beliebige Einbaulage",
+     "wartungsfrei bis 10 Mio. Hübe",
+     "kompakte Bauweise",
+     "mehrfache Positionsabfrage durch Signalgeber (optional)"
+    ],
+    "notes": [],
+    "downloads": [
+     {
+      "label": "Technisches Datenblatt",
+      "file": "pw206_technisches_datenblatt.pdf"
+     }
+    ],
+    "videos": [
+     {
+      "id": "iqKLYKyEpi4",
+      "label": ""
+     }
+    ]
+   },
+   {
+    "slug": "pw306",
+    "code": "PW306",
+    "title": "Abgedichteter 3-Finger-Parallel-Winkel-Greifer",
+    "subtitle": "Größe PW306",
+    "images": [
+     "pw306"
+    ],
+    "features": [
+     "parallele Fingerbewegung",
+     "aus Greifbereich wegschwenkende Finger",
+     "riesiger Hub",
+     "hohe Greifkräfte",
+     "kurze Zykluszeit",
+     "komplett abgedichtete Mechanik",
+     "beliebige Einbaulage",
+     "wartungsfrei bis 10 Mio. Hübe",
+     "kompakte Bauweise",
+     "mehrfache Positionsabfrage durch Signalgeber (optional)"
+    ],
+    "notes": [],
+    "downloads": [
+     {
+      "label": "Technisches Datenblatt",
+      "file": "pw306_technisches_datenblatt.pdf"
+     }
+    ],
+    "videos": [
+     {
+      "id": "-8pROMN_QsU",
+      "label": ""
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "slug": "schwerlast",
+  "name": "Schwerlastgreifer",
+  "teaser": "Modularer Greifertyp mit bis zu 850 Nm Belastbarkeit pro Achse und Finger.",
+  "image": "s310",
+  "series": [
+   {
+    "slug": "sx10",
+    "code": "SX10",
+    "title": "Einzelmodul Schwerlastgreifer",
+    "subtitle": "Sx10",
+    "images": [
+     "sx10"
+    ],
+    "features": [
+     "innen- und außengreifend mit beliebiger Geometrie und Fingerzahl",
+     "parallele Fingerbewegung",
+     "Einsatz langer Finger in unterschiedlichen Positionen (Finger optional)",
+     "großer Hub mit beidseitiger Endlagendämpfung",
+     "hohe Greifkräfte, optional mit Objektsicherung bei Energieausfall",
+     "Aufnahme hoher Momente in alle drei Richtungen",
+     "kurze Zykluszeit (unter 2 s)",
+     "kompakte Bauweise, geringes Eigengewicht",
+     "ab dem 3-Finger-Zentrischgreifer mit durchgehend hohler Mitte",
+     "wartungs- und schmierungsfreie Gleitlager",
+     "mehrfache Positionsabfrage durch Signalgeber (optional)"
+    ],
+    "notes": [],
+    "downloads": [
+     {
+      "label": "Technisches Datenblatt",
+      "file": "sx10_technisches_datenblatt.pdf"
+     }
+    ],
+    "videos": []
+   },
+   {
+    "slug": "s210",
+    "code": "S210",
+    "title": "Zweifinger Schwerlast-Parallelgreifer",
+    "subtitle": "S210",
+    "images": [
+     "s210"
+    ],
+    "features": [
+     "innen- und außengreifend",
+     "parallele Fingerbewegung",
+     "Einsatz langer Finger in unterschiedlichen Positionen (Finger optional)",
+     "großer Hub mit beidseitiger Endlagendämpfung",
+     "hohe Greifkräfte, optional mit Objektsicherung bei Energieausfall",
+     "Aufnahme hoher Momente in alle drei Richtungen",
+     "kurze Zykluszeit (unter 2 s)",
+     "kompakte Bauweise, geringes Eigengewicht",
+     "wartungs- und schmierungsfreie Gleitlager",
+     "mehrfache Positionsabfrage durch Signalgeber (optional)"
+    ],
+    "notes": [],
+    "downloads": [
+     {
+      "label": "Technisches Datenblatt",
+      "file": "sx10_technisches_datenblatt.pdf"
+     }
+    ],
+    "videos": []
+   },
+   {
+    "slug": "s310",
+    "code": "S310",
+    "title": "Dreifinger Schwerlast-Zentrischgreifer",
+    "subtitle": "S310",
+    "images": [
+     "s310"
+    ],
+    "features": [
+     "innen- und außengreifend",
+     "parallele Fingerbewegung",
+     "Einsatz langer Finger in unterschiedlichen Positionen (Finger optional)",
+     "großer Hub mit beidseitiger Endlagendämpfung",
+     "hohe Greifkräfte, optional mit Objektsicherung bei Energieausfall",
+     "Aufnahme hoher Momente in alle drei Richtungen",
+     "kurze Zykluszeit (unter 2 s)",
+     "kompakte Bauweise, geringes Eigengewicht",
+     "durchgehend hohle Mitte",
+     "wartungs- und schmierungsfreie Gleitlager",
+     "mehrfache Positionsabfrage durch Signalgeber (optional)"
+    ],
+    "notes": [],
+    "downloads": [
+     {
+      "label": "Technisches Datenblatt",
+      "file": "sx10_technisches_datenblatt.pdf"
+     }
+    ],
+    "videos": [
+     {
+      "id": "FLs6g3Z5qdc",
+      "label": ""
+     }
+    ]
+   },
+   {
+    "slug": "s410",
+    "code": "S410",
+    "title": "Vierfinger Schwerlast-Zentrischgreifer",
+    "subtitle": "S410",
+    "images": [
+     "s410"
+    ],
+    "features": [
+     "innen- und außengreifend",
+     "parallele Fingerbewegung",
+     "Einsatz langer Finger in unterschiedlichen Positionen (Finger optional)",
+     "großer Hub mit beidseitiger Endlagendämpfung",
+     "hohe Greifkräfte, optional mit Objektsicherung bei Energieausfall",
+     "Aufnahme hoher Momente in alle drei Richtungen",
+     "kurze Zykluszeit (unter 2 s)",
+     "kompakte Bauweise, geringes Eigengewicht",
+     "durchgehend hohle Mitte",
+     "wartungs- und schmierungsfreie Gleitlager",
+     "mehrfache Positionsabfrage durch Signalgeber (optional)"
+    ],
+    "notes": [],
+    "downloads": [
+     {
+      "label": "Technisches Datenblatt",
+      "file": "sx10_technisches_datenblatt.pdf"
+     }
+    ],
+    "videos": []
+   },
+   {
+    "slug": "s610",
+    "code": "S610",
+    "title": "Sechsfinger Schwerlast-Zentrischgreifer",
+    "subtitle": "S610",
+    "images": [
+     "s610"
+    ],
+    "features": [
+     "innen- und außengreifend",
+     "parallele Fingerbewegung",
+     "Einsatz langer Finger in unterschiedlichen Positionen (Finger optional)",
+     "großer Hub mit beidseitiger Endlagendämpfung",
+     "hohe Greifkräfte, optional mit Objektsicherung bei Energieausfall",
+     "Aufnahme hoher Momente in alle drei Richtungen",
+     "kurze Zykluszeit (unter 2 s)",
+     "kompakte Bauweise, geringes Eigengewicht",
+     "durchgehend hohle Mitte",
+     "wartungs- und schmierungsfreie Gleitlager",
+     "mehrfache Positionsabfrage durch Signalgeber (optional)"
+    ],
+    "notes": [],
+    "downloads": [
+     {
+      "label": "Technisches Datenblatt",
+      "file": "sx10_technisches_datenblatt.pdf"
+     }
+    ],
+    "videos": []
+   }
+  ]
+ },
+ {
+  "slug": "reifengreifer",
+  "name": "Reifengreifer",
+  "teaser": "Der meistnachgebaute Greifer. Direkt vom Erfinder.",
+  "image": "r_106",
+  "product": {
+   "slug": "reifengreifer",
+   "code": "R106",
+   "title": "Reifengreifer",
+   "subtitle": "",
+   "images": [
+    "r_106"
+   ],
+   "features": [
+    "Geradenparallele Bewegung der Fingerspitzen",
+    "pneumatischer oder elektromotorischer Antrieb",
+    "Beliebige Anzahl an Signalgebern möglich",
+    "Werkstoffe: Nichtrostender Stahl, Finger aus Aluminium eloxiert",
+    "Wartungs- und schmierungsfreie Gleitlager",
+    "umweltfreundlich und 100%-ig wiederverwertbar",
+    "Abmessungen nach Kundenwunsch",
+    "optional mit Objektsicherung bei Energieausfall"
+   ],
+   "notes": [],
+   "downloads": [
+    {
+     "label": "Technisches Datenblatt",
+     "file": "r106_technisches_datenblatt.pdf"
+    }
+   ],
+   "videos": [
+    {
+     "id": "GKlMxyvjdX0",
+     "label": ""
+    }
+   ]
+  }
+ },
+ {
+  "slug": "nadelgreifer",
+  "name": "Nadelgreifer",
+  "teaser": "Abgedichtete Nadelgreifer für weiche oder unregelmäßige Teile.",
+  "image": "n203",
+  "series": [
+   {
+    "slug": "n203",
+    "code": "N203",
+    "title": "Abgedichteter Nadelgreifer",
+    "subtitle": "Größe N203",
+    "images": [
+     "n203"
+    ],
+    "features": [
+     "ideal zum Greifen von weichen oder unregelmäßigen Teilen wie z. B. Teig- oder Fleischwaren",
+     "radiale Nadelbewegung",
+     "Nadeln gefedert",
+     "kurze Zykluszeit",
+     "komplett abgedichtete Mechanik",
+     "beliebige Einbaulage",
+     "wartungsfrei bis 10 Mio. Hübe",
+     "kompakte Bauweise",
+     "modularer Aufbau",
+     "mehrfache Positionsabfrage durch Signalgeber (optional)",
+     "Abstreifblech optional für Produkte, in die die Nadeln einstechen (z. B. Backwaren)",
+     "individuelle Nadeln auf Anfrage möglich"
+    ],
+    "notes": [
+     "Mit Hilfe eines gegebenen Drehmomentes M, kann bei geschlossenen und parallel stehenden Greiferfingern der erforderliche Luftdruck p erf wie folgt ermittelt werden: 0,5 bar ≤ p erf = M bar / 1,25 Nm ≤ 6 bar"
+    ],
+    "downloads": [
+     {
+      "label": "Technisches Datenblatt",
+      "file": "n203_technisches_datenblatt.pdf"
+     }
+    ],
+    "videos": [
+     {
+      "id": "clxE7nZies4",
+      "label": ""
+     }
+    ]
+   },
+   {
+    "slug": "n206",
+    "code": "N206",
+    "title": "Abgedichteter Nadelgreifer",
+    "subtitle": "Größe N206",
+    "images": [
+     "n206"
+    ],
+    "features": [
+     "ideal zum Greifen von weichen oder unregelmäßigen Teilen wie z. B. Teig- oder Fleischwaren",
+     "radiale Nadelbewegung",
+     "Nadeln gefedert",
+     "kurze Zykluszeit",
+     "komplett abgedichtete Mechanik",
+     "beliebige Einbaulage",
+     "wartungsfrei bis 10 Mio. Hübe",
+     "kompakte Bauweise",
+     "modularer Aufbau",
+     "mehrfache Positionsabfrage durch Signalgeber (optional)",
+     "Abstreifblech optional für Produkte, in die die Nadeln einstechen (z. B. Backwaren)",
+     "individuelle Nadeln auf Anfrage möglich"
+    ],
+    "notes": [
+     "Mit Hilfe eines gegebenen Drehmomentes M, kann bei geschlossenen und parallel stehenden Greiferfingern der erforderliche Luftdruck p erf wie folgt ermittelt werden: 0,5 bar ≤ p erf = M bar / 30 Nm ≤ 6 bar"
+    ],
+    "downloads": [
+     {
+      "label": "Technisches Datenblatt",
+      "file": "n206_technisches_datenblatt.pdf"
+     }
+    ],
+    "videos": [
+     {
+      "id": "clxE7nZies4",
+      "label": ""
+     }
+    ]
+   }
+  ]
+ },
+ {
+  "slug": "langarmgreifer",
+  "name": "Langarmgreifer",
+  "teaser": "Schlanker 3-Finger-Greifer für den Griff in die Ecken von Kisten und Kartonagen.",
+  "image": "langarmgreifer",
+  "product": {
+   "slug": "langarmgreifer",
+   "code": "I105",
+   "title": "Langarmgreifer",
+   "subtitle": "",
+   "images": [
+    "langarmgreifer"
+   ],
+   "features": [],
+   "notes": [
+    "Schlanker 3-Finger-Greifer für den Griff in die Ecken von Kisten und Kartonagen",
+    "Patent angemeldet!"
+   ],
+   "downloads": [
+    {
+     "label": "Technisches Datenblatt",
+     "file": "i105_technisches_datenblatt.pdf"
+    }
+   ],
+   "videos": [
+    {
+     "id": "dITKkOq6PW4",
+     "label": ""
+    }
+   ]
+  }
+ }
+]

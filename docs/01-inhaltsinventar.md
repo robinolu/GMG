@@ -121,13 +121,13 @@ N203 (k = 1,25) und N206 (k = 30): ideal für weiche/unregelmäßige Teile (Teig
 ### 4.9 Langarmgreifer
 I105: „Schlanker 3-Finger-Greifer für den Griff in die Ecken von Kisten und Kartonagen“ – **Patent angemeldet!**
 
-**Summe: 9 Produktfamilien, 29 Baureihen/Varianten.**
+**Summe: 9 Produktfamilien, 24 Baureihen + Bewegungsform CP (26 Produktseiten).**
 
 ## 5. Medien
 - **Logo:** /resources/css/images/logo_gmg_mit_schriftzug.png
 - **Produktbilder:** je Baureihe ein Freisteller (`gmg_slider_<typ>.png`), W03 mit 4 Ansichten
 - **Startseiten-Slider:** 4 Bilder DE, 3 Bilder EN
-- **Videos:** keine
+- **Videos:** 41 YouTube-Videos (Bewegungsformen A/B/C, Fingeranordnungen A/I, Produktvideos) auf den Produktseiten, 2 auf der Startseite (S310, Langarmgreifer)
 - **PDFs (79):** Datenblätter, Betriebsanleitungen, Ersatzteillisten jeweils DE + EN, AGB DE + EN
 
 ## 6. Schwächen der aktuellen Seite (für Neuaufbau)
