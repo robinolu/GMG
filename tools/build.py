@@ -478,33 +478,36 @@ def configurator_block(r):
   <div class="kfg" data-konfigurator data-base="{r}">
     <div class="kfg__panel">
       <div class="kfg__step"><span class="kfg__num">1</span><h3>Teil laden</h3></div>
-      <label class="kfg__drop">
-        <input id="kfg-file" type="file" accept=".step,.stp,.stl">
-        <span class="kfg__drop-title">{icon('download')}STEP- oder STL-Datei hierher ziehen</span>
-        <span class="muted">oder klicken zum Auswählen · max. 100 MB</span>
-      </label>
-      <p id="kfg-datei" class="kfg__file muted"></p>
-      <div class="kfg__forms"><span class="muted">Oder Grundform mit eigenen Maßen:</span>
+      <div class="kfg__source" role="group" aria-label="Teil auswählen">
+        <button type="button" class="kfg__src-file" data-src="datei">{icon('download')}<span><strong>STEP-/STL-Datei</strong><small>eigenes Teil laden</small></span></button>
         <div class="kfg__seg">
-          <button type="button" data-form="zylinder">Zylinder</button>
-          <button type="button" data-form="quader">Quader</button>
-          <button type="button" data-form="rohr">Rohr / Ring</button>
-          <button type="button" data-form="kasten">Kasten offen</button>
+          <button type="button" data-src="zylinder">Zylinder</button>
+          <button type="button" data-src="quader">Quader</button>
+          <button type="button" data-src="rohr">Rohr / Ring</button>
+          <button type="button" data-src="kasten">Kasten offen</button>
         </div>
-        <div id="kfg-form-felder" class="kfg__fields"></div>
-        <p id="kfg-form-hinweis" class="kfg__warn" role="status"></p>
       </div>
-      <div class="form__row">
+      <div id="kfg-quelle-datei" class="kfg__box" hidden>
+        <label class="kfg__drop">
+          <input id="kfg-file" type="file" accept=".step,.stp,.stl">
+          <span class="kfg__drop-title">{icon('download')}Datei hierher ziehen</span>
+          <span class="muted">oder klicken zum Auswählen · STEP, STP, STL · max. 100 MB</span>
+        </label>
+        <p id="kfg-datei" class="kfg__file muted">Noch keine Datei geladen.</p>
         <div class="field"><label for="kfg-einheit">Einheit der Datei</label>
           <select id="kfg-einheit"><option value="auto">Automatisch</option><option value="mm">Millimeter</option><option value="cm">Zentimeter</option><option value="m">Meter</option></select>
           <small id="kfg-einheit-info" class="muted"></small></div>
-        <div class="field"><label for="kfg-material">Werkstoff</label>
-          <select id="kfg-material">
-            <option value="7850">Stahl</option><option value="2700">Aluminium</option><option value="1200">Kunststoff</option>
-            <option value="600">Holz</option><option value="150">Karton / leichte Verpackung</option>
-            <option value="1050" data-weich="1">Weich: Teig, Fleisch, Lebensmittel</option>
-          </select></div>
       </div>
+      <div id="kfg-quelle-form" class="kfg__box">
+        <div id="kfg-form-felder" class="kfg__fields"></div>
+        <p id="kfg-form-hinweis" class="kfg__warn" role="status"></p>
+      </div>
+      <div class="field"><label for="kfg-material">Werkstoff</label>
+        <select id="kfg-material">
+          <option value="7850">Stahl</option><option value="2700">Aluminium</option><option value="1200">Kunststoff</option>
+          <option value="600">Holz</option><option value="150">Karton / leichte Verpackung</option>
+          <option value="1050" data-weich="1">Weich: Teig, Fleisch, Lebensmittel</option>
+        </select></div>
       <dl class="kfg__facts"><dt>Abmessungen</dt><dd id="kfg-masse">–</dd><dt>Gewicht</dt><dd id="kfg-gewicht">–</dd></dl>
       <div class="kfg__turn"><span class="muted">Teil um 90° drehen:</span>
         <button type="button" class="btn btn--ghost btn--xs" id="kfg-dreh-y">↻ im Kreis</button>
@@ -515,20 +518,8 @@ def configurator_block(r):
       <div id="kfg-vorschlag" class="kfg__list"></div>
       <p class="kfg__small muted">Hier erscheinen die Greifer, für die ein 3D-Modell vorliegt. Weitere GMG-Greifer folgen.</p>
 
-      <div class="kfg__step"><span class="kfg__num">3</span><h3>Greifen testen</h3></div>
-      <div class="field"><label for="kfg-hoehe">Höhe: Greifer absenken</label><input id="kfg-hoehe" type="range" min="0" max="100" value="85"></div>
-      <div class="form__row">
-        <div class="field"><label for="kfg-x">Links / rechts</label><input id="kfg-x" type="range" min="-100" max="100" value="0"></div>
-        <div class="field"><label for="kfg-z">Vorne / hinten</label><input id="kfg-z" type="range" min="-100" max="100" value="0"></div>
-      </div>
-      <div class="kfg__seg kfg__seg--2" role="group" aria-label="Greifart">
-        <button type="button" data-griff="aussen" aria-pressed="true">Außen greifen</button>
-        <button type="button" data-griff="innen" id="kfg-griff-innen">Innen greifen</button>
-      </div>
-      <div class="field"><label for="kfg-zu" id="kfg-zu-label">Greifer schließen</label><input id="kfg-zu" type="range" min="0" max="100" value="0"></div>
-      <p id="kfg-status" class="kfg__status is-info" role="status">Teil wird geladen …</p>
-      <a id="kfg-anfrage" class="btn btn--primary" href="mailto:{MAIL}">Anfrage mit diesem Teil {icon('arrow')}</a>
     </div>
+    <div class="kfg__stage">
     <div class="kfg__view">
       <canvas aria-label="3D-Ansicht: Teil und Greifer"></canvas>
       <div class="kfg__hint">Ziehen zum Drehen · Scrollen zum Zoomen</div>
@@ -539,6 +530,21 @@ def configurator_block(r):
         <svg viewBox="0 0 120 120"><circle class="kfg__ring-bg" cx="60" cy="60" r="50" pathLength="100"/><circle class="kfg__ring-bar" cx="60" cy="60" r="50" pathLength="100"/></svg>
         <span class="kfg__ring-pct">0 %</span>
         <span class="kfg__ring-label">Datei wird gelesen</span>
+      </div>
+    </div>
+      <div class="kfg__test">
+      <div class="kfg__step"><span class="kfg__num">3</span><h3>Greifen testen</h3></div>
+      <div class="field"><label for="kfg-hoehe">Höhe: Greifer absenken</label><input id="kfg-hoehe" type="range" min="0" max="100" value="85"></div>
+      <div class="field"><label for="kfg-zu" id="kfg-zu-label">Greifer schließen</label><input id="kfg-zu" type="range" min="0" max="100" value="0"></div>
+      <div class="field"><label for="kfg-x">Links / rechts</label><input id="kfg-x" type="range" min="-100" max="100" value="0"></div>
+      <div class="field"><label for="kfg-z">Vorne / hinten</label><input id="kfg-z" type="range" min="-100" max="100" value="0"></div>
+      <div class="kfg__seg kfg__seg--2" role="group" aria-label="Greifart">
+        <button type="button" data-griff="aussen" aria-pressed="true">Außen greifen</button>
+        <button type="button" data-griff="innen" id="kfg-griff-innen">Innen greifen</button>
+      </div>
+      <button type="button" class="btn btn--ghost btn--xs kfg__center" id="kfg-zentrieren">⌖ Greifer über dem Teil zentrieren</button>
+      <p id="kfg-status" class="kfg__status is-info" role="status">Teil wird geladen …</p>
+      <a id="kfg-anfrage" class="btn btn--primary" href="mailto:{MAIL}">Anfrage mit diesem Teil {icon('arrow')}</a>
       </div>
     </div>
   </div>

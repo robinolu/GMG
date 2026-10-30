@@ -124,6 +124,7 @@ let part = null, partBVH = null, box = new THREE.Box3();
 const partMat = new THREE.MeshStandardMaterial({ color: 0xd9a441, metalness: 0.2, roughness: 0.55 });
 
 function unitFactor() {
+  if (fileKind === 'form') return { f: 1, auto: true, label: 'mm' };   // Grundformen werden in mm eingegeben
   const u = $('#kfg-einheit').value;
   if (u !== 'auto') return { f: { mm: 1, cm: 10, m: 1000 }[u], auto: false };
   if (fileKind !== 'stl') return { f: 1, auto: true, label: 'mm' };   // STEP: Einheit aus der Datei; Grundform: mm
@@ -356,7 +357,7 @@ function suggest() {
   }
   const body = [
     'Guten Tag,', '', 'über den Greifer-Konfigurator möchte ich folgendes Teil anfragen:',
-    `Teil: ${$('#kfg-datei').textContent}`,
+    `Teil: ${partLabel}`,
     `Abmessungen: ${fmt(facts.s.x)} × ${fmt(facts.s.y)} × ${fmt(facts.s.z)} mm (L × H × Greifbreite)`,
     `Werkstoff: ${$('#kfg-material').selectedOptions[0].textContent}`, `Gewicht (geschätzt): ${fmt(facts.mass, 2)} kg`,
     '', '(Falls vorhanden, bitte die STEP-Datei an diese E-Mail anhängen.)'].join('\n');
@@ -507,7 +508,6 @@ async function loadFile(file) {
   try {
     const buf = await readFile(file, (f) => progress(f * 25));
     fileKind = ext === 'stl' ? 'stl' : 'step';
-    $('#kfg-einheit').disabled = false;
     progress(25, 'Geometrie wird berechnet');
     baseGeo = fileKind === 'stl' ? await loadStl(buf, (f) => progress(25 + f * 65)) : await loadStep(buf, (f) => progress(25 + f * 65));
     if (baseGeo.index) baseGeo = baseGeo.toNonIndexed();
@@ -516,6 +516,9 @@ async function loadFile(file) {
     progress(92, 'Darstellung wird aufgebaut');
     await nextFrame();
     info.textContent = `${file.name} (${fmt(file.size / 1048576, 1)} MB) – wird nur in Ihrem Browser verarbeitet.`;
+    partLabel = file.name;
+    fileState = { geo: baseGeo, kind: fileKind, label: partLabel };   // bleibt erhalten, wenn man zu einer Grundform wechselt
+    showSource('datei');
     placePart(true);
     progress(100, 'Fertig');
     await new Promise((r) => setTimeout(r, 450));
@@ -562,7 +565,6 @@ function renderFormFields() {
   $('#kfg-form-felder').innerHTML = f.fields.map(([k, label, def]) => `
     <div class="field"><label for="kfg-f-${k}">${label} (mm)</label>
     <input id="kfg-f-${k}" data-k="${k}" type="number" min="1" max="10000" step="1" value="${def}" inputmode="decimal"></div>`).join('');
-  root.querySelectorAll('[data-form]').forEach((b) => b.setAttribute('aria-pressed', b.dataset.form === form ? 'true' : 'false'));
   $('#kfg-form-felder').querySelectorAll('input').forEach((i) => {
     i.addEventListener('input', () => buildForm(false, false));   // beim Tippen nur rechnen, Feld nicht überschreiben
     i.addEventListener('change', () => buildForm(false, true));   // beim Verlassen korrigierten Wert eintragen
@@ -595,15 +597,29 @@ function readForm(writeBack) {
 function buildForm(autoOrient, writeBack = true) {
   const v = readForm(writeBack);
   fileKind = 'form';
-  $('#kfg-einheit').value = 'auto';
-  $('#kfg-einheit').disabled = true;
   const g = FORMS[form].geo(v);
   baseGeo = g.index ? g.toNonIndexed() : g;
   baseGeo.computeBoundingBox();
-  $('#kfg-datei').textContent = 'Grundform: ' + FORMS[form].label(v);
+  partLabel = 'Grundform: ' + FORMS[form].label(v);
   placePart(autoOrient);
 }
+// Quelle des Teils: geladene Datei oder eine der Grundformen
+let fileState = null, partLabel = '';
+function showSource(src) {
+  root.querySelectorAll('[data-src]').forEach((b) => b.setAttribute('aria-pressed', b.dataset.src === src ? 'true' : 'false'));
+  $('#kfg-quelle-datei').hidden = src !== 'datei';
+  $('#kfg-quelle-form').hidden = src === 'datei';
+}
+function chooseSource(src) {
+  if (src !== 'datei') { sample(src); return; }
+  showSource('datei');
+  if (fileState) {
+    baseGeo = fileState.geo; fileKind = fileState.kind; partLabel = fileState.label;
+    placePart(true);
+  }
+}
 function sample(kind) {
+  showSource(kind);
   form = kind;
   mode = kind === 'kasten' ? 'innen' : 'aussen';   // offener Kasten: zum Innengreifen gedacht
   renderFormFields();
@@ -618,7 +634,8 @@ const drop = $('.kfg__drop');
 ['dragenter', 'dragover'].forEach((t) => drop.addEventListener(t, (e) => { e.preventDefault(); drop.classList.add('is-over'); }));
 ['dragleave', 'drop'].forEach((t) => drop.addEventListener(t, (e) => { e.preventDefault(); drop.classList.remove('is-over'); }));
 drop.addEventListener('drop', (e) => e.dataTransfer.files[0] && loadFile(e.dataTransfer.files[0]));
-root.querySelectorAll('[data-form]').forEach((b) => b.addEventListener('click', () => sample(b.dataset.form)));
+root.querySelectorAll('[data-src]').forEach((b) => b.addEventListener('click', () => chooseSource(b.dataset.src)));
+$('#kfg-zentrieren').addEventListener('click', () => { $('#kfg-x').value = 0; $('#kfg-z').value = 0; update(); });
 $('#kfg-einheit').addEventListener('change', () => placePart(false));
 $('#kfg-material').addEventListener('change', () => { updateFacts(); suggest(); });
 $('#kfg-hoehe').addEventListener('input', update);
