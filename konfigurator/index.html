@@ -20,7 +20,7 @@
 <link rel="icon" href="../assets/logo/gmg-3d-dezent-bildmarke.svg" type="image/svg+xml">
 <link rel="alternate icon" href="../assets/img/gmg-bildmarke-3d.png" type="image/png">
 <link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
-<link rel="stylesheet" href="../assets/css/style.css?v=202610301844">
+<link rel="stylesheet" href="../assets/css/style.css?v=202610301924">
 </head>
 <body>
 <div class="draft">Entwurf / Testversion der neuen GMG-Webseite. Inhalte von gmg-system.com übernommen.</div>
@@ -44,7 +44,7 @@
   <nav class="crumbs" aria-label="Brotkrumen"><a href="../index.html">Start</a><span aria-hidden="true">/</span><span>Konfigurator</span></nav>
   <span class="eyebrow">Greifer-Konfigurator</span>
   <h1>Welcher Greifer greift Ihr Teil?</h1>
-  <p class="lead">Laden Sie Ihr Teil als STEP- oder STL-Datei. Der Konfigurator schlägt passende GMG-Greifer vor, und Sie testen direkt in 3D, wie gegriffen wird. Die Datei bleibt auf Ihrem Rechner und wird nicht hochgeladen.</p>
+  <p class="lead">Laden Sie Ihr Teil als STEP- oder STL-Datei oder wählen Sie eine Grundform mit Ihren Maßen. Dann testen Sie direkt in 3D, wie der Greifer zufasst. Die Datei bleibt auf Ihrem Rechner und wird nicht hochgeladen.</p>
 </div></section>
 <section class="section kfg-section"><div class="wrap">
   <div class="kfg" data-konfigurator data-base="../">
@@ -53,13 +53,16 @@
       <label class="kfg__drop">
         <input id="kfg-file" type="file" accept=".step,.stp,.stl">
         <span class="kfg__drop-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>STEP- oder STL-Datei hierher ziehen</span>
-        <span class="muted">oder klicken zum Auswählen · max. 10 MB</span>
+        <span class="muted">oder klicken zum Auswählen · max. 100 MB</span>
       </label>
       <p id="kfg-datei" class="kfg__file muted"></p>
-      <div class="kfg__samples"><span class="muted">Ohne Datei testen:</span>
-        <button type="button" class="btn btn--ghost btn--xs" data-muster="welle">Welle</button>
-        <button type="button" class="btn btn--ghost btn--xs" data-muster="karton">Karton</button>
-        <button type="button" class="btn btn--ghost btn--xs" data-muster="flansch">Scheibe</button>
+      <div class="kfg__forms"><span class="muted">Oder Grundform mit eigenen Maßen:</span>
+        <div class="kfg__seg">
+          <button type="button" data-form="zylinder">Zylinder</button>
+          <button type="button" data-form="quader">Quader</button>
+          <button type="button" data-form="rohr">Rohr / Ring</button>
+        </div>
+        <div id="kfg-form-felder" class="kfg__fields"></div>
       </div>
       <div class="form__row">
         <div class="field"><label for="kfg-einheit">Einheit der Datei</label>
@@ -73,13 +76,14 @@
           </select></div>
       </div>
       <dl class="kfg__facts"><dt>Abmessungen</dt><dd id="kfg-masse">–</dd><dt>Gewicht</dt><dd id="kfg-gewicht">–</dd></dl>
-      <div class="kfg__turn"><span class="muted">Teil drehen:</span>
-        <button type="button" class="btn btn--ghost btn--xs" id="kfg-dreh-y">↻ 90° hochkant</button>
-        <button type="button" class="btn btn--ghost btn--xs" id="kfg-dreh-x">⤾ 90° kippen</button></div>
+      <div class="kfg__turn"><span class="muted">Teil um 90° drehen:</span>
+        <button type="button" class="btn btn--ghost btn--xs" id="kfg-dreh-y">↻ im Kreis</button>
+        <button type="button" class="btn btn--ghost btn--xs" id="kfg-dreh-x">⤾ nach vorn kippen</button>
+        <button type="button" class="btn btn--ghost btn--xs" id="kfg-dreh-z">⤿ zur Seite kippen</button></div>
 
-      <div class="kfg__step"><span class="kfg__num">2</span><h3>Passende Greifer</h3></div>
+      <div class="kfg__step"><span class="kfg__num">2</span><h3>Greifer</h3></div>
       <div id="kfg-vorschlag" class="kfg__list"></div>
-      <p class="kfg__small muted">Vorauswahl anhand von Greifweite und Greifkraft aus den Datenblättern (Reibschluss, Sicherheitsfaktor 2). Die endgültige Auslegung übernimmt GMG.</p>
+      <p class="kfg__small muted">Hier erscheinen die Greifer, für die ein 3D-Modell vorliegt. Weitere GMG-Greifer folgen.</p>
 
       <div class="kfg__step"><span class="kfg__num">3</span><h3>Greifen testen</h3></div>
       <div class="field"><label for="kfg-hoehe">Höhe: Greifer absenken</label><input id="kfg-hoehe" type="range" min="0" max="100" value="85"></div>
@@ -90,7 +94,7 @@
     <div class="kfg__view">
       <canvas aria-label="3D-Ansicht: Teil und Greifer"></canvas>
       <div class="kfg__hint">Ziehen zum Drehen · Scrollen zum Zoomen</div>
-      <div class="kfg__badge">Platzhalter-Greifer, maßstäblich an Ihr Teil angepasst</div>
+      <div class="kfg__badge">Greifer Capit (Testmodell), maßstäblich an Ihr Teil angepasst</div>
       <noscript><p class="kfg__nojs">Der Konfigurator benötigt JavaScript.</p></noscript>
       <p class="kfg__offline">Der 3D-Konfigurator läuft nur auf der Webseite (online).</p>
     </div>
@@ -150,6 +154,6 @@
   <a class="btn btn--ghost" href="tel:+4929214062"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg>Anrufen</a>
   <a class="btn btn--primary" href="../kontakt/index.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>Anfrage</a>
 </div>
-<script src="../assets/js/main.js?v=202610301844"></script><script src="../assets/js/konfigurator.js?v=202610301844" defer></script>
+<script src="../assets/js/main.js?v=202610301924"></script><script src="../assets/js/konfigurator.js?v=202610301924" defer></script>
 </body>
 </html>

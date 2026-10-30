@@ -471,7 +471,7 @@ def build_configurator():
   {crumbs(r, [('Konfigurator', None)])}
   <span class="eyebrow">Greifer-Konfigurator</span>
   <h1>Welcher Greifer greift Ihr Teil?</h1>
-  <p class="lead">Laden Sie Ihr Teil als STEP- oder STL-Datei. Der Konfigurator schlägt passende GMG-Greifer vor, und Sie testen direkt in 3D, wie gegriffen wird. Die Datei bleibt auf Ihrem Rechner und wird nicht hochgeladen.</p>
+  <p class="lead">Laden Sie Ihr Teil als STEP- oder STL-Datei oder wählen Sie eine Grundform mit Ihren Maßen. Dann testen Sie direkt in 3D, wie der Greifer zufasst. Die Datei bleibt auf Ihrem Rechner und wird nicht hochgeladen.</p>
 </div></section>
 <section class="section kfg-section"><div class="wrap">
   <div class="kfg" data-konfigurator data-base="{r}">
@@ -480,13 +480,16 @@ def build_configurator():
       <label class="kfg__drop">
         <input id="kfg-file" type="file" accept=".step,.stp,.stl">
         <span class="kfg__drop-title">{icon('download')}STEP- oder STL-Datei hierher ziehen</span>
-        <span class="muted">oder klicken zum Auswählen · max. 10 MB</span>
+        <span class="muted">oder klicken zum Auswählen · max. 100 MB</span>
       </label>
       <p id="kfg-datei" class="kfg__file muted"></p>
-      <div class="kfg__samples"><span class="muted">Ohne Datei testen:</span>
-        <button type="button" class="btn btn--ghost btn--xs" data-muster="welle">Welle</button>
-        <button type="button" class="btn btn--ghost btn--xs" data-muster="karton">Karton</button>
-        <button type="button" class="btn btn--ghost btn--xs" data-muster="flansch">Scheibe</button>
+      <div class="kfg__forms"><span class="muted">Oder Grundform mit eigenen Maßen:</span>
+        <div class="kfg__seg">
+          <button type="button" data-form="zylinder">Zylinder</button>
+          <button type="button" data-form="quader">Quader</button>
+          <button type="button" data-form="rohr">Rohr / Ring</button>
+        </div>
+        <div id="kfg-form-felder" class="kfg__fields"></div>
       </div>
       <div class="form__row">
         <div class="field"><label for="kfg-einheit">Einheit der Datei</label>
@@ -500,13 +503,14 @@ def build_configurator():
           </select></div>
       </div>
       <dl class="kfg__facts"><dt>Abmessungen</dt><dd id="kfg-masse">–</dd><dt>Gewicht</dt><dd id="kfg-gewicht">–</dd></dl>
-      <div class="kfg__turn"><span class="muted">Teil drehen:</span>
-        <button type="button" class="btn btn--ghost btn--xs" id="kfg-dreh-y">↻ 90° hochkant</button>
-        <button type="button" class="btn btn--ghost btn--xs" id="kfg-dreh-x">⤾ 90° kippen</button></div>
+      <div class="kfg__turn"><span class="muted">Teil um 90° drehen:</span>
+        <button type="button" class="btn btn--ghost btn--xs" id="kfg-dreh-y">↻ im Kreis</button>
+        <button type="button" class="btn btn--ghost btn--xs" id="kfg-dreh-x">⤾ nach vorn kippen</button>
+        <button type="button" class="btn btn--ghost btn--xs" id="kfg-dreh-z">⤿ zur Seite kippen</button></div>
 
-      <div class="kfg__step"><span class="kfg__num">2</span><h3>Passende Greifer</h3></div>
+      <div class="kfg__step"><span class="kfg__num">2</span><h3>Greifer</h3></div>
       <div id="kfg-vorschlag" class="kfg__list"></div>
-      <p class="kfg__small muted">Vorauswahl anhand von Greifweite und Greifkraft aus den Datenblättern (Reibschluss, Sicherheitsfaktor 2). Die endgültige Auslegung übernimmt GMG.</p>
+      <p class="kfg__small muted">Hier erscheinen die Greifer, für die ein 3D-Modell vorliegt. Weitere GMG-Greifer folgen.</p>
 
       <div class="kfg__step"><span class="kfg__num">3</span><h3>Greifen testen</h3></div>
       <div class="field"><label for="kfg-hoehe">Höhe: Greifer absenken</label><input id="kfg-hoehe" type="range" min="0" max="100" value="85"></div>
@@ -517,7 +521,7 @@ def build_configurator():
     <div class="kfg__view">
       <canvas aria-label="3D-Ansicht: Teil und Greifer"></canvas>
       <div class="kfg__hint">Ziehen zum Drehen · Scrollen zum Zoomen</div>
-      <div class="kfg__badge">Platzhalter-Greifer, maßstäblich an Ihr Teil angepasst</div>
+      <div class="kfg__badge">Greifer Capit (Testmodell), maßstäblich an Ihr Teil angepasst</div>
       <noscript><p class="kfg__nojs">Der Konfigurator benötigt JavaScript.</p></noscript>
       <p class="kfg__offline">Der 3D-Konfigurator läuft nur auf der Webseite (online).</p>
     </div>

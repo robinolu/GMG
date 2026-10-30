@@ -265,7 +265,15 @@ td a { font-weight: 600; }
 .kfg__drop-title { display: flex; align-items: center; gap: 8px; font-weight: 650; color: var(--ink); }
 .kfg__drop-title svg { width: 20px; height: 20px; color: var(--blue); }
 .kfg__file { margin: 0; font-size: .88rem; min-height: 1.2em; }
-.kfg__samples, .kfg__turn { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: .88rem; }
+.kfg__turn { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: .88rem; }
+.kfg__forms { display: grid; gap: 10px; font-size: .88rem; }
+.kfg__seg { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid #cbd2da; border-radius: 8px; overflow: hidden; }
+.kfg__seg button { font: inherit; font-weight: 600; padding: 9px 6px; border: 0; background: #fff; color: var(--ink); cursor: pointer; }
+.kfg__seg button + button { border-left: 1px solid #cbd2da; }
+.kfg__seg button[aria-pressed="true"] { background: var(--blue); color: #fff; }
+.kfg__fields { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.kfg__fields .field input { padding: 9px 10px; }
+.kfg__fields label { font-size: .8rem; }
 .kfg__facts { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; margin: 0; font-size: .92rem; padding: 12px 14px; background: var(--bg-alt); border-radius: 8px; }
 .kfg__facts dt { color: var(--muted); }
 .kfg__facts dd { margin: 0; color: var(--ink); font-weight: 600; }

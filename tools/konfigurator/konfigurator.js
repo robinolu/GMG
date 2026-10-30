@@ -8,12 +8,15 @@ import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment
 import { mergeGeometries, toCreasedNormals } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { MeshBVH } from 'three-mesh-bvh';
 import GRIPPER from '../../data/3d/greifer-platzhalter.json';
-import SPECS from '../../data/greifer-specs.json';
+// Greifer mit 3D-Modell. Weitere GMG-Greifer kommen hinzu, sobald ihre STEP-Dateien vorliegen
+// (Kennwerte aller Baureihen liegen schon in data/greifer-specs.json).
+const GRIPPERS_3D = [{ code: 'Capit', name: 'Gelenk-Parallelgreifer', note: 'Testmodell, maßstäblich an Ihr Teil angepasst' }];
 
 const root = document.querySelector('[data-konfigurator]');
 const BASE = root.dataset.base || '';
 const $ = (s) => root.querySelector(s);
-const MAX_BYTES = 10 * 1024 * 1024;
+const MAX_BYTES = 100 * 1024 * 1024;   // darüber wird es im Browser zäh (Speicher, Rechenzeit)
+const SLOW_BYTES = 25 * 1024 * 1024;
 const fmt = (v, d = 0) => v.toLocaleString('de-DE', { maximumFractionDigits: d, minimumFractionDigits: d });
 
 // ---------- Szene ----------
@@ -115,14 +118,14 @@ function pose(phi) {
 // ---------- Teil ----------
 let baseGeo = null;          // Teil in Rohmaßen der Datei
 let fileKind = null;         // 'step' | 'stl' | 'muster'
-let turns = { x: 0, y: 0 };  // Vierteldrehungen
+let turns = { x: 0, y: 0, z: 0 };  // Vierteldrehungen
 let part = null, partBVH = null, box = new THREE.Box3();
 const partMat = new THREE.MeshStandardMaterial({ color: 0xd9a441, metalness: 0.2, roughness: 0.55 });
 
 function unitFactor() {
   const u = $('#kfg-einheit').value;
   if (u !== 'auto') return { f: { mm: 1, cm: 10, m: 1000 }[u], auto: false };
-  if (fileKind !== 'stl') return { f: 1, auto: true, label: 'mm' };
+  if (fileKind !== 'stl') return { f: 1, auto: true, label: 'mm' };   // STEP: Einheit aus der Datei; Grundform: mm
   // STL hat keine Einheit: Größe plausibel schätzen (Greifteile liegen meist zwischen 5 mm und 2 m)
   const s = new THREE.Vector3(); baseGeo.boundingBox.getSize(s);
   const d = Math.max(s.x, s.y, s.z);
@@ -133,15 +136,16 @@ function unitFactor() {
 function placePart(autoOrient) {
   if (!baseGeo) return;
   const { f, auto, label } = unitFactor();
-  $('#kfg-einheit-info').textContent = auto ? (fileKind === 'step' ? 'aus der STEP-Datei übernommen (mm)' : `erkannt: ${label}`) : '';
+  $('#kfg-einheit-info').textContent = !auto ? '' : fileKind === 'step' ? 'aus der STEP-Datei übernommen (mm)' : fileKind === 'form' ? 'Grundform in mm' : `erkannt: ${label}`;
   const geo = baseGeo.clone();
   geo.scale(f, f, f);
   geo.computeBoundingBox();
   if (autoOrient) {   // schmalere waagerechte Seite in Greifrichtung (Z)
     const s = new THREE.Vector3(); geo.boundingBox.getSize(s);
-    turns = { x: 0, y: s.z > s.x ? 1 : 0 };
+    turns = { x: 0, y: s.z > s.x ? 1 : 0, z: 0 };
   }
   geo.applyMatrix4(new THREE.Matrix4().makeRotationX(turns.x * Math.PI / 2));
+  geo.applyMatrix4(new THREE.Matrix4().makeRotationZ(turns.z * Math.PI / 2));
   geo.applyMatrix4(new THREE.Matrix4().makeRotationY(turns.y * Math.PI / 2));
   geo.computeBoundingBox();
   const c = new THREE.Vector3(); geo.boundingBox.getCenter(c);
@@ -206,47 +210,19 @@ function updateFacts() {
 // ---------- Vorschlag ----------
 function suggest() {
   if (!facts) return;
-  const need = facts.mass * 9.81 * 2 / (2 * 0.1);   // Reibschluss: μ 0,1, Sicherheit 2, zwei Backen
-  const w = facts.grip;
-  const rows = [];
-  for (const g of SPECS.greifer) {
-    if (!!g.weich !== facts.soft) continue;
-    let score = 50, why = [];
-    if (g.familie === 'Einzelfinger') score -= 15;   // Baustein für Eigenkonstruktionen, kein Komplettgreifer
-    if (g.kraft != null) {
-      if (g.kraft < need) continue;
-      score -= Math.min(20, Math.log10(g.kraft / Math.max(need, 1)) * 6);
-      why.push(`Greifkraft bis ${fmt(g.kraft)} N (benötigt ca. ${fmt(Math.max(need, 1))} N)`);
-    }
-    if (g.weite) {
-      const [a, b] = g.weite;
-      if (w >= a && w <= b) { score += 40 - Math.abs(w - (a + b) / 2) / (b - a) * 30; why.unshift(`Greifweite ${a}–${b} mm passt zu ${fmt(w)} mm`); }
-      else if (w < a && w >= a * 0.4) { score += 5; why.unshift(`mit angepassten Fingern (Standard ${a}–${b} mm)`); }
-      else continue;
-    } else {
-      why.unshift('Greifweite über Fingerlänge anpassbar');
-    }
-    rows.push({ g, score, why });
-  }
-  rows.sort((p, q) => q.score - p.score);
-  const list = $('#kfg-vorschlag');
-  if (!rows.length) {
-    list.innerHTML = '<p class="kfg__empty">Für dieses Teil passt keiner der Standardgreifer direkt. Häufig ist das ein Fall für eine kundenspezifische Lösung – fragen Sie uns gern an.</p>';
-  } else {
-    list.innerHTML = rows.slice(0, 4).map((r, i) => `
-      <a class="kfg__card${i === 0 ? ' is-best' : ''}" href="${BASE}${r.g.url}">
-        <span class="kfg__rank">${i === 0 ? 'Beste Wahl' : 'Alternative'}</span>
-        <strong>${r.g.code}</strong> <span class="kfg__fam">${r.g.familie}</span>
-        <span class="kfg__why">${r.why.join(' · ')}</span>
-        <span class="kfg__note">${r.g.hinweis}</span>
-      </a>`).join('');
-  }
-  const top = rows.slice(0, 3).map((r) => r.g.code).join(', ') || 'keiner';
+  $('#kfg-vorschlag').innerHTML = GRIPPERS_3D.map((g, i) => `
+    <div class="kfg__card${i === 0 ? ' is-best' : ''}">
+      <span class="kfg__rank">3D-Modell verfügbar</span>
+      <strong>${g.code}</strong> <span class="kfg__fam">${g.name}</span>
+      <span class="kfg__why">Greifbreite ${fmt(facts.grip)} mm · Gewicht ${facts.mass < 1 ? fmt(facts.mass * 1000) + ' g' : fmt(facts.mass, 1) + ' kg'}</span>
+      <span class="kfg__note">${g.note}</span>
+    </div>`).join('');
   const body = [
     'Guten Tag,', '', 'über den Greifer-Konfigurator möchte ich folgendes Teil anfragen:',
+    `Teil: ${$('#kfg-datei').textContent}`,
     `Abmessungen: ${fmt(facts.s.x)} × ${fmt(facts.s.y)} × ${fmt(facts.s.z)} mm (L × H × Greifbreite)`,
     `Werkstoff: ${$('#kfg-material').selectedOptions[0].textContent}`, `Gewicht (geschätzt): ${fmt(facts.mass, 2)} kg`,
-    `Vorschlag des Konfigurators: ${top}`, '', '(Bitte die STEP-Datei an diese E-Mail anhängen.)'].join('\n');
+    '', '(Falls vorhanden, bitte die STEP-Datei an diese E-Mail anhängen.)'].join('\n');
   $('#kfg-anfrage').href = 'mailto:info@gmg-system.com?subject=' + encodeURIComponent('Greiferanfrage über den Konfigurator') + '&body=' + encodeURIComponent(body);
 }
 
@@ -294,36 +270,37 @@ function update() {
 }
 
 // ---------- Laden ----------
-async function loadStep(buf) {
-  if (!window.occtimportjs) {
-    await new Promise((res, rej) => {
-      const sc = document.createElement('script');
-      sc.src = BASE + 'assets/vendor/occt/occt-import-js.js';
-      sc.onload = res; sc.onerror = () => rej(new Error('STEP-Leser konnte nicht geladen werden.'));
-      document.head.appendChild(sc);
-    });
-  }
-  const occt = await window.occtimportjs({ locateFile: (f) => BASE + 'assets/vendor/occt/' + f });
-  const r = occt.ReadStepFile(new Uint8Array(buf), { linearUnit: 'millimeter', linearDeflectionType: 'bounding_box_ratio', linearDeflection: 0.002, angularDeflection: 0.4 });
-  if (!r.success || !r.meshes.length) throw new Error('Die STEP-Datei enthält keine lesbaren Körper.');
-  return mergeGeometries(r.meshes.map((m) => {
-    const g = new THREE.BufferGeometry();
-    g.setAttribute('position', new THREE.Float32BufferAttribute(m.attributes.position.array, 3));
-    if (m.index) g.setIndex(Array.from(m.index.array));
-    return g.index ? g.toNonIndexed() : g;
-  }));
+function loadStep(buf) {
+  // Im Hintergrund lesen, damit die Seite auch bei großen Dateien bedienbar bleibt
+  return new Promise((resolve, reject) => {
+    const w = new Worker(BASE + 'assets/vendor/occt/gmg-step-worker.js');
+    w.onerror = () => { w.terminate(); reject(new Error('STEP-Leser konnte nicht gestartet werden.')); };
+    w.onmessage = (ev) => {
+      w.terminate();
+      const r = ev.data;
+      if (!r || !r.success || !r.meshes.length) { reject(new Error('Die STEP-Datei enthält keine lesbaren Körper.')); return; }
+      resolve(mergeGeometries(r.meshes.map((m) => {
+        const g = new THREE.BufferGeometry();
+        g.setAttribute('position', new THREE.Float32BufferAttribute(m.attributes.position.array, 3));
+        if (m.index) g.setIndex(Array.from(m.index.array));
+        return g.index ? g.toNonIndexed() : g;
+      })));
+    };
+    w.postMessage({ buffer: new Uint8Array(buf), params: { linearUnit: 'millimeter', linearDeflectionType: 'bounding_box_ratio', linearDeflection: 0.002, angularDeflection: 0.4 } });
+  });
 }
 
 async function loadFile(file) {
   const ext = file.name.split('.').pop().toLowerCase();
   const info = $('#kfg-datei');
   if (!['step', 'stp', 'stl'].includes(ext)) { info.textContent = 'Bitte eine STEP- (.step, .stp) oder STL-Datei wählen.'; return; }
-  if (file.size > MAX_BYTES) { info.textContent = `Die Datei ist ${fmt(file.size / 1048576, 1)} MB groß – erlaubt sind bis 10 MB.`; return; }
-  info.textContent = `${file.name} wird gelesen …`;
+  if (file.size > MAX_BYTES) { info.textContent = `Die Datei ist ${fmt(file.size / 1048576, 1)} MB groß – erlaubt sind bis 100 MB.`; return; }
+  info.textContent = `${file.name} wird gelesen …` + (file.size > SLOW_BYTES ? ' Große Datei, das kann bis zu einer Minute dauern.' : '');
   root.classList.add('is-loading');
   try {
     const buf = await file.arrayBuffer();
     fileKind = ext === 'stl' ? 'stl' : 'step';
+    $('#kfg-einheit').disabled = false;
     baseGeo = fileKind === 'stl' ? new STLLoader().parse(buf) : await loadStep(buf);
     if (baseGeo.index) baseGeo = baseGeo.toNonIndexed();
     baseGeo.deleteAttribute('normal');
@@ -337,20 +314,45 @@ async function loadFile(file) {
   }
 }
 
-function sample(kind) {
-  fileKind = 'muster';
-  $('#kfg-einheit').value = 'auto';
-  const geo = {
-    welle: () => new THREE.CylinderGeometry(40, 40, 260, 64).rotateZ(Math.PI / 2),
-    karton: () => new THREE.BoxGeometry(300, 160, 200),
-    flansch: () => new THREE.CylinderGeometry(90, 90, 40, 96),
-  }[kind]();
-  baseGeo = geo.toNonIndexed();
-  baseGeo.computeBoundingBox();
-  $('#kfg-material').value = { welle: '7850', karton: '150', flansch: '2700' }[kind];
-  $('#kfg-datei').textContent = 'Beispielteil: ' + { welle: 'Welle Ø 80 × 260 mm, Stahl', karton: 'Karton 300 × 200 × 160 mm', flansch: 'Scheibe Ø 180 × 40 mm, Aluminium' }[kind];
-  placePart(true);
+// Grundformen mit eigenen Maßen (mm), falls keine Datei vorliegt
+const FORMS = {
+  zylinder: { name: 'Zylinder', fields: [['d', 'Durchmesser', 80], ['l', 'Länge', 260]],
+    geo: (v) => new THREE.CylinderGeometry(v.d / 2, v.d / 2, v.l, 96).rotateZ(Math.PI / 2),
+    label: (v) => `Zylinder Ø ${fmt(v.d)} × ${fmt(v.l)} mm` },
+  quader: { name: 'Quader', fields: [['l', 'Länge', 300], ['b', 'Breite', 200], ['h', 'Höhe', 160]],
+    geo: (v) => new THREE.BoxGeometry(v.l, v.h, v.b),
+    label: (v) => `Quader ${fmt(v.l)} × ${fmt(v.b)} × ${fmt(v.h)} mm` },
+  rohr: { name: 'Rohr / Ring', fields: [['d', 'Außen-Ø', 160], ['i', 'Innen-Ø', 100], ['l', 'Länge', 60]],
+    geo: (v) => {
+      const sh = new THREE.Shape(); sh.absarc(0, 0, v.d / 2, 0, Math.PI * 2, false);
+      const hole = new THREE.Path(); hole.absarc(0, 0, Math.min(v.i, v.d - 1) / 2, 0, Math.PI * 2, true); sh.holes.push(hole);
+      return new THREE.ExtrudeGeometry(sh, { depth: v.l, curveSegments: 96, bevelEnabled: false }).rotateX(Math.PI / 2);
+    },
+    label: (v) => `Rohr Ø ${fmt(v.d)} / ${fmt(v.i)} × ${fmt(v.l)} mm` },
+};
+let form = 'zylinder';
+function renderFormFields() {
+  const f = FORMS[form];
+  $('#kfg-form-felder').innerHTML = f.fields.map(([k, label, def]) => `
+    <div class="field"><label for="kfg-f-${k}">${label} (mm)</label>
+    <input id="kfg-f-${k}" data-k="${k}" type="number" min="1" max="10000" step="1" value="${def}" inputmode="decimal"></div>`).join('');
+  root.querySelectorAll('[data-form]').forEach((b) => b.setAttribute('aria-pressed', b.dataset.form === form ? 'true' : 'false'));
+  $('#kfg-form-felder').querySelectorAll('input').forEach((i) => i.addEventListener('input', () => buildForm(false)));
 }
+function buildForm(autoOrient) {
+  const v = {};
+  for (const i of $('#kfg-form-felder').querySelectorAll('input')) v[i.dataset.k] = Math.max(1, Number(i.value) || 1);
+  if (form === 'rohr' && v.i >= v.d) v.i = v.d * 0.6;
+  fileKind = 'form';
+  $('#kfg-einheit').value = 'auto';
+  $('#kfg-einheit').disabled = true;
+  const g = FORMS[form].geo(v);
+  baseGeo = g.index ? g.toNonIndexed() : g;
+  baseGeo.computeBoundingBox();
+  $('#kfg-datei').textContent = 'Grundform: ' + FORMS[form].label(v);
+  placePart(autoOrient);
+}
+function sample(kind) { form = kind; renderFormFields(); buildForm(true); }
 
 // ---------- Bedienung ----------
 const input = $('#kfg-file');
@@ -359,13 +361,14 @@ const drop = $('.kfg__drop');
 ['dragenter', 'dragover'].forEach((t) => drop.addEventListener(t, (e) => { e.preventDefault(); drop.classList.add('is-over'); }));
 ['dragleave', 'drop'].forEach((t) => drop.addEventListener(t, (e) => { e.preventDefault(); drop.classList.remove('is-over'); }));
 drop.addEventListener('drop', (e) => e.dataTransfer.files[0] && loadFile(e.dataTransfer.files[0]));
-root.querySelectorAll('[data-muster]').forEach((b) => b.addEventListener('click', () => sample(b.dataset.muster)));
+root.querySelectorAll('[data-form]').forEach((b) => b.addEventListener('click', () => sample(b.dataset.form)));
 $('#kfg-einheit').addEventListener('change', () => placePart(false));
 $('#kfg-material').addEventListener('change', () => { updateFacts(); suggest(); });
 $('#kfg-hoehe').addEventListener('input', update);
 $('#kfg-zu').addEventListener('input', update);
 $('#kfg-dreh-y').addEventListener('click', () => { turns.y = (turns.y + 1) % 4; placePart(false); });
 $('#kfg-dreh-x').addEventListener('click', () => { turns.x = (turns.x + 1) % 4; placePart(false); });
+$('#kfg-dreh-z').addEventListener('click', () => { turns.z = (turns.z + 1) % 4; placePart(false); });
 
 function resize() {
   const w = viewport.clientWidth, h = viewport.clientHeight;
@@ -376,7 +379,7 @@ function resize() {
 window.addEventListener('resize', resize);
 resize();
 pose(0);
-sample('welle');
+sample('zylinder');
 root.classList.add('is-ready');
 (function loop() { requestAnimationFrame(loop); controls.update(); renderer.render(scene, camera); })();
 window.__kfg = { sample, update, set: (h, z) => { $('#kfg-hoehe').value = h; $('#kfg-zu').value = z; update(); }, status: () => $('#kfg-status').textContent };
