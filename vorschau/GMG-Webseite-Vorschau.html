@@ -276,6 +276,8 @@ td a { font-weight: 600; }
 /* Konfigurator */
 .btn--xs { padding: 6px 12px; font-size: .85rem; border-width: 1px; }
 .kfg-section { padding-top: 40px; }
+.kfg-home { padding-bottom: 40px; }
+.kfg-home .kfg-section { padding: 0; }
 .kfg { display: grid; grid-template-columns: 400px 1fr; gap: 28px; align-items: start; }
 .kfg__panel { display: grid; gap: 14px; }
 .kfg__step { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
@@ -289,13 +291,18 @@ td a { font-weight: 600; }
 .kfg__file { margin: 0; font-size: .88rem; min-height: 1.2em; }
 .kfg__turn { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: .88rem; }
 .kfg__forms { display: grid; gap: 10px; font-size: .88rem; }
-.kfg__seg { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid #cbd2da; border-radius: 8px; overflow: hidden; }
+.kfg__seg { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid #cbd2da; border-radius: 8px; overflow: hidden; }
 .kfg__seg button { font: inherit; font-weight: 600; padding: 9px 6px; border: 0; background: #fff; color: var(--ink); cursor: pointer; }
 .kfg__seg button + button { border-left: 1px solid #cbd2da; }
 .kfg__seg button[aria-pressed="true"] { background: var(--blue); color: #fff; }
+.kfg__seg button:disabled { color: #a8b1bb; cursor: not-allowed; }
+.kfg__seg--2 { grid-template-columns: 1fr 1fr; }
+.kfg__fields { grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)) !important; }
 .kfg__fields { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 .kfg__fields .field input { padding: 9px 10px; }
 .kfg__fields label { font-size: .8rem; }
+.kfg__warn { margin: 0; font-size: .85rem; color: #855a06; }
+.kfg__warn:empty { display: none; }
 .kfg__facts { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; margin: 0; font-size: .92rem; padding: 12px 14px; background: var(--bg-alt); border-radius: 8px; }
 .kfg__facts dt { color: var(--muted); }
 .kfg__facts dd { margin: 0; color: var(--ink); font-weight: 600; }
@@ -303,6 +310,11 @@ td a { font-weight: 600; }
 .kfg__card { display: grid; gap: 2px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 8px; color: var(--text); background: #fff; }
 .kfg__card:hover { border-color: var(--blue); text-decoration: none; }
 .kfg__card.is-best { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-soft); }
+button.kfg__card { font: inherit; text-align: left; cursor: pointer; width: 100%; }
+.kfg__card.is-active { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-soft); }
+.kfg__card.is-nofit { border-color: #e7b3ad; background: #fdf6f5; }
+.kfg__card.is-nofit.is-active { box-shadow: 0 0 0 3px #f6d6d2; }
+.kfg__card.is-nofit .kfg__rank { color: #9b2a21; }
 .kfg__card strong { color: var(--ink); font-size: 1.1rem; }
 .kfg__rank { font-size: .7rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--blue); }
 .kfg__fam { color: var(--muted); font-size: .88rem; }
@@ -324,7 +336,14 @@ td a { font-weight: 600; }
 .kfg .form__row { align-items: start; }
 .kfg__offline { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; color: var(--muted); }
 .kfg.is-ready .kfg__offline { display: none; }
-.kfg.is-loading .kfg__view::after { content: "Datei wird gelesen …"; position: absolute; inset: 0; display: grid; place-items: center; background: rgba(255,255,255,.7); font-weight: 650; color: var(--ink); }
+.kfg__progress { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 6px; background: rgba(244,246,248,.82); backdrop-filter: blur(2px); }
+.kfg__progress[hidden] { display: none; }
+.kfg__progress svg { width: 132px; height: 132px; transform: rotate(-90deg); grid-area: 1 / 1; }
+.kfg__progress circle { fill: none; stroke-width: 9; }
+.kfg__ring-bg { stroke: #dbe2e9; }
+.kfg__ring-bar { stroke: var(--blue); stroke-linecap: round; stroke-dasharray: 100; stroke-dashoffset: 100; transition: stroke-dashoffset .15s linear; }
+.kfg__ring-pct { grid-area: 1 / 1; align-self: center; font-size: 1.6rem; font-weight: 750; color: var(--ink); }
+.kfg__ring-label { font-size: .9rem; font-weight: 600; color: var(--muted); }
 
 /* Mobile contact bar */
 .mobilebar { display: none; }
@@ -516,6 +535,83 @@ td a { font-weight: 600; }
   </div>
 </section>
 
+<section class="section kfg-home" id="konfigurator">
+  <div class="wrap"><div class="section__head">
+    <span class="eyebrow">Greifer testen</span>
+    <h2>Ihr Teil, unser Greifer – direkt hier ausprobieren</h2>
+    <p class="lead">Laden Sie Ihr Teil als STEP- oder STL-Datei oder wählen Sie eine Grundform. Dann den Greifer verfahren, absenken und zugreifen lassen. Die Datei bleibt auf Ihrem Rechner.</p>
+  </div></div>
+  <section class="section kfg-section"><div class="wrap">
+  <div class="kfg" data-konfigurator data-base="">
+    <div class="kfg__panel">
+      <div class="kfg__step"><span class="kfg__num">1</span><h3>Teil laden</h3></div>
+      <label class="kfg__drop">
+        <input id="kfg-file" type="file" accept=".step,.stp,.stl">
+        <span class="kfg__drop-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>STEP- oder STL-Datei hierher ziehen</span>
+        <span class="muted">oder klicken zum Auswählen · max. 100 MB</span>
+      </label>
+      <p id="kfg-datei" class="kfg__file muted"></p>
+      <div class="kfg__forms"><span class="muted">Oder Grundform mit eigenen Maßen:</span>
+        <div class="kfg__seg">
+          <button type="button" data-form="zylinder">Zylinder</button>
+          <button type="button" data-form="quader">Quader</button>
+          <button type="button" data-form="rohr">Rohr / Ring</button>
+          <button type="button" data-form="kasten">Kasten offen</button>
+        </div>
+        <div id="kfg-form-felder" class="kfg__fields"></div>
+        <p id="kfg-form-hinweis" class="kfg__warn" role="status"></p>
+      </div>
+      <div class="form__row">
+        <div class="field"><label for="kfg-einheit">Einheit der Datei</label>
+          <select id="kfg-einheit"><option value="auto">Automatisch</option><option value="mm">Millimeter</option><option value="cm">Zentimeter</option><option value="m">Meter</option></select>
+          <small id="kfg-einheit-info" class="muted"></small></div>
+        <div class="field"><label for="kfg-material">Werkstoff</label>
+          <select id="kfg-material">
+            <option value="7850">Stahl</option><option value="2700">Aluminium</option><option value="1200">Kunststoff</option>
+            <option value="600">Holz</option><option value="150">Karton / leichte Verpackung</option>
+            <option value="1050" data-weich="1">Weich: Teig, Fleisch, Lebensmittel</option>
+          </select></div>
+      </div>
+      <dl class="kfg__facts"><dt>Abmessungen</dt><dd id="kfg-masse">–</dd><dt>Gewicht</dt><dd id="kfg-gewicht">–</dd></dl>
+      <div class="kfg__turn"><span class="muted">Teil um 90° drehen:</span>
+        <button type="button" class="btn btn--ghost btn--xs" id="kfg-dreh-y">↻ im Kreis</button>
+        <button type="button" class="btn btn--ghost btn--xs" id="kfg-dreh-x">⤾ nach vorn kippen</button>
+        <button type="button" class="btn btn--ghost btn--xs" id="kfg-dreh-z">⤿ zur Seite kippen</button></div>
+
+      <div class="kfg__step"><span class="kfg__num">2</span><h3>Greifer</h3></div>
+      <div id="kfg-vorschlag" class="kfg__list"></div>
+      <p class="kfg__small muted">Hier erscheinen die Greifer, für die ein 3D-Modell vorliegt. Weitere GMG-Greifer folgen.</p>
+
+      <div class="kfg__step"><span class="kfg__num">3</span><h3>Greifen testen</h3></div>
+      <div class="field"><label for="kfg-hoehe">Höhe: Greifer absenken</label><input id="kfg-hoehe" type="range" min="0" max="100" value="85"></div>
+      <div class="form__row">
+        <div class="field"><label for="kfg-x">Links / rechts</label><input id="kfg-x" type="range" min="-100" max="100" value="0"></div>
+        <div class="field"><label for="kfg-z">Vorne / hinten</label><input id="kfg-z" type="range" min="-100" max="100" value="0"></div>
+      </div>
+      <div class="kfg__seg kfg__seg--2" role="group" aria-label="Greifart">
+        <button type="button" data-griff="aussen" aria-pressed="true">Außen greifen</button>
+        <button type="button" data-griff="innen" id="kfg-griff-innen">Innen greifen</button>
+      </div>
+      <div class="field"><label for="kfg-zu" id="kfg-zu-label">Greifer schließen</label><input id="kfg-zu" type="range" min="0" max="100" value="0"></div>
+      <p id="kfg-status" class="kfg__status is-info" role="status">Teil wird geladen …</p>
+      <a id="kfg-anfrage" class="btn btn--primary" href="mailto:info@gmg-system.com">Anfrage mit diesem Teil <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+    </div>
+    <div class="kfg__view">
+      <canvas aria-label="3D-Ansicht: Teil und Greifer"></canvas>
+      <div class="kfg__hint">Ziehen zum Drehen · Scrollen zum Zoomen</div>
+      <div class="kfg__badge" id="kfg-badge">Greifer Capit (Testmodell) in Originalgröße</div>
+      <noscript><p class="kfg__nojs">Der Konfigurator benötigt JavaScript.</p></noscript>
+      <p class="kfg__offline">Der 3D-Konfigurator läuft nur auf der Webseite (online).</p>
+      <div class="kfg__progress" hidden role="progressbar" aria-label="Ladefortschritt">
+        <svg viewBox="0 0 120 120"><circle class="kfg__ring-bg" cx="60" cy="60" r="50" pathLength="100"/><circle class="kfg__ring-bar" cx="60" cy="60" r="50" pathLength="100"/></svg>
+        <span class="kfg__ring-pct">0 %</span>
+        <span class="kfg__ring-label">Datei wird gelesen</span>
+      </div>
+    </div>
+  </div>
+</div></section>
+</section>
+
 <section class="facts">
   <div class="wrap facts__grid">
     <div class="fact"><div class="fact__value">1992</div><div class="fact__label">gegründet in Soest</div></div>
@@ -662,8 +758,10 @@ td a { font-weight: 600; }
           <button type="button" data-form="zylinder">Zylinder</button>
           <button type="button" data-form="quader">Quader</button>
           <button type="button" data-form="rohr">Rohr / Ring</button>
+          <button type="button" data-form="kasten">Kasten offen</button>
         </div>
         <div id="kfg-form-felder" class="kfg__fields"></div>
+        <p id="kfg-form-hinweis" class="kfg__warn" role="status"></p>
       </div>
       <div class="form__row">
         <div class="field"><label for="kfg-einheit">Einheit der Datei</label>
@@ -688,16 +786,29 @@ td a { font-weight: 600; }
 
       <div class="kfg__step"><span class="kfg__num">3</span><h3>Greifen testen</h3></div>
       <div class="field"><label for="kfg-hoehe">Höhe: Greifer absenken</label><input id="kfg-hoehe" type="range" min="0" max="100" value="85"></div>
-      <div class="field"><label for="kfg-zu">Greifer schließen</label><input id="kfg-zu" type="range" min="0" max="100" value="0"></div>
+      <div class="form__row">
+        <div class="field"><label for="kfg-x">Links / rechts</label><input id="kfg-x" type="range" min="-100" max="100" value="0"></div>
+        <div class="field"><label for="kfg-z">Vorne / hinten</label><input id="kfg-z" type="range" min="-100" max="100" value="0"></div>
+      </div>
+      <div class="kfg__seg kfg__seg--2" role="group" aria-label="Greifart">
+        <button type="button" data-griff="aussen" aria-pressed="true">Außen greifen</button>
+        <button type="button" data-griff="innen" id="kfg-griff-innen">Innen greifen</button>
+      </div>
+      <div class="field"><label for="kfg-zu" id="kfg-zu-label">Greifer schließen</label><input id="kfg-zu" type="range" min="0" max="100" value="0"></div>
       <p id="kfg-status" class="kfg__status is-info" role="status">Teil wird geladen …</p>
       <a id="kfg-anfrage" class="btn btn--primary" href="mailto:info@gmg-system.com">Anfrage mit diesem Teil <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
     </div>
     <div class="kfg__view">
       <canvas aria-label="3D-Ansicht: Teil und Greifer"></canvas>
       <div class="kfg__hint">Ziehen zum Drehen · Scrollen zum Zoomen</div>
-      <div class="kfg__badge">Greifer Capit (Testmodell), maßstäblich an Ihr Teil angepasst</div>
+      <div class="kfg__badge" id="kfg-badge">Greifer Capit (Testmodell) in Originalgröße</div>
       <noscript><p class="kfg__nojs">Der Konfigurator benötigt JavaScript.</p></noscript>
       <p class="kfg__offline">Der 3D-Konfigurator läuft nur auf der Webseite (online).</p>
+      <div class="kfg__progress" hidden role="progressbar" aria-label="Ladefortschritt">
+        <svg viewBox="0 0 120 120"><circle class="kfg__ring-bg" cx="60" cy="60" r="50" pathLength="100"/><circle class="kfg__ring-bar" cx="60" cy="60" r="50" pathLength="100"/></svg>
+        <span class="kfg__ring-pct">0 %</span>
+        <span class="kfg__ring-label">Datei wird gelesen</span>
+      </div>
     </div>
   </div>
 </div></section>

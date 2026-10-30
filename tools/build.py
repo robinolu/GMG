@@ -289,6 +289,15 @@ def build_home():
   </div>
 </section>
 
+<section class="section kfg-home" id="konfigurator">
+  <div class="wrap"><div class="section__head">
+    <span class="eyebrow">Greifer testen</span>
+    <h2>Ihr Teil, unser Greifer – direkt hier ausprobieren</h2>
+    <p class="lead">Laden Sie Ihr Teil als STEP- oder STL-Datei oder wählen Sie eine Grundform. Dann den Greifer verfahren, absenken und zugreifen lassen. Die Datei bleibt auf Ihrem Rechner.</p>
+  </div></div>
+  {configurator_block(r)}
+</section>
+
 <section class="facts">
   <div class="wrap facts__grid">
     <div class="fact"><div class="fact__value">1992</div><div class="fact__label">gegründet in Soest</div></div>
@@ -345,7 +354,7 @@ def build_home():
 
 {cta_band(r)}
 """
-    page("", "", body, scripts=["assets/js/greifer3d.js"])
+    page("", "", body, scripts=["assets/js/greifer3d.js", "assets/js/konfigurator.js"])
 
 
 def build_overview():
@@ -463,17 +472,9 @@ def build_product(fam, p, path):
     page(path, f"{code} {desc}", body, "produkte", f"{code} – {desc}. {fam['teaser']}")
 
 
-def build_configurator():
-    path = "konfigurator"
-    r = rel(path)
-    body = f"""
-<section class="page-head"><div class="wrap">
-  {crumbs(r, [('Konfigurator', None)])}
-  <span class="eyebrow">Greifer-Konfigurator</span>
-  <h1>Welcher Greifer greift Ihr Teil?</h1>
-  <p class="lead">Laden Sie Ihr Teil als STEP- oder STL-Datei oder wählen Sie eine Grundform mit Ihren Maßen. Dann testen Sie direkt in 3D, wie der Greifer zufasst. Die Datei bleibt auf Ihrem Rechner und wird nicht hochgeladen.</p>
-</div></section>
-<section class="section kfg-section"><div class="wrap">
+def configurator_block(r):
+    """Greifer-Konfigurator (Startseite und eigene Seite), Logik in tools/konfigurator/konfigurator.js."""
+    return f"""<section class="section kfg-section"><div class="wrap">
   <div class="kfg" data-konfigurator data-base="{r}">
     <div class="kfg__panel">
       <div class="kfg__step"><span class="kfg__num">1</span><h3>Teil laden</h3></div>
@@ -488,8 +489,10 @@ def build_configurator():
           <button type="button" data-form="zylinder">Zylinder</button>
           <button type="button" data-form="quader">Quader</button>
           <button type="button" data-form="rohr">Rohr / Ring</button>
+          <button type="button" data-form="kasten">Kasten offen</button>
         </div>
         <div id="kfg-form-felder" class="kfg__fields"></div>
+        <p id="kfg-form-hinweis" class="kfg__warn" role="status"></p>
       </div>
       <div class="form__row">
         <div class="field"><label for="kfg-einheit">Einheit der Datei</label>
@@ -514,19 +517,45 @@ def build_configurator():
 
       <div class="kfg__step"><span class="kfg__num">3</span><h3>Greifen testen</h3></div>
       <div class="field"><label for="kfg-hoehe">Höhe: Greifer absenken</label><input id="kfg-hoehe" type="range" min="0" max="100" value="85"></div>
-      <div class="field"><label for="kfg-zu">Greifer schließen</label><input id="kfg-zu" type="range" min="0" max="100" value="0"></div>
+      <div class="form__row">
+        <div class="field"><label for="kfg-x">Links / rechts</label><input id="kfg-x" type="range" min="-100" max="100" value="0"></div>
+        <div class="field"><label for="kfg-z">Vorne / hinten</label><input id="kfg-z" type="range" min="-100" max="100" value="0"></div>
+      </div>
+      <div class="kfg__seg kfg__seg--2" role="group" aria-label="Greifart">
+        <button type="button" data-griff="aussen" aria-pressed="true">Außen greifen</button>
+        <button type="button" data-griff="innen" id="kfg-griff-innen">Innen greifen</button>
+      </div>
+      <div class="field"><label for="kfg-zu" id="kfg-zu-label">Greifer schließen</label><input id="kfg-zu" type="range" min="0" max="100" value="0"></div>
       <p id="kfg-status" class="kfg__status is-info" role="status">Teil wird geladen …</p>
       <a id="kfg-anfrage" class="btn btn--primary" href="mailto:{MAIL}">Anfrage mit diesem Teil {icon('arrow')}</a>
     </div>
     <div class="kfg__view">
       <canvas aria-label="3D-Ansicht: Teil und Greifer"></canvas>
       <div class="kfg__hint">Ziehen zum Drehen · Scrollen zum Zoomen</div>
-      <div class="kfg__badge">Greifer Capit (Testmodell), maßstäblich an Ihr Teil angepasst</div>
+      <div class="kfg__badge" id="kfg-badge">Greifer Capit (Testmodell) in Originalgröße</div>
       <noscript><p class="kfg__nojs">Der Konfigurator benötigt JavaScript.</p></noscript>
       <p class="kfg__offline">Der 3D-Konfigurator läuft nur auf der Webseite (online).</p>
+      <div class="kfg__progress" hidden role="progressbar" aria-label="Ladefortschritt">
+        <svg viewBox="0 0 120 120"><circle class="kfg__ring-bg" cx="60" cy="60" r="50" pathLength="100"/><circle class="kfg__ring-bar" cx="60" cy="60" r="50" pathLength="100"/></svg>
+        <span class="kfg__ring-pct">0 %</span>
+        <span class="kfg__ring-label">Datei wird gelesen</span>
+      </div>
     </div>
   </div>
+</div></section>"""
+
+
+def build_configurator():
+    path = "konfigurator"
+    r = rel(path)
+    body = f"""
+<section class="page-head"><div class="wrap">
+  {crumbs(r, [('Konfigurator', None)])}
+  <span class="eyebrow">Greifer-Konfigurator</span>
+  <h1>Welcher Greifer greift Ihr Teil?</h1>
+  <p class="lead">Laden Sie Ihr Teil als STEP- oder STL-Datei oder wählen Sie eine Grundform mit Ihren Maßen. Dann testen Sie direkt in 3D, wie der Greifer zufasst. Die Datei bleibt auf Ihrem Rechner und wird nicht hochgeladen.</p>
 </div></section>
+{configurator_block(r)}
 {cta_band(r)}"""
     page(path, "Greifer-Konfigurator", body, "konfigurator",
          "Teil als STEP-Datei laden, passenden GMG-Greifer finden und das Greifen direkt in 3D testen.",

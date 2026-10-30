@@ -8,9 +8,9 @@ import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment
 import { mergeGeometries, toCreasedNormals } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { MeshBVH } from 'three-mesh-bvh';
 import GRIPPER from '../../data/3d/greifer-platzhalter.json';
+import { Quaternion as Q } from 'three';
 // Greifer mit 3D-Modell. Weitere GMG-Greifer kommen hinzu, sobald ihre STEP-Dateien vorliegen
 // (Kennwerte aller Baureihen liegen schon in data/greifer-specs.json).
-const GRIPPERS_3D = [{ code: 'Capit', name: 'Gelenk-Parallelgreifer', note: 'Testmodell, maßstäblich an Ihr Teil angepasst' }];
 
 const root = document.querySelector('[data-konfigurator]');
 const BASE = root.dataset.base || '';
@@ -49,6 +49,7 @@ const PHI_MAX = THREE.MathUtils.degToRad(57);
 const MODEL_GAP = 11.15;       // Backenabstand innen bei ganz offenem Modell (Modelleinheiten)
 const MODEL_JAW_LEN = 14.8;    // Länge der Backen
 const MODEL_LEN = 32;         // Gesamtlänge des Greifers mit Kolbenstange
+const SCALE = 10;             // Modelleinheit → mm: Capit ist rund 320 mm lang
 const MAT = {
   gehaeuse: new THREE.MeshStandardMaterial({ color: 0x2b3038, metalness: 0.65, roughness: 0.4 }),
   backe: new THREE.MeshStandardMaterial({ color: 0x8e98a4, metalness: 0.9, roughness: 0.34 }),
@@ -158,17 +159,145 @@ function placePart(autoOrient) {
   scene.add(part);
   partBVH = new MeshBVH(geo);
   box.copy(geo.boundingBox);
+  innerWidth = measureInner();
+  if (mode === 'innen' && !innerWidth) setMode('aussen');
+  $('#kfg-griff-innen').disabled = !innerWidth || !A.range.innen;
   fitScene();
   updateFacts();
   suggest();
   update();
 }
 
+let mode = 'aussen';          // 'aussen' = Backen schließen um das Teil, 'innen' = Backen spreizen im Hohlraum
+let innerWidth = null;
+function measureInner() {
+  // Hohlraum, der von oben zugänglich ist: von der Mitte nach oben frei, nach ±Z eine Wand
+  const s = new THREE.Vector3(); box.getSize(s);
+  const ray = new THREE.Ray();
+  for (const f of [0.6, 0.45, 0.75, 0.3]) {
+    const o = new THREE.Vector3(0, s.y * f, 0);
+    ray.set(o, new THREE.Vector3(0, 1, 0));
+    if (partBVH.raycastFirst(ray, THREE.DoubleSide)) continue;
+    ray.set(o, new THREE.Vector3(0, 0, 1)); const a = partBVH.raycastFirst(ray, THREE.DoubleSide);
+    ray.set(o, new THREE.Vector3(0, 0, -1)); const b = partBVH.raycastFirst(ray, THREE.DoubleSide);
+    if (a && b) return a.distance + b.distance;
+  }
+  return null;
+}
+
+// Greifbereich des Greifers in mm, aus den Backen gemessen (offen / geschlossen)
+const RANGE = (() => {
+  gripper.scale.setScalar(SCALE);
+  const m = (phi) => {
+    pose(phi);
+    const a = new THREE.Box3().setFromObject(parts.backe_a), b = new THREE.Box3().setFromObject(parts.backe_b);
+    return { gap: b.min.z - a.max.z, outer: b.max.z - a.min.z };
+  };
+  const open = m(0), shut = m(PHI_MAX);
+  pose(0);
+  return { aussen: [Math.max(0, shut.gap), open.gap], innen: [shut.outer, open.outer] };
+})();
+// ---------- Greifer-Auswahl ----------
+// Jeder Greifer: root (Gruppe, Backen-/Fingerspitzen im Ursprung), meshes, contact, set(t) mit 0 = offen, 1 = geschlossen,
+// range (mm) für außen/innen, reach (Länge der Finger), length (Gesamthöhe), paint(state)
+const GRIPPERS = {
+  capit: {
+    id: 'capit', code: 'Capit', name: 'Gelenk-Parallelgreifer', note: 'Testmodell in Originalgröße (ca. 320 mm lang)',
+    root: gripper, meshes: Object.values(parts), contact: [parts.backe_a, parts.backe_b], ready: true,
+    set: (t) => pose(PHI_MAX * t), range: RANGE, reach: MODEL_JAW_LEN * SCALE, length: MODEL_LEN * SCALE, word: 'Beide Backen liegen',
+    paint: (st) => { for (const m of [parts.backe_a, parts.backe_b]) m.material = st === 'gegriffen' ? jawContact : st === 'kollision' ? jawCollide : MAT.backe; },
+  },
+  tentra: {
+    id: 'tentra', code: 'Tentra T3', name: 'Tentakelgreifer, 3 Finger', note: 'Testmodell in Originalgröße (Ø 104 mm, 166 mm hoch)',
+    ready: false, range: { aussen: [16, 78], innen: null }, reach: 100, length: 166, word: 'Die Finger liegen',
+  },
+};
+let A = GRIPPERS.capit;   // aktiver Greifer
+
+const TMAT = {
+  dunkel: new THREE.MeshStandardMaterial({ color: 0x1f2830, metalness: 0.5, roughness: 0.45 }),
+  platte: new THREE.MeshStandardMaterial({ color: 0x8e98a2, metalness: 0.7, roughness: 0.35 }),
+  finger: new THREE.MeshStandardMaterial({ color: 0xc8501a, metalness: 0.15, roughness: 0.5 }),
+  polster: new THREE.MeshStandardMaterial({ color: 0x0f7a78, metalness: 0.1, roughness: 0.7 }),
+  stahl: new THREE.MeshStandardMaterial({ color: 0xb7bec7, metalness: 1.0, roughness: 0.22 }),
+  gelb: new THREE.MeshStandardMaterial({ color: 0xd9a03a, metalness: 0.6, roughness: 0.35 }),
+};
+const padContact = new THREE.MeshStandardMaterial({ color: 0x2e9d5b, metalness: 0.1, roughness: 0.6 });
+const padCollide = new THREE.MeshStandardMaterial({ color: 0xc8372d, metalness: 0.1, roughness: 0.6 });
+const tentraMat = (n) => /Vertebra/.test(n) ? TMAT.finger : /Contact_pad/.test(n) ? TMAT.polster : /Upper_plate/.test(n) ? TMAT.platte
+  : /screw|nut|standoff/i.test(n) ? TMAT.stahl : /spool|actuator/i.test(n) ? TMAT.gelb : TMAT.dunkel;
+
+async function loadTentra() {
+  // Bewegung je Teil aus den STEP-Stellungen OPEN → GRASP (tools/tentra/bewegung.py)
+  const data = await (await fetch(BASE + 'data/3d/tentra-t3.json')).json();
+  const g = GRIPPERS.tentra, root = new THREE.Group(), inner = new THREE.Group();
+  inner.position.y = 117.8;   // Fingerspitzen (offen) auf Höhe 0
+  root.add(inner);
+  const meshes = [], pads = [], moving = [];
+  const byIndex = [];
+  for (const pt of data.parts) {
+    let geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(pt.p, 3));
+    geo.setIndex(pt.i);
+    geo = toCreasedNormals(geo, THREE.MathUtils.degToRad(35));
+    geo.boundsTree = new MeshBVH(geo);
+    const mesh = new THREE.Mesh(geo, tentraMat(pt.name));
+    mesh.castShadow = mesh.receiveShadow = true;
+    mesh.matrixAutoUpdate = false;
+    inner.add(mesh);
+    meshes.push(mesh);
+    byIndex.push(mesh);
+    if (/Contact_pad/.test(pt.name)) pads.push(mesh);
+    if (pt.bewegung) {
+      const b = pt.bewegung;
+      moving.push({ mesh, parent: b.parent, pivot: new THREE.Vector3(...b.pivot), q: new Q(...b.q), rest: new THREE.Vector3(...b.rest) });
+    }
+  }
+  // Kette: jedes Glied dreht relativ zu seinem Vorgänger um sein Gelenk (Eltern stehen in der Liste vorn)
+  const qi = new Q(), m1 = new THREE.Matrix4(), m2 = new THREE.Matrix4(), local = new THREE.Matrix4();
+  g.set = (t) => {
+    for (const mv of moving) {
+      qi.identity().slerp(mv.q, t);
+      local.makeTranslation(mv.pivot.x + mv.rest.x * t, mv.pivot.y + mv.rest.y * t, mv.pivot.z + mv.rest.z * t)
+        .multiply(m1.makeRotationFromQuaternion(qi)).multiply(m2.makeTranslation(-mv.pivot.x, -mv.pivot.y, -mv.pivot.z));
+      if (mv.parent >= 0) mv.mesh.matrix.multiplyMatrices(byIndex[mv.parent].matrix, local);
+      else mv.mesh.matrix.copy(local);
+    }
+    root.updateMatrixWorld(true);
+  };
+  g.paint = (st) => { for (const m of pads) m.material = st === 'gegriffen' ? padContact : st === 'kollision' ? padCollide : TMAT.polster; };
+  g.root = root; g.meshes = meshes; g.contact = moving.map((mv) => mv.mesh);
+  // Greifbereich aus den Polstern: kleinster Abstand zur Achse offen / geschlossen
+  const radial = (t) => { g.set(t); let r = Infinity; const v = new THREE.Vector3();
+    for (const m of pads) { const pos = m.geometry.attributes.position;
+      for (let i = 0; i < pos.count; i++) { v.fromBufferAttribute(pos, i).applyMatrix4(m.matrixWorld); r = Math.min(r, Math.hypot(v.x, v.z)); } }
+    return r; };
+  g.range = { aussen: [2 * radial(1), 2 * radial(0)], innen: null };
+  g.set(0);
+  g.ready = true;
+}
+
+async function selectGripper(id) {
+  const g = GRIPPERS[id];
+  if (!g.ready) {
+    $('#kfg-status').className = 'kfg__status is-info';
+    $('#kfg-status').textContent = `${g.code} wird geladen …`;
+    try { await loadTentra(); } catch (e) { $('#kfg-status').textContent = `${g.code} konnte nicht geladen werden.`; return; }
+  }
+  if (A.root) scene.remove(A.root);
+  A = g;
+  scene.add(A.root);
+  A.root.visible = true;
+  $('#kfg-badge').textContent = `Greifer ${A.code} (Testmodell) in Originalgröße`;
+  const innenOk = !!A.range.innen;
+  if (!innenOk && mode === 'innen') { mode = 'aussen'; }
+  setMode(mode);
+}
+
+
 function fitScene() {
   const s = new THREE.Vector3(); box.getSize(s);
-  const w = Math.max(s.z, 1);
-  gripper.scale.setScalar((w * 1.35) / MODEL_GAP);   // Platzhalter-Greifer an die Teilgröße angepasst
-  const gLen = MODEL_LEN * gripper.scale.x;
+  const gLen = A.length;   // Greifer in echter Größe – das Teil wird nicht an den Greifer angepasst
   const r = Math.max(s.x, s.z, s.y + gLen * 0.75);
   floor.scale.set(r * 8, r * 8, 1);
   grid.scale.setScalar(r * 4);
@@ -202,21 +331,29 @@ function updateFacts() {
   if (!(vol > 0 && vol <= bbox * 1.01)) vol = bbox * 0.5;   // offenes Netz: grob schätzen
   const dens = Number($('#kfg-material').value);
   const mass = vol * 1e-9 * dens;                           // mm³ → m³ · kg/m³
-  facts = { s, vol, mass, grip: s.z, soft: $('#kfg-material').selectedOptions[0].dataset.weich === '1' };
-  $('#kfg-masse').textContent = `${fmt(s.x)} × ${fmt(s.y)} × ${fmt(s.z)} mm (L × H × Greifbreite)`;
+  facts = { s, vol, mass, grip: mode === 'innen' && innerWidth ? innerWidth : s.z, soft: $('#kfg-material').selectedOptions[0].dataset.weich === '1' };
+  $('#kfg-masse').textContent = `${fmt(s.x)} × ${fmt(s.y)} × ${fmt(s.z)} mm (L × H × Greifbreite)` + (innerWidth ? ` · Innenmaß ${fmt(innerWidth)} mm` : '');
   $('#kfg-gewicht').textContent = mass < 1 ? `ca. ${fmt(mass * 1000)} g` : `ca. ${fmt(mass, 1)} kg`;
 }
 
 // ---------- Vorschlag ----------
 function suggest() {
   if (!facts) return;
-  $('#kfg-vorschlag').innerHTML = GRIPPERS_3D.map((g, i) => `
-    <div class="kfg__card${i === 0 ? ' is-best' : ''}">
-      <span class="kfg__rank">3D-Modell verfügbar</span>
+  const rangeText = (g) => `außen ${fmt(g.range.aussen[0])}–${fmt(g.range.aussen[1])} mm` + (g.range.innen ? ` · innen ${fmt(g.range.innen[0])}–${fmt(g.range.innen[1])} mm` : ' · kein Innengreifen');
+  // Karten nur neu aufbauen, wenn sich die Auswahl ändert – sonst ginge ein Klick verloren,
+  // der gleichzeitig ein Maßfeld verlässt (dessen change-Ereignis ruft suggest auf).
+  const sig = A.id + Object.values(GRIPPERS).map((g) => g.ready).join();
+  if ($('#kfg-vorschlag').dataset.sig !== sig) {
+  $('#kfg-vorschlag').dataset.sig = sig;
+  $('#kfg-vorschlag').innerHTML = Object.values(GRIPPERS).map((g) => {
+    return `<button type="button" class="kfg__card${g === A ? ' is-active' : ''}" data-greifer="${g.id}" aria-pressed="${g === A}">
+      <span class="kfg__rank">${g === A ? 'Im Test' : 'Zum Testen anklicken'}</span>
       <strong>${g.code}</strong> <span class="kfg__fam">${g.name}</span>
-      <span class="kfg__why">Greifbreite ${fmt(facts.grip)} mm · Gewicht ${facts.mass < 1 ? fmt(facts.mass * 1000) + ' g' : fmt(facts.mass, 1) + ' kg'}</span>
+      <span class="kfg__why">Greifweite ${rangeText(g)}</span>
       <span class="kfg__note">${g.note}</span>
-    </div>`).join('');
+    </button>`; }).join('');
+  $('#kfg-vorschlag').querySelectorAll('[data-greifer]').forEach((b) => b.addEventListener('click', () => b.dataset.greifer !== A.id && selectGripper(b.dataset.greifer)));
+  }
   const body = [
     'Guten Tag,', '', 'über den Greifer-Konfigurator möchte ich folgendes Teil anfragen:',
     `Teil: ${$('#kfg-datei').textContent}`,
@@ -228,65 +365,134 @@ function suggest() {
 
 // ---------- Greiftest ----------
 const tmp = new THREE.Matrix4();
-const touches = (name) => partBVH.intersectsGeometry(parts[name].geometry, tmp.copy(parts[name].matrixWorld));
-const jawsTouch = () => touches('backe_a') || touches('backe_b');
-const anyTouch = () => Object.keys(parts).some(touches);
+const touches = (mesh) => partBVH.intersectsGeometry(mesh.geometry, tmp.copy(mesh.matrixWorld));
+const jawsTouch = () => A.contact.some(touches);
+const anyTouch = () => A.meshes.some(touches);
 
 function update() {
   if (!part) return;
   const s = new THREE.Vector3(); box.getSize(s);
-  const jaw = MODEL_JAW_LEN * gripper.scale.x;
+  const inside = mode === 'innen';
+  const jaw = A.reach;
   const h = $('#kfg-hoehe').value / 100;
   const top = s.y + jaw * 0.25, low = Math.max(s.y * 0.04, s.y - jaw * 0.9);
-  gripper.position.y = top + (low - top) * h;
-  const target = PHI_MAX * ($('#kfg-zu').value / 100);
-  pose(0);
+  A.root.position.y = top + (low - top) * h;
+  // Verfahren in der Ebene: bis eine Fingerlänge über den Teilrand hinaus
+  const reachX = s.x / 2 + jaw, reachZ = s.z / 2 + jaw;
+  A.root.position.x = ($('#kfg-x').value / 100) * reachX;
+  A.root.position.z = ($('#kfg-z').value / 100) * reachZ;
+  A.root.updateMatrixWorld(true);
+  // Außen: Regler schließt (0 = offen). Innen: Regler öffnet (0 = geschlossen, Backen spreizen nach außen).
+  const v = $('#kfg-zu').value / 100;
+  const start = inside ? 1 : 0;
+  const target = inside ? 1 - v : v;
+  A.set(start);
   let state, phi = target;
   if (anyTouch()) {
     state = 'kollision';
-    phi = 0;
+    phi = start;
   } else {
-    pose(target);
+    A.set(target);
     if (jawsTouch()) {
-      let lo = 0, hi = target;
-      for (let i = 0; i < 14; i++) { const mid = (lo + hi) / 2; pose(mid); if (jawsTouch()) hi = mid; else lo = mid; }
-      phi = lo;
+      let free = start, hit = target;
+      for (let i = 0; i < 14; i++) { const mid = (free + hit) / 2; A.set(mid); if (jawsTouch()) hit = mid; else free = mid; }
+      phi = free;
       state = 'gegriffen';
-    } else state = target >= PHI_MAX * 0.99 ? 'leer' : 'offen';
+    } else state = v >= 0.99 ? 'leer' : 'offen';
   }
-  pose(phi);
-  const depth = s.y - gripper.position.y;   // wie weit die Backenspitzen unter der Oberkante sind
-  for (const n of ['backe_a', 'backe_b']) parts[n].material = state === 'gegriffen' ? jawContact : state === 'kollision' ? jawCollide : MAT.backe;
+  A.set(phi);
+  const depth = s.y - A.root.position.y;   // wie weit die Backen-/Fingerspitzen unter der Oberkante sind
+  A.paint(state);
+  const what = inside ? `an den Innenwänden (Innenmaß ${fmt(facts.grip)} mm)` : `am Teil (Greifbreite ${fmt(facts.grip)} mm)`;
   const msg = {
-    kollision: ['bad', 'Kollision: Der Greifer stößt beim Absenken auf das Teil. Weiter öffnen oder höher fahren.'],
-    gegriffen: depth >= Math.min(jaw * 0.35, s.y * 0.5) ? ['ok', `Gegriffen: Beide Backen liegen am Teil an (Greifbreite ${fmt(facts.grip)} mm).`]
+    kollision: ['bad', inside ? 'Kollision: Der geschlossene Greifer passt so nicht in den Hohlraum. Höher fahren.'
+      : 'Kollision: Der Greifer stößt beim Absenken auf das Teil. Weiter öffnen oder höher fahren.'],
+    gegriffen: depth >= Math.min(jaw * 0.35, s.y * 0.5) ? ['ok', `${inside ? 'Innen gegriffen' : 'Gegriffen'}: ${A.word} ${what} an.`]
       : ['warn', 'Gegriffen, aber nur an der Kante. Für sicheren Halt den Greifer tiefer fahren.'],
-    leer: ['warn', depth <= 0 ? 'Der Greifer ist über dem Teil und greift ins Leere. Mit „Höhe“ absenken.' : 'Greifer geschlossen, ohne das Teil zu berühren.'],
-    offen: ['info', 'Mit „Greifer schließen“ zufahren und prüfen, wie das Teil gegriffen wird.'],
+    leer: ['warn', depth <= 0 ? 'Der Greifer ist über dem Teil und greift ins Leere. Mit „Höhe“ absenken.'
+      : inside ? 'Greifer ganz geöffnet, ohne die Innenwände zu berühren.' : 'Greifer geschlossen, ohne das Teil zu berühren.'],
+    offen: ['info', inside ? 'Greifer in den Hohlraum absenken und mit „Greifer öffnen“ spreizen.' : 'Mit „Greifer schließen“ zufahren und prüfen, wie das Teil gegriffen wird.'],
   }[state];
   const el = $('#kfg-status');
   el.className = 'kfg__status is-' + msg[0];
   el.textContent = msg[1];
 }
 
+function setMode(m) {
+  mode = m;
+  root.querySelectorAll('[data-griff]').forEach((b) => b.setAttribute('aria-pressed', b.dataset.griff === m ? 'true' : 'false'));
+  $('#kfg-zu-label').textContent = m === 'innen' ? 'Greifer öffnen (innen spreizen)' : 'Greifer schließen';
+  $('#kfg-zu').value = 0;
+  $('#kfg-griff-innen').disabled = !innerWidth || !A.range.innen;
+  if (!part) return;
+  fitScene(); updateFacts(); suggest(); update();
+}
+
 // ---------- Laden ----------
-function loadStep(buf) {
-  // Im Hintergrund lesen, damit die Seite auch bei großen Dateien bedienbar bleibt
+// ---------- Ladeanzeige ----------
+const ring = $('.kfg__progress');
+function progress(pct, label) {
+  ring.hidden = false;
+  const p = Math.max(0, Math.min(100, pct));
+  ring.querySelector('.kfg__ring-bar').style.strokeDashoffset = String(100 - p);
+  ring.querySelector('.kfg__ring-pct').textContent = Math.round(p) + ' %';
+  if (label) ring.querySelector('.kfg__ring-label').textContent = label;
+}
+const nextFrame = () => new Promise((r) => requestAnimationFrame(() => setTimeout(r, 0)));
+
+function readFile(file, onPct) {
+  return new Promise((resolve, reject) => {
+    const fr = new FileReader();
+    fr.onprogress = (e) => e.lengthComputable && onPct(e.loaded / e.total);
+    fr.onload = () => resolve(fr.result);
+    fr.onerror = () => reject(new Error('Datei konnte nicht gelesen werden.'));
+    fr.readAsArrayBuffer(file);
+  });
+}
+
+function geometryFrom(meshes) {
+  return mergeGeometries(meshes.map((m) => {
+    const g = new THREE.BufferGeometry();
+    g.setAttribute('position', new THREE.Float32BufferAttribute(m.attributes.position.array, 3));
+    if (m.index) g.setIndex(Array.from(m.index.array));
+    return g.index ? g.toNonIndexed() : g;
+  }));
+}
+
+function loadStep(buf, onPct) {
+  // Im Hintergrund lesen, damit die Seite auch bei großen Dateien bedienbar bleibt.
+  // OpenCascade meldet keinen Fortschritt: geschätzt aus der Dateigröße, läuft gegen 95 %.
   return new Promise((resolve, reject) => {
     const w = new Worker(BASE + 'assets/vendor/occt/gmg-step-worker.js');
-    w.onerror = () => { w.terminate(); reject(new Error('STEP-Leser konnte nicht gestartet werden.')); };
+    const expect = 2500 + buf.byteLength / 1048576 * 900, t0 = performance.now();
+    const tick = setInterval(() => onPct(1 - Math.exp(-(performance.now() - t0) / expect)), 120);
+    const done = () => { clearInterval(tick); w.terminate(); };
+    w.onerror = () => { done(); reject(new Error('STEP-Leser konnte nicht gestartet werden.')); };
     w.onmessage = (ev) => {
-      w.terminate();
+      done();
       const r = ev.data;
       if (!r || !r.success || !r.meshes.length) { reject(new Error('Die STEP-Datei enthält keine lesbaren Körper.')); return; }
-      resolve(mergeGeometries(r.meshes.map((m) => {
-        const g = new THREE.BufferGeometry();
-        g.setAttribute('position', new THREE.Float32BufferAttribute(m.attributes.position.array, 3));
-        if (m.index) g.setIndex(Array.from(m.index.array));
-        return g.index ? g.toNonIndexed() : g;
-      })));
+      onPct(1);
+      resolve(geometryFrom(r.meshes));
     };
     w.postMessage({ buffer: new Uint8Array(buf), params: { linearUnit: 'millimeter', linearDeflectionType: 'bounding_box_ratio', linearDeflection: 0.002, angularDeflection: 0.4 } });
+  });
+}
+
+function loadStl(buf, onPct) {
+  // STL im Hintergrund zerlegen, mit echtem Fortschritt
+  return new Promise((resolve, reject) => {
+    const w = new Worker(BASE + 'assets/vendor/gmg-stl-worker.js');
+    w.onerror = () => { w.terminate(); reject(new Error('STL-Leser konnte nicht gestartet werden.')); };
+    w.onmessage = (ev) => {
+      if (ev.data.progress != null) { onPct(ev.data.progress); return; }
+      w.terminate();
+      if (ev.data.error) { reject(new Error(ev.data.error)); return; }
+      const g = new THREE.BufferGeometry();
+      g.setAttribute('position', new THREE.BufferAttribute(ev.data.positions, 3));
+      resolve(g);
+    };
+    w.postMessage(buf, [buf]);
   });
 }
 
@@ -297,20 +503,27 @@ async function loadFile(file) {
   if (file.size > MAX_BYTES) { info.textContent = `Die Datei ist ${fmt(file.size / 1048576, 1)} MB groß – erlaubt sind bis 100 MB.`; return; }
   info.textContent = `${file.name} wird gelesen …` + (file.size > SLOW_BYTES ? ' Große Datei, das kann bis zu einer Minute dauern.' : '');
   root.classList.add('is-loading');
+  progress(0, 'Datei wird gelesen');
   try {
-    const buf = await file.arrayBuffer();
+    const buf = await readFile(file, (f) => progress(f * 25));
     fileKind = ext === 'stl' ? 'stl' : 'step';
     $('#kfg-einheit').disabled = false;
-    baseGeo = fileKind === 'stl' ? new STLLoader().parse(buf) : await loadStep(buf);
+    progress(25, 'Geometrie wird berechnet');
+    baseGeo = fileKind === 'stl' ? await loadStl(buf, (f) => progress(25 + f * 65)) : await loadStep(buf, (f) => progress(25 + f * 65));
     if (baseGeo.index) baseGeo = baseGeo.toNonIndexed();
-    baseGeo.deleteAttribute('normal');
+    if (baseGeo.attributes.normal) baseGeo.deleteAttribute('normal');
     baseGeo.computeBoundingBox();
+    progress(92, 'Darstellung wird aufgebaut');
+    await nextFrame();
     info.textContent = `${file.name} (${fmt(file.size / 1048576, 1)} MB) – wird nur in Ihrem Browser verarbeitet.`;
     placePart(true);
+    progress(100, 'Fertig');
+    await new Promise((r) => setTimeout(r, 450));
   } catch (e) {
     info.textContent = 'Die Datei konnte nicht gelesen werden: ' + e.message;
   } finally {
     root.classList.remove('is-loading');
+    ring.hidden = true;
   }
 }
 
@@ -319,16 +532,29 @@ const FORMS = {
   zylinder: { name: 'Zylinder', fields: [['d', 'Durchmesser', 80], ['l', 'Länge', 260]],
     geo: (v) => new THREE.CylinderGeometry(v.d / 2, v.d / 2, v.l, 96).rotateZ(Math.PI / 2),
     label: (v) => `Zylinder Ø ${fmt(v.d)} × ${fmt(v.l)} mm` },
-  quader: { name: 'Quader', fields: [['l', 'Länge', 300], ['b', 'Breite', 200], ['h', 'Höhe', 160]],
+  quader: { name: 'Quader', fields: [['l', 'Länge', 200], ['b', 'Breite', 90], ['h', 'Höhe', 120]],
     geo: (v) => new THREE.BoxGeometry(v.l, v.h, v.b),
     label: (v) => `Quader ${fmt(v.l)} × ${fmt(v.b)} × ${fmt(v.h)} mm` },
-  rohr: { name: 'Rohr / Ring', fields: [['d', 'Außen-Ø', 160], ['i', 'Innen-Ø', 100], ['l', 'Länge', 60]],
+  rohr: { name: 'Rohr / Ring', fields: [['d', 'Außen-Ø', 100], ['i', 'Innen-Ø', 60], ['l', 'Länge', 50]],
     geo: (v) => {
       const sh = new THREE.Shape(); sh.absarc(0, 0, v.d / 2, 0, Math.PI * 2, false);
       const hole = new THREE.Path(); hole.absarc(0, 0, Math.min(v.i, v.d - 1) / 2, 0, Math.PI * 2, true); sh.holes.push(hole);
       return new THREE.ExtrudeGeometry(sh, { depth: v.l, curveSegments: 96, bevelEnabled: false }).rotateX(Math.PI / 2);
     },
     label: (v) => `Rohr Ø ${fmt(v.d)} / ${fmt(v.i)} × ${fmt(v.l)} mm` },
+  kasten: { name: 'Kasten offen', fields: [['l', 'Länge', 300], ['b', 'Breite', 200], ['h', 'Höhe', 150], ['t', 'Wandstärke', 10]],
+    geo: (v) => {   // Boden + vier Wände, ohne Überschneidung (Volumen stimmt)
+      const t = Math.min(v.t, v.l / 2 - 1, v.b / 2 - 1, v.h - 1), wh = v.h - t;
+      const at = (g, x, y, z) => g.translate(x, y, z);
+      return mergeGeometries([
+        at(new THREE.BoxGeometry(v.l, t, v.b), 0, t / 2, 0),
+        at(new THREE.BoxGeometry(v.l, wh, t), 0, t + wh / 2, v.b / 2 - t / 2),
+        at(new THREE.BoxGeometry(v.l, wh, t), 0, t + wh / 2, -v.b / 2 + t / 2),
+        at(new THREE.BoxGeometry(t, wh, v.b - 2 * t), v.l / 2 - t / 2, t + wh / 2, 0),
+        at(new THREE.BoxGeometry(t, wh, v.b - 2 * t), -v.l / 2 + t / 2, t + wh / 2, 0),
+      ]);
+    },
+    label: (v) => `Kasten offen ${fmt(v.l)} × ${fmt(v.b)} × ${fmt(v.h)} mm, Wand ${fmt(v.t)} mm` },
 };
 let form = 'zylinder';
 function renderFormFields() {
@@ -337,12 +563,37 @@ function renderFormFields() {
     <div class="field"><label for="kfg-f-${k}">${label} (mm)</label>
     <input id="kfg-f-${k}" data-k="${k}" type="number" min="1" max="10000" step="1" value="${def}" inputmode="decimal"></div>`).join('');
   root.querySelectorAll('[data-form]').forEach((b) => b.setAttribute('aria-pressed', b.dataset.form === form ? 'true' : 'false'));
-  $('#kfg-form-felder').querySelectorAll('input').forEach((i) => i.addEventListener('input', () => buildForm(false)));
+  $('#kfg-form-felder').querySelectorAll('input').forEach((i) => {
+    i.addEventListener('input', () => buildForm(false, false));   // beim Tippen nur rechnen, Feld nicht überschreiben
+    i.addEventListener('change', () => buildForm(false, true));   // beim Verlassen korrigierten Wert eintragen
+  });
 }
-function buildForm(autoOrient) {
+// Unmögliche Maße sperren: Innen-Ø < Außen-Ø, Wandstärke passt in Länge, Breite und Höhe (mind. 1 mm Wand/Öffnung)
+function limits(v) {
+  const notes = [];
+  if (form === 'rohr' && v.i > v.d - 2) {
+    v.i = Math.max(1, v.d - 2);
+    notes.push(`Innen-Ø muss kleiner als Außen-Ø sein – auf ${fmt(v.i)} mm begrenzt.`);
+  }
+  if (form === 'kasten') {
+    const max = Math.max(1, Math.min((v.l - 2) / 2, (v.b - 2) / 2, v.h - 1));
+    if (v.t > max) { v.t = Math.floor(max); notes.push(`Wandstärke passt nicht in Länge, Breite und Höhe – auf ${fmt(v.t)} mm begrenzt.`); }
+  }
+  return notes;
+}
+function readForm(writeBack) {
+  const inputs = [...$('#kfg-form-felder').querySelectorAll('input')];
   const v = {};
-  for (const i of $('#kfg-form-felder').querySelectorAll('input')) v[i.dataset.k] = Math.max(1, Number(i.value) || 1);
-  if (form === 'rohr' && v.i >= v.d) v.i = v.d * 0.6;
+  for (const i of inputs) v[i.dataset.k] = Math.min(10000, Math.max(1, Number(i.value) || 1));
+  const notes = limits(v);
+  if (form === 'rohr') $('#kfg-f-i').max = Math.max(1, v.d - 2);
+  if (form === 'kasten') $('#kfg-f-t').max = v.t;
+  if (writeBack) for (const i of inputs) if (Number(i.value) !== v[i.dataset.k]) i.value = v[i.dataset.k];
+  $('#kfg-form-hinweis').textContent = notes.join(' ');
+  return v;
+}
+function buildForm(autoOrient, writeBack = true) {
+  const v = readForm(writeBack);
   fileKind = 'form';
   $('#kfg-einheit').value = 'auto';
   $('#kfg-einheit').disabled = true;
@@ -352,7 +603,13 @@ function buildForm(autoOrient) {
   $('#kfg-datei').textContent = 'Grundform: ' + FORMS[form].label(v);
   placePart(autoOrient);
 }
-function sample(kind) { form = kind; renderFormFields(); buildForm(true); }
+function sample(kind) {
+  form = kind;
+  mode = kind === 'kasten' ? 'innen' : 'aussen';   // offener Kasten: zum Innengreifen gedacht
+  renderFormFields();
+  buildForm(true);
+  setMode(innerWidth ? mode : 'aussen');
+}
 
 // ---------- Bedienung ----------
 const input = $('#kfg-file');
@@ -366,6 +623,9 @@ $('#kfg-einheit').addEventListener('change', () => placePart(false));
 $('#kfg-material').addEventListener('change', () => { updateFacts(); suggest(); });
 $('#kfg-hoehe').addEventListener('input', update);
 $('#kfg-zu').addEventListener('input', update);
+$('#kfg-x').addEventListener('input', update);
+$('#kfg-z').addEventListener('input', update);
+root.querySelectorAll('[data-griff]').forEach((b) => b.addEventListener('click', () => setMode(b.dataset.griff)));
 $('#kfg-dreh-y').addEventListener('click', () => { turns.y = (turns.y + 1) % 4; placePart(false); });
 $('#kfg-dreh-x').addEventListener('click', () => { turns.x = (turns.x + 1) % 4; placePart(false); });
 $('#kfg-dreh-z').addEventListener('click', () => { turns.z = (turns.z + 1) % 4; placePart(false); });
@@ -382,4 +642,4 @@ pose(0);
 sample('zylinder');
 root.classList.add('is-ready');
 (function loop() { requestAnimationFrame(loop); controls.update(); renderer.render(scene, camera); })();
-window.__kfg = { sample, update, set: (h, z) => { $('#kfg-hoehe').value = h; $('#kfg-zu').value = z; update(); }, status: () => $('#kfg-status').textContent };
+window.__kfg = { sample, update, setMode, selectGripper, gripper: () => A.id, move: (x, z) => { $('#kfg-x').value = x; $('#kfg-z').value = z; update(); }, set: (h, z) => { $('#kfg-hoehe').value = h; $('#kfg-zu').value = z; update(); }, status: () => $('#kfg-status').textContent };

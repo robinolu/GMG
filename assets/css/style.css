@@ -254,6 +254,8 @@ td a { font-weight: 600; }
 /* Konfigurator */
 .btn--xs { padding: 6px 12px; font-size: .85rem; border-width: 1px; }
 .kfg-section { padding-top: 40px; }
+.kfg-home { padding-bottom: 40px; }
+.kfg-home .kfg-section { padding: 0; }
 .kfg { display: grid; grid-template-columns: 400px 1fr; gap: 28px; align-items: start; }
 .kfg__panel { display: grid; gap: 14px; }
 .kfg__step { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
@@ -267,13 +269,18 @@ td a { font-weight: 600; }
 .kfg__file { margin: 0; font-size: .88rem; min-height: 1.2em; }
 .kfg__turn { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; font-size: .88rem; }
 .kfg__forms { display: grid; gap: 10px; font-size: .88rem; }
-.kfg__seg { display: grid; grid-template-columns: repeat(3, 1fr); border: 1px solid #cbd2da; border-radius: 8px; overflow: hidden; }
+.kfg__seg { display: grid; grid-template-columns: repeat(4, 1fr); border: 1px solid #cbd2da; border-radius: 8px; overflow: hidden; }
 .kfg__seg button { font: inherit; font-weight: 600; padding: 9px 6px; border: 0; background: #fff; color: var(--ink); cursor: pointer; }
 .kfg__seg button + button { border-left: 1px solid #cbd2da; }
 .kfg__seg button[aria-pressed="true"] { background: var(--blue); color: #fff; }
+.kfg__seg button:disabled { color: #a8b1bb; cursor: not-allowed; }
+.kfg__seg--2 { grid-template-columns: 1fr 1fr; }
+.kfg__fields { grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)) !important; }
 .kfg__fields { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 .kfg__fields .field input { padding: 9px 10px; }
 .kfg__fields label { font-size: .8rem; }
+.kfg__warn { margin: 0; font-size: .85rem; color: #855a06; }
+.kfg__warn:empty { display: none; }
 .kfg__facts { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; margin: 0; font-size: .92rem; padding: 12px 14px; background: var(--bg-alt); border-radius: 8px; }
 .kfg__facts dt { color: var(--muted); }
 .kfg__facts dd { margin: 0; color: var(--ink); font-weight: 600; }
@@ -281,6 +288,11 @@ td a { font-weight: 600; }
 .kfg__card { display: grid; gap: 2px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 8px; color: var(--text); background: #fff; }
 .kfg__card:hover { border-color: var(--blue); text-decoration: none; }
 .kfg__card.is-best { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-soft); }
+button.kfg__card { font: inherit; text-align: left; cursor: pointer; width: 100%; }
+.kfg__card.is-active { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-soft); }
+.kfg__card.is-nofit { border-color: #e7b3ad; background: #fdf6f5; }
+.kfg__card.is-nofit.is-active { box-shadow: 0 0 0 3px #f6d6d2; }
+.kfg__card.is-nofit .kfg__rank { color: #9b2a21; }
 .kfg__card strong { color: var(--ink); font-size: 1.1rem; }
 .kfg__rank { font-size: .7rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--blue); }
 .kfg__fam { color: var(--muted); font-size: .88rem; }
@@ -302,7 +314,14 @@ td a { font-weight: 600; }
 .kfg .form__row { align-items: start; }
 .kfg__offline { position: absolute; inset: 0; display: grid; place-items: center; margin: 0; color: var(--muted); }
 .kfg.is-ready .kfg__offline { display: none; }
-.kfg.is-loading .kfg__view::after { content: "Datei wird gelesen …"; position: absolute; inset: 0; display: grid; place-items: center; background: rgba(255,255,255,.7); font-weight: 650; color: var(--ink); }
+.kfg__progress { position: absolute; inset: 0; display: grid; place-content: center; justify-items: center; gap: 6px; background: rgba(244,246,248,.82); backdrop-filter: blur(2px); }
+.kfg__progress[hidden] { display: none; }
+.kfg__progress svg { width: 132px; height: 132px; transform: rotate(-90deg); grid-area: 1 / 1; }
+.kfg__progress circle { fill: none; stroke-width: 9; }
+.kfg__ring-bg { stroke: #dbe2e9; }
+.kfg__ring-bar { stroke: var(--blue); stroke-linecap: round; stroke-dasharray: 100; stroke-dashoffset: 100; transition: stroke-dashoffset .15s linear; }
+.kfg__ring-pct { grid-area: 1 / 1; align-self: center; font-size: 1.6rem; font-weight: 750; color: var(--ink); }
+.kfg__ring-label { font-size: .9rem; font-weight: 600; color: var(--muted); }
 
 /* Mobile contact bar */
 .mobilebar { display: none; }
