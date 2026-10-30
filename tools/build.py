@@ -11,6 +11,8 @@ import pathlib
 import re
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
+# Versionskennung für CSS/JS, damit Browser nach jedem Update die neuen Dateien laden.
+BUILD = __import__("time").strftime("%Y%m%d%H%M")
 FAMILIES = json.loads((ROOT / "data" / "produkte.json").read_text(encoding="utf-8"))
 MEDIA = "https://www.gmg-system.com/media/"
 PHONE = "+49 (0) 2921 4062"
@@ -126,7 +128,7 @@ def page(path, title, body, active="", description="", scripts=()):
 <link rel="icon" href="{r}assets/logo/gmg-3d-dezent-bildmarke.svg" type="image/svg+xml">
 <link rel="alternate icon" href="{r}assets/img/gmg-bildmarke-3d.png" type="image/png">
 <link rel="apple-touch-icon" href="{r}assets/img/apple-touch-icon.png">
-<link rel="stylesheet" href="{r}assets/css/style.css">
+<link rel="stylesheet" href="{r}assets/css/style.css?v={BUILD}">
 </head>
 <body>
 <div class="draft">Entwurf / Testversion der neuen GMG-Webseite. Inhalte von gmg-system.com übernommen.</div>
@@ -177,7 +179,7 @@ def page(path, title, body, active="", description="", scripts=()):
   <a class="btn btn--ghost" href="{PHONE_LINK}">{icon('phone')}Anrufen</a>
   <a class="btn btn--primary" href="{r}kontakt/index.html">{icon('mail')}Anfrage</a>
 </div>
-<script src="{r}assets/js/main.js"></script>{"".join(f'<script src="{r}{s}" defer></script>' for s in scripts)}
+<script src="{r}assets/js/main.js?v={BUILD}"></script>{"".join(f'<script src="{r}{s}?v={BUILD}" defer></script>' for s in scripts)}
 </body>
 </html>
 """

@@ -92,8 +92,8 @@ window.addEventListener('hashchange', gmgRoute);
     out = re.sub(r'<link rel="alternate icon"[^>]*>\n', '', out)
     out = re.sub(r'<link rel="icon"[^>]*>', lambda _: f'<link rel="icon" href="{images["gmg-3d-dezent-bildmarke"]}">', out)
     out = re.sub(r"<main>.*</main>", "<main></main>", out, flags=re.S)
-    out = re.sub(r'<script src="[^"]*greifer3d\.js" defer></script>', '', out)   # 3D nur online; Vorschau zeigt das Standbild
-    out = re.sub(r'<script src="[^"]*main\.js"></script>',
+    out = re.sub(r'<script src="[^"]*greifer3d\.js[^"]*" defer></script>', '', out)   # 3D nur online; Vorschau zeigt das Standbild
+    out = re.sub(r'<script src="[^"]*main\.js[^"]*"></script>',
                  lambda _: f"{templates}{router}\n<script>gmgImages(document);gmgRoute();</script>\n<script>\n{js}</script>", out)
     OUT.parent.mkdir(exist_ok=True)
     OUT.write_text(out, encoding="utf-8")
