@@ -15,7 +15,7 @@ import re
 
 ROOT = pathlib.Path(__file__).resolve().parent.parent
 OUT = ROOT / "vorschau" / "GMG-Webseite-Vorschau.html"
-SKIP = ("vorschau", "docs", "tools", "data", "assets")
+SKIP = ("vorschau", "docs", "tools", "data", "assets", "logo-varianten")
 
 
 def rewrite(fragment, page_dir):
@@ -36,7 +36,7 @@ def rewrite(fragment, page_dir):
         return f'{"data-img" if attr == "src" else "data-img-full"}="{name}"'
 
     fragment = re.sub(r'href="([^"]*)"', href, fragment)
-    return re.sub(r'(src|data-src)="(?:\.\./)*assets/img/(?:produkte/)?([\w.-]+)\.png"', img, fragment)
+    return re.sub(r'(src|data-src)="(?:\.\./)*assets/(?:img|logo)/(?:produkte/)?([\w.-]+)\.(?:png|svg)"', img, fragment)
 
 
 def main():
@@ -53,6 +53,8 @@ def main():
     shell = rewrite((ROOT / "index.html").read_text(encoding="utf-8"), ".")
     images = {p.stem: "data:image/png;base64," + base64.b64encode(p.read_bytes()).decode()
               for p in sorted((ROOT / "assets" / "img").rglob("*.png"))}
+    images.update({p.stem: "data:image/svg+xml;base64," + base64.b64encode(p.read_bytes()).decode()
+                   for p in sorted((ROOT / "assets" / "logo").glob("gmg-3d-dezent*.svg"))})
     css = (ROOT / "assets" / "css" / "style.css").read_text(encoding="utf-8")
     js = (ROOT / "assets" / "js" / "main.js").read_text(encoding="utf-8")
 
@@ -84,7 +86,8 @@ window.addEventListener('hashchange', gmgRoute);
 </script>"""
 
     out = re.sub(r'<link rel="stylesheet"[^>]*>', lambda _: f"<style>\n{css}</style>", shell)
-    out = re.sub(r'<link rel="icon"[^>]*>', lambda _: f'<link rel="icon" href="{images["gmg-logo-mark"]}">', out)
+    out = re.sub(r'<link rel="alternate icon"[^>]*>\n', '', out)
+    out = re.sub(r'<link rel="icon"[^>]*>', lambda _: f'<link rel="icon" href="{images["gmg-3d-dezent-bildmarke"]}">', out)
     out = re.sub(r"<main>.*</main>", "<main></main>", out, flags=re.S)
     out = re.sub(r'<script src="[^"]*main\.js"></script>',
                  lambda _: f"{templates}{router}\n<script>gmgImages(document);gmgRoute();</script>\n<script>\n{js}</script>", out)

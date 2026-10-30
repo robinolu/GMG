@@ -123,7 +123,8 @@ def page(path, title, body, active="", description=""):
 <meta property="og:image:height" content="630">
 <meta property="og:image:alt" content="GMG – Modulare Greifersysteme direkt vom Erfinder">
 <meta name="twitter:card" content="summary_large_image">
-<link rel="icon" href="{r}assets/img/gmg-logo-mark.png">
+<link rel="icon" href="{r}assets/logo/gmg-3d-dezent-bildmarke.svg" type="image/svg+xml">
+<link rel="alternate icon" href="{r}assets/img/gmg-bildmarke-3d.png" type="image/png">
 <link rel="apple-touch-icon" href="{r}assets/img/apple-touch-icon.png">
 <link rel="stylesheet" href="{r}assets/css/style.css">
 </head>
@@ -132,7 +133,7 @@ def page(path, title, body, active="", description=""):
 <header class="header">
   <div class="wrap header__inner">
     <a class="brand" href="{r}index.html" aria-label="GMG Startseite">
-      <img src="{r}assets/img/gmg-logo-mark.png" alt="" width="89" height="125">
+      <img src="{r}assets/logo/gmg-3d-dezent-bildmarke.svg" alt="" width="92" height="101">
       <span class="brand__text"><span class="brand__name">GMG</span><span class="brand__tag">Modulare Greifersysteme</span></span>
     </a>
     <nav class="nav" aria-label="Hauptnavigation">{nav_html}</nav>
@@ -153,7 +154,6 @@ def page(path, title, body, active="", description=""):
         <h4>GMG</h4>
         <p>GMG Gesellschaft für modulare Greifersysteme mbH<br>{ADDRESS}</p>
         <p><a href="{PHONE_LINK}">{PHONE}</a><br><a href="mailto:{MAIL}">{MAIL}</a></p>
-        <p class="footer__slogan">„Die rechte Hand Ihrer Maschine“</p>
       </div>
       <div><h4>Produkte</h4><ul>{fam_links}</ul></div>
       <div><h4>Unternehmen</h4><ul>
@@ -611,7 +611,7 @@ def main():
     build_contact()
     build_downloads()
     build_legal()
-    print("Fertig:", sum(1 for _ in ROOT.rglob("index.html")), "Seiten")
+    print("Fertig:", sum(1 for p in ROOT.rglob("index.html") if p.parts[len(ROOT.parts)] != "logo-varianten"), "Seiten")
 
 
 if __name__ == "__main__":
