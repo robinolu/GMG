@@ -38,3 +38,11 @@ Referenzen, Branchen, FAQ (Lieferzeit, Sonderbau, Ersatzteile, Ex-Schutz), volls
 **Funktionen:** Produktfilter (Antrieb, Finger, Greifkraft, Ex), CAD-Download (STEP), Ersatzteil-Anfrage,
 SEO (eine Seite je Baureihe, schnelle Ladezeit, Google-Unternehmensprofil), DSGVO-konform,
 barrierearm, einfach pflegbares CMS.
+
+## Entscheidungen (Stand 30.10.2026)
+- **Logo:** Variante 2 („schlanker + dezent 3D“), Original-Form als Vektor nachgezeichnet (`assets/logo/gmg-3d-dezent*.svg`).
+- **Slogan:** „Die rechte Hand Ihrer Maschine“ entfällt ersatzlos.
+- **Startbild:** B02 als scharfes Standbild aus dem Datenblatt-Rendering.
+- **Scroll-Animation des Greifers:** zurückgestellt, bis die STEP-Datei des B02 von GMG vorliegt (echtes 3D-Modell statt zerschnittenem Foto).
+- **Einsatzszene beim Drüberfahren:** nur am Startbild, nur per Maus; Umgebung in hellen Graustufen, Greifer farbig. KI-Szene (Roboter + Halle) ohne Karton, echter Greifer wird pixelgenau darübergelegt.
+- **Veröffentlichung:** ausschließlich unter https://robinolu.github.io/GMG/
