@@ -1,0 +1,155 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Greifer-Konfigurator | GMG – Modulare Greifersysteme</title>
+<meta name="description" content="Teil als STEP-Datei laden, passenden GMG-Greifer finden und das Greifen direkt in 3D testen.">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="GMG – Modulare Greifersysteme">
+<meta property="og:locale" content="de_DE">
+<meta property="og:title" content="Greifer-Konfigurator | GMG – Modulare Greifersysteme">
+<meta property="og:description" content="Teil als STEP-Datei laden, passenden GMG-Greifer finden und das Greifen direkt in 3D testen.">
+<meta property="og:url" content="https://robinolu.github.io/GMG/konfigurator/">
+<meta property="og:image" content="https://robinolu.github.io/GMG/assets/img/gmg-vorschau.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="GMG – Modulare Greifersysteme direkt vom Erfinder">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../assets/logo/gmg-3d-dezent-bildmarke.svg" type="image/svg+xml">
+<link rel="alternate icon" href="../assets/img/gmg-bildmarke-3d.png" type="image/png">
+<link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
+<link rel="stylesheet" href="../assets/css/style.css?v=202610301844">
+</head>
+<body>
+<div class="draft">Entwurf / Testversion der neuen GMG-Webseite. Inhalte von gmg-system.com übernommen.</div>
+<header class="header">
+  <div class="wrap header__inner">
+    <a class="brand" href="../index.html" aria-label="GMG Startseite">
+      <img src="../assets/logo/gmg-3d-dezent-bildmarke.svg" alt="" width="92" height="101">
+      <span class="brand__text"><span class="brand__name">GMG</span><span class="brand__tag">Modulare Greifersysteme</span></span>
+    </a>
+    <nav class="nav" aria-label="Hauptnavigation"><a href="../produkte/index.html">Produkte</a><a href="../konfigurator/index.html" aria-current="page">Konfigurator</a><a href="../ueber-gmg/index.html">Über GMG</a><a href="../downloads/index.html">Downloads</a><a href="../kontakt/index.html">Kontakt</a></nav>
+    <div class="header__cta">
+      <a class="header__phone" href="tel:+4929214062"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg>+49 (0) 2921 4062</a>
+      <a class="btn btn--primary btn--sm" href="../kontakt/index.html">Anfrage stellen</a>
+    </div>
+    <button class="burger" aria-label="Menü" aria-expanded="false"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/></svg></button>
+  </div>
+</header>
+<main>
+
+<section class="page-head"><div class="wrap">
+  <nav class="crumbs" aria-label="Brotkrumen"><a href="../index.html">Start</a><span aria-hidden="true">/</span><span>Konfigurator</span></nav>
+  <span class="eyebrow">Greifer-Konfigurator</span>
+  <h1>Welcher Greifer greift Ihr Teil?</h1>
+  <p class="lead">Laden Sie Ihr Teil als STEP- oder STL-Datei. Der Konfigurator schlägt passende GMG-Greifer vor, und Sie testen direkt in 3D, wie gegriffen wird. Die Datei bleibt auf Ihrem Rechner und wird nicht hochgeladen.</p>
+</div></section>
+<section class="section kfg-section"><div class="wrap">
+  <div class="kfg" data-konfigurator data-base="../">
+    <div class="kfg__panel">
+      <div class="kfg__step"><span class="kfg__num">1</span><h3>Teil laden</h3></div>
+      <label class="kfg__drop">
+        <input id="kfg-file" type="file" accept=".step,.stp,.stl">
+        <span class="kfg__drop-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>STEP- oder STL-Datei hierher ziehen</span>
+        <span class="muted">oder klicken zum Auswählen · max. 10 MB</span>
+      </label>
+      <p id="kfg-datei" class="kfg__file muted"></p>
+      <div class="kfg__samples"><span class="muted">Ohne Datei testen:</span>
+        <button type="button" class="btn btn--ghost btn--xs" data-muster="welle">Welle</button>
+        <button type="button" class="btn btn--ghost btn--xs" data-muster="karton">Karton</button>
+        <button type="button" class="btn btn--ghost btn--xs" data-muster="flansch">Scheibe</button>
+      </div>
+      <div class="form__row">
+        <div class="field"><label for="kfg-einheit">Einheit der Datei</label>
+          <select id="kfg-einheit"><option value="auto">Automatisch</option><option value="mm">Millimeter</option><option value="cm">Zentimeter</option><option value="m">Meter</option></select>
+          <small id="kfg-einheit-info" class="muted"></small></div>
+        <div class="field"><label for="kfg-material">Werkstoff</label>
+          <select id="kfg-material">
+            <option value="7850">Stahl</option><option value="2700">Aluminium</option><option value="1200">Kunststoff</option>
+            <option value="600">Holz</option><option value="150">Karton / leichte Verpackung</option>
+            <option value="1050" data-weich="1">Weich: Teig, Fleisch, Lebensmittel</option>
+          </select></div>
+      </div>
+      <dl class="kfg__facts"><dt>Abmessungen</dt><dd id="kfg-masse">–</dd><dt>Gewicht</dt><dd id="kfg-gewicht">–</dd></dl>
+      <div class="kfg__turn"><span class="muted">Teil drehen:</span>
+        <button type="button" class="btn btn--ghost btn--xs" id="kfg-dreh-y">↻ 90° hochkant</button>
+        <button type="button" class="btn btn--ghost btn--xs" id="kfg-dreh-x">⤾ 90° kippen</button></div>
+
+      <div class="kfg__step"><span class="kfg__num">2</span><h3>Passende Greifer</h3></div>
+      <div id="kfg-vorschlag" class="kfg__list"></div>
+      <p class="kfg__small muted">Vorauswahl anhand von Greifweite und Greifkraft aus den Datenblättern (Reibschluss, Sicherheitsfaktor 2). Die endgültige Auslegung übernimmt GMG.</p>
+
+      <div class="kfg__step"><span class="kfg__num">3</span><h3>Greifen testen</h3></div>
+      <div class="field"><label for="kfg-hoehe">Höhe: Greifer absenken</label><input id="kfg-hoehe" type="range" min="0" max="100" value="85"></div>
+      <div class="field"><label for="kfg-zu">Greifer schließen</label><input id="kfg-zu" type="range" min="0" max="100" value="0"></div>
+      <p id="kfg-status" class="kfg__status is-info" role="status">Teil wird geladen …</p>
+      <a id="kfg-anfrage" class="btn btn--primary" href="mailto:info@gmg-system.com">Anfrage mit diesem Teil <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+    </div>
+    <div class="kfg__view">
+      <canvas aria-label="3D-Ansicht: Teil und Greifer"></canvas>
+      <div class="kfg__hint">Ziehen zum Drehen · Scrollen zum Zoomen</div>
+      <div class="kfg__badge">Platzhalter-Greifer, maßstäblich an Ihr Teil angepasst</div>
+      <noscript><p class="kfg__nojs">Der Konfigurator benötigt JavaScript.</p></noscript>
+      <p class="kfg__offline">Der 3D-Konfigurator läuft nur auf der Webseite (online).</p>
+    </div>
+  </div>
+</div></section>
+<section class="cta-band">
+  <div class="wrap cta-band__inner">
+    <div>
+      <h2>Ihre Handhabungsaufgabe. Unsere Greiferlösung.</h2>
+      <p class="lead">Rufen Sie uns an oder schicken Sie uns Ihre Anfrage, gern mit Zeichnung oder Skizze. Häufig entsteht daraus ein kundenspezifischer Greifer.</p>
+      <div class="btn-row">
+        <a class="btn btn--white" href="../kontakt/index.html">Anfrage stellen <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        <a class="btn btn--outline-white" href="tel:+4929214062"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg>+49 (0) 2921 4062</a>
+      </div>
+    </div>
+    <div class="contact-card">
+      <div class="contact-card__person">
+        <div class="avatar">Foto<br>folgt</div>
+        <div><strong style="color:var(--ink)">Ihr Ansprechpartner</strong><br><span class="muted">Name und Funktion folgen</span></div>
+      </div>
+      <div class="contact-lines">
+        <a href="tel:+4929214062"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg>+49 (0) 2921 4062</a>
+        <a href="mailto:info@gmg-system.com"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>info@gmg-system.com</a>
+        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M20 10c0 6-8 12-8 12s-8-6-8-12a8 8 0 0 1 16 0z"/><circle cx="12" cy="10" r="3"/></svg>Werler Landstraße 6–8, 59494 Soest</span>
+      </div>
+    </div>
+  </div>
+</section>
+</main>
+<footer class="footer">
+  <div class="wrap">
+    <div class="footer__grid">
+      <div>
+        <h4>GMG</h4>
+        <p>GMG Gesellschaft für modulare Greifersysteme mbH<br>Werler Landstraße 6–8, 59494 Soest</p>
+        <p><a href="tel:+4929214062">+49 (0) 2921 4062</a><br><a href="mailto:info@gmg-system.com">info@gmg-system.com</a></p>
+      </div>
+      <div><h4>Produkte</h4><ul><li><a href="../produkte/hexagonal/index.html">Hexagonale Bauform</a></li><li><a href="../produkte/rechteckig/index.html">Rechteckige Bauform</a></li><li><a href="../produkte/einzelfinger/index.html">Einzelfinger</a></li><li><a href="../produkte/winkelgreifer/index.html">Winkelgreifer</a></li><li><a href="../produkte/parallel-winkelgreifer/index.html">Parallel-Winkelgreifer</a></li><li><a href="../produkte/schwerlast/index.html">Schwerlastgreifer</a></li><li><a href="../produkte/reifengreifer/index.html">Reifengreifer</a></li><li><a href="../produkte/nadelgreifer/index.html">Nadelgreifer</a></li><li><a href="../produkte/langarmgreifer/index.html">Langarmgreifer</a></li></ul></div>
+      <div><h4>Unternehmen</h4><ul>
+        <li><a href="../ueber-gmg/index.html">Über GMG</a></li>
+        <li><a href="../downloads/index.html">Downloads</a></li>
+        <li><a href="../kontakt/index.html">Kontakt</a></li>
+        <li><a href="https://www.gmg-system.com/media/agb_gmg-gmbh.pdf">AGB (PDF)</a></li>
+      </ul></div>
+      <div><h4>Direkt anfragen</h4>
+        <p>Beschreiben Sie Ihre Handhabungsaufgabe. Wir finden den passenden Greifer.</p>
+        <a class="btn btn--primary btn--sm" href="../kontakt/index.html">Anfrage stellen</a>
+      </div>
+    </div>
+    <div class="footer__bottom">
+      <span>© GMG Gesellschaft für modulare Greifersysteme mbH</span>
+      <span><a href="../impressum/index.html">Impressum</a> · <a href="../datenschutz/index.html">Datenschutz</a></span>
+    </div>
+  </div>
+</footer>
+<div class="mobilebar">
+  <a class="btn btn--ghost" href="tel:+4929214062"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"/></svg>Anrufen</a>
+  <a class="btn btn--primary" href="../kontakt/index.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>Anfrage</a>
+</div>
+<script src="../assets/js/main.js?v=202610301844"></script><script src="../assets/js/konfigurator.js?v=202610301844" defer></script>
+</body>
+</html>

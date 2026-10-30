@@ -98,7 +98,8 @@ def chips(p):
 def page(path, title, body, active="", description="", scripts=()):
     depth = path.count("/") + 1 if path else 0
     r = "../" * depth
-    nav = [("Produkte", "produkte/index.html", "produkte"), ("Über GMG", "ueber-gmg/index.html", "ueber"),
+    nav = [("Produkte", "produkte/index.html", "produkte"), ("Konfigurator", "konfigurator/index.html", "konfigurator"),
+           ("Über GMG", "ueber-gmg/index.html", "ueber"),
            ("Downloads", "downloads/index.html", "downloads"), ("Kontakt", "kontakt/index.html", "kontakt")]
     nav_html = "".join(
         f'<a href="{r}{href}"{" aria-current=\"page\"" if key == active else ""}>{label}</a>' for label, href, key in nav)
@@ -462,6 +463,72 @@ def build_product(fam, p, path):
     page(path, f"{code} {desc}", body, "produkte", f"{code} – {desc}. {fam['teaser']}")
 
 
+def build_configurator():
+    path = "konfigurator"
+    r = rel(path)
+    body = f"""
+<section class="page-head"><div class="wrap">
+  {crumbs(r, [('Konfigurator', None)])}
+  <span class="eyebrow">Greifer-Konfigurator</span>
+  <h1>Welcher Greifer greift Ihr Teil?</h1>
+  <p class="lead">Laden Sie Ihr Teil als STEP- oder STL-Datei. Der Konfigurator schlägt passende GMG-Greifer vor, und Sie testen direkt in 3D, wie gegriffen wird. Die Datei bleibt auf Ihrem Rechner und wird nicht hochgeladen.</p>
+</div></section>
+<section class="section kfg-section"><div class="wrap">
+  <div class="kfg" data-konfigurator data-base="{r}">
+    <div class="kfg__panel">
+      <div class="kfg__step"><span class="kfg__num">1</span><h3>Teil laden</h3></div>
+      <label class="kfg__drop">
+        <input id="kfg-file" type="file" accept=".step,.stp,.stl">
+        <span class="kfg__drop-title">{icon('download')}STEP- oder STL-Datei hierher ziehen</span>
+        <span class="muted">oder klicken zum Auswählen · max. 10 MB</span>
+      </label>
+      <p id="kfg-datei" class="kfg__file muted"></p>
+      <div class="kfg__samples"><span class="muted">Ohne Datei testen:</span>
+        <button type="button" class="btn btn--ghost btn--xs" data-muster="welle">Welle</button>
+        <button type="button" class="btn btn--ghost btn--xs" data-muster="karton">Karton</button>
+        <button type="button" class="btn btn--ghost btn--xs" data-muster="flansch">Scheibe</button>
+      </div>
+      <div class="form__row">
+        <div class="field"><label for="kfg-einheit">Einheit der Datei</label>
+          <select id="kfg-einheit"><option value="auto">Automatisch</option><option value="mm">Millimeter</option><option value="cm">Zentimeter</option><option value="m">Meter</option></select>
+          <small id="kfg-einheit-info" class="muted"></small></div>
+        <div class="field"><label for="kfg-material">Werkstoff</label>
+          <select id="kfg-material">
+            <option value="7850">Stahl</option><option value="2700">Aluminium</option><option value="1200">Kunststoff</option>
+            <option value="600">Holz</option><option value="150">Karton / leichte Verpackung</option>
+            <option value="1050" data-weich="1">Weich: Teig, Fleisch, Lebensmittel</option>
+          </select></div>
+      </div>
+      <dl class="kfg__facts"><dt>Abmessungen</dt><dd id="kfg-masse">–</dd><dt>Gewicht</dt><dd id="kfg-gewicht">–</dd></dl>
+      <div class="kfg__turn"><span class="muted">Teil drehen:</span>
+        <button type="button" class="btn btn--ghost btn--xs" id="kfg-dreh-y">↻ 90° hochkant</button>
+        <button type="button" class="btn btn--ghost btn--xs" id="kfg-dreh-x">⤾ 90° kippen</button></div>
+
+      <div class="kfg__step"><span class="kfg__num">2</span><h3>Passende Greifer</h3></div>
+      <div id="kfg-vorschlag" class="kfg__list"></div>
+      <p class="kfg__small muted">Vorauswahl anhand von Greifweite und Greifkraft aus den Datenblättern (Reibschluss, Sicherheitsfaktor 2). Die endgültige Auslegung übernimmt GMG.</p>
+
+      <div class="kfg__step"><span class="kfg__num">3</span><h3>Greifen testen</h3></div>
+      <div class="field"><label for="kfg-hoehe">Höhe: Greifer absenken</label><input id="kfg-hoehe" type="range" min="0" max="100" value="85"></div>
+      <div class="field"><label for="kfg-zu">Greifer schließen</label><input id="kfg-zu" type="range" min="0" max="100" value="0"></div>
+      <p id="kfg-status" class="kfg__status is-info" role="status">Teil wird geladen …</p>
+      <a id="kfg-anfrage" class="btn btn--primary" href="mailto:{MAIL}">Anfrage mit diesem Teil {icon('arrow')}</a>
+    </div>
+    <div class="kfg__view">
+      <canvas aria-label="3D-Ansicht: Teil und Greifer"></canvas>
+      <div class="kfg__hint">Ziehen zum Drehen · Scrollen zum Zoomen</div>
+      <div class="kfg__badge">Platzhalter-Greifer, maßstäblich an Ihr Teil angepasst</div>
+      <noscript><p class="kfg__nojs">Der Konfigurator benötigt JavaScript.</p></noscript>
+      <p class="kfg__offline">Der 3D-Konfigurator läuft nur auf der Webseite (online).</p>
+    </div>
+  </div>
+</div></section>
+{cta_band(r)}"""
+    page(path, "Greifer-Konfigurator", body, "konfigurator",
+         "Teil als STEP-Datei laden, passenden GMG-Greifer finden und das Greifen direkt in 3D testen.",
+         scripts=["assets/js/konfigurator.js"])
+
+
 def build_about():
     path = "ueber-gmg"
     r = rel(path)
@@ -615,6 +682,7 @@ def main():
             build_family(fam)
     for fam, p, path in products():
         build_product(fam, p, path)
+    build_configurator()
     build_about()
     build_contact()
     build_downloads()

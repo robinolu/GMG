@@ -1,0 +1,25 @@
+{
+  "_quelle": "Technische Datenblätter von gmg-system.com (Stand Okt. 2026). Greifweite: Spanne über alle Bewegungsformen und Standard-Fingerlängen, bezogen auf die Außenkante der Finger. Greifkraft: Höchstwert bei 6 bar. null = im Datenblatt nicht angegeben.",
+  "greifer": [
+    {"code": "B02", "familie": "Rechteckige Bauform", "url": "produkte/rechteckig/b02/index.html", "weite": [80, 166], "kraft": 1075, "finger": 2, "hinweis": "2- bis 6-Finger"},
+    {"code": "A06", "familie": "Rechteckige Bauform", "url": "produkte/rechteckig/a06/index.html", "weite": [144, 297], "kraft": 4652, "finger": 2, "hinweis": "Hohlgreifer Ø38 mm"},
+    {"code": "B10", "familie": "Rechteckige Bauform", "url": "produkte/rechteckig/b10/index.html", "weite": [203, 507], "kraft": 8100, "finger": 2, "hinweis": "Hohlgreifer Ø75 mm"},
+    {"code": "C03", "familie": "Hexagonale Bauform", "url": "produkte/hexagonal/c03/index.html", "weite": [107, 192], "kraft": 1800, "finger": 3, "hinweis": "zentrisch, ideal für runde Teile"},
+    {"code": "C06", "familie": "Hexagonale Bauform", "url": "produkte/hexagonal/c06/index.html", "weite": [153, 305], "kraft": 4650, "finger": 3, "hinweis": "Hohlgreifer Ø38 mm, zentrisch"},
+    {"code": "C10", "familie": "Hexagonale Bauform", "url": "produkte/hexagonal/c10/index.html", "weite": [201, 519], "kraft": 8100, "finger": 3, "hinweis": "Hohlgreifer Ø75 mm, zentrisch"},
+    {"code": "C16", "familie": "Hexagonale Bauform", "url": "produkte/hexagonal/c16/index.html", "weite": [276, 935], "kraft": 44000, "finger": 3, "hinweis": "Hohlgreifer Ø80 mm, bis 44 kN"},
+    {"code": "E03", "familie": "Einzelfinger", "url": "produkte/einzelfinger/index.html", "weite": [74, 150], "kraft": 1940, "finger": 1, "hinweis": "Modul für Eigenkonstruktionen"},
+    {"code": "I105", "familie": "Langarmgreifer", "url": "produkte/langarmgreifer/index.html", "weite": [145, 343], "kraft": 3833, "finger": 3, "hinweis": "Griff in Kisten und Kartons"},
+    {"code": "PW106", "familie": "Parallel-Winkelgreifer", "url": "produkte/parallel-winkelgreifer/pw106/index.html", "weite": [110, 436], "kraft": 6000, "finger": 2, "hinweis": "sehr großer Hub (326 mm)"},
+    {"code": "PW206", "familie": "Parallel-Winkelgreifer", "url": "produkte/parallel-winkelgreifer/pw206/index.html", "weite": [132, 792], "kraft": 3000, "finger": 2, "hinweis": "riesiger Hub (660 mm)"},
+    {"code": "PW306", "familie": "Parallel-Winkelgreifer", "url": "produkte/parallel-winkelgreifer/pw306/index.html", "weite": null, "kraft": 4500, "finger": 3, "hinweis": "zentrisch, Hub 476 mm"},
+    {"code": "S210", "familie": "Schwerlastgreifer", "url": "produkte/schwerlast/s210/index.html", "weite": null, "kraft": 3400, "finger": 2, "hinweis": "Hub 70 mm je Finger, schwere Teile"},
+    {"code": "S310", "familie": "Schwerlastgreifer", "url": "produkte/schwerlast/s310/index.html", "weite": null, "kraft": 5100, "finger": 3, "hinweis": "Hub 70 mm je Finger, hohle Mitte"},
+    {"code": "W03", "familie": "Winkelgreifer", "url": "produkte/winkelgreifer/w03-winkelgreifer/index.html", "weite": null, "kraft": 136, "finger": 2, "hinweis": "kompakt, Greifweite über Fingerlänge"},
+    {"code": "W05", "familie": "Winkelgreifer", "url": "produkte/winkelgreifer/w05-winkelgreifer/index.html", "weite": null, "kraft": 870, "finger": 2, "hinweis": "Greifweite über Fingerlänge"},
+    {"code": "W06", "familie": "Winkelgreifer", "url": "produkte/winkelgreifer/w06-winkelgreifer/index.html", "weite": null, "kraft": 2250, "finger": 2, "hinweis": "Greifweite über Fingerlänge"},
+    {"code": "W10", "familie": "Winkelgreifer", "url": "produkte/winkelgreifer/w10-winkelgreifer/index.html", "weite": null, "kraft": 3000, "finger": 2, "hinweis": "Greifweite über Fingerlänge"},
+    {"code": "N203", "familie": "Nadelgreifer", "url": "produkte/nadelgreifer/n203/index.html", "weite": null, "kraft": 147, "finger": 0, "weich": true, "hinweis": "für Teig, Fleisch, weiche Teile"},
+    {"code": "N206", "familie": "Nadelgreifer", "url": "produkte/nadelgreifer/n206/index.html", "weite": null, "kraft": null, "finger": 0, "weich": true, "hinweis": "größere weiche Teile"}
+  ]
+}

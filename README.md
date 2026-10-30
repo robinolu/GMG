@@ -9,6 +9,7 @@ Statischer Entwurf der neuen Webseite für GMG Gesellschaft für modulare Greife
 - `tools/build_single.py` – packt alles in eine Vorschau-Datei: `python3 tools/build_single.py`
 - `tools/produktbilder.py` – Produktbilder in hoher Auflösung (Datenblatt-Renderings aus `data/renders/`, sonst hochgerechnet)
 - `tools/greifer3d/` – 3D-Greifer der Startseite (Platzhaltermodell aus `data/3d/`); Bündeln mit esbuild zu `assets/js/greifer3d.js`
+- `tools/konfigurator/` – Greifer-Konfigurator (STEP/STL im Browser, Vorschlag aus `data/greifer-specs.json`, Greiftest); Bündeln mit esbuild zu `assets/js/konfigurator.js`, STEP-Leser in `assets/vendor/occt/`
 - `tools/logo3d.py`, `tools/logo_assets.py` – Logo (Vektor, 3D) und daraus Favicon, App-Symbol, Link-Vorschaubild
 - `docs/` – Inhaltsinventar der alten Seite und Konzept
 
