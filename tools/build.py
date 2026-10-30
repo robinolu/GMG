@@ -280,11 +280,11 @@ def build_home():
       </div>
     </div>
     <div class="hero__visual">
-      <div class="hero3d" data-greifer3d>
+      <div class="hero3d" data-roboter3d>
         <img class="hero3d__fallback" src="{img(r, 'b02')}" alt="GMG-Greifer B02">
-        <canvas aria-label="3D-Modell eines Greifers, öffnet sich beim Scrollen"></canvas>
+        <canvas aria-label="3D-Szene: Roboter mit Greifer setzt beim Scrollen ein Kugellager von einem Tisch auf den anderen"></canvas>
       </div>
-      <p class="hero3d__note">3D-Platzhaltermodell (Test) – wird durch einen GMG-Greifer ersetzt</p>
+      <p class="hero3d__note">3D-Testszene mit Testgreifer Tentra T3 – wird durch einen GMG-Greifer ersetzt</p>
     </div>
   </div>
 </section>
@@ -354,7 +354,7 @@ def build_home():
 
 {cta_band(r)}
 """
-    page("", "", body, scripts=["assets/js/greifer3d.js", "assets/js/konfigurator.js"])
+    page("", "", body, scripts=["assets/js/roboter3d.js", "assets/js/konfigurator.js"])
 
 
 def build_overview():

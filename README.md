@@ -8,7 +8,8 @@ Statischer Entwurf der neuen Webseite für GMG Gesellschaft für modulare Greife
 - `tools/build.py` – erzeugt alle Seiten neu: `python3 tools/build.py`
 - `tools/build_single.py` – packt alles in eine Vorschau-Datei: `python3 tools/build_single.py`
 - `tools/produktbilder.py` – Produktbilder in hoher Auflösung (Datenblatt-Renderings aus `data/renders/`, sonst hochgerechnet)
-- `tools/greifer3d/` – 3D-Greifer der Startseite (Platzhaltermodell aus `data/3d/`); Bündeln mit esbuild zu `assets/js/greifer3d.js`
+- `tools/greifer3d/` – Aufbereitung des Platzhalter-Greifers (Capit) für den Konfigurator
+- `tools/roboter/` – Startseiten-Szene: ABB IRB 120 mit Testgreifer Tentra T3 setzt beim Scrollen ein Kugellager (SKF 361204 R) um; `export.py` ordnet die STEP-Teile den Achsen zu (`data/3d/roboter-szene.json`), `roboter3d.js` wird mit esbuild zu `assets/js/roboter3d.js` gebündelt
 - `tools/konfigurator/` – Greifer-Konfigurator (STEP/STL im Browser, Vorschlag aus `data/greifer-specs.json`, Greiftest); Bündeln mit esbuild zu `assets/js/konfigurator.js`, STEP-Leser in `assets/vendor/occt/`
 - `tools/tentra/` – Tentra T3: `lesen.js` liest die STEP-Stellungen OPEN/GRASP, `bewegung.py` berechnet daraus die Gelenkkette → `data/3d/tentra-t3.json`
 - `tools/pinza/` – adaptiver Parallelgreifer: `lesen.js` liest die STEP-Datei, `export.py` ordnet die Teile den Getriebegliedern zu → `data/3d/pinza-adattiva.json`

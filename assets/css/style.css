@@ -391,3 +391,5 @@ button.kfg__card { font: inherit; text-align: left; cursor: pointer; width: 100%
   .grid--4 { grid-template-columns: 1fr; }
   .footer__grid { grid-template-columns: 1fr; }
 }
+.hero3d.is-loading .hero3d__fallback { visibility: hidden; }
+.hero3d[data-roboter3d] { background: #e6e8eb; border-radius: var(--radius); overflow: hidden; }

@@ -413,6 +413,8 @@ button.kfg__card { font: inherit; text-align: left; cursor: pointer; width: 100%
   .grid--4 { grid-template-columns: 1fr; }
   .footer__grid { grid-template-columns: 1fr; }
 }
+.hero3d.is-loading .hero3d__fallback { visibility: hidden; }
+.hero3d[data-roboter3d] { background: #e6e8eb; border-radius: var(--radius); overflow: hidden; }
 </style>
 </head>
 <body>
@@ -543,11 +545,11 @@ button.kfg__card { font: inherit; text-align: left; cursor: pointer; width: 100%
       </div>
     </div>
     <div class="hero__visual">
-      <div class="hero3d" data-greifer3d>
+      <div class="hero3d" data-roboter3d>
         <img class="hero3d__fallback" data-img="b02" alt="GMG-Greifer B02">
-        <canvas aria-label="3D-Modell eines Greifers, öffnet sich beim Scrollen"></canvas>
+        <canvas aria-label="3D-Szene: Roboter mit Greifer setzt beim Scrollen ein Kugellager von einem Tisch auf den anderen"></canvas>
       </div>
-      <p class="hero3d__note">3D-Platzhaltermodell (Test) – wird durch einen GMG-Greifer ersetzt</p>
+      <p class="hero3d__note">3D-Testszene mit Testgreifer Tentra T3 – wird durch einen GMG-Greifer ersetzt</p>
     </div>
   </div>
 </section>
