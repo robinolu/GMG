@@ -16,6 +16,8 @@ MEDIA = "https://www.gmg-system.com/media/"
 PHONE = "+49 (0) 2921 4062"
 PHONE_LINK = "tel:+4929214062"
 MAIL = "info@gmg-system.com"
+# Öffentliche Adresse der Testseite; nötig für absolute Links in der Link-Vorschau (WhatsApp, LinkedIn, …).
+SITE_URL = "https://robinolu.github.io/GMG/"
 ADDRESS = "Werler Landstraße 6–8, 59494 Soest"
 
 ICON = {
@@ -100,6 +102,8 @@ def page(path, title, body, active="", description=""):
         f'<a href="{r}{href}"{" aria-current=\"page\"" if key == active else ""}>{label}</a>' for label, href, key in nav)
     fam_links = "".join(f'<li><a href="{r}produkte/{f["slug"]}/index.html">{e(f["name"])}</a></li>' for f in FAMILIES[:9])
     full_title = f"{title} | GMG – Modulare Greifersysteme" if title else "GMG – Modulare Greifersysteme aus Soest"
+    desc = description or ('GMG – Gesellschaft für modulare Greifersysteme mbH, Soest. Der Erfinder der modularen '
+                          'Greifersysteme: Greifer für Roboter, Maschinen und Handhabungsgeräte seit 1992.')
     out = f"""<!doctype html>
 <html lang="de">
 <head>
@@ -107,8 +111,20 @@ def page(path, title, body, active="", description=""):
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="robots" content="noindex, nofollow">
 <title>{e(full_title)}</title>
-<meta name="description" content="{e(description or 'GMG – Gesellschaft für modulare Greifersysteme mbH, Soest. Der Erfinder der modularen Greifersysteme: Greifer für Roboter, Maschinen und Handhabungsgeräte seit 1992.')}">
+<meta name="description" content="{e(desc)}">
+<meta property="og:type" content="website">
+<meta property="og:site_name" content="GMG – Modulare Greifersysteme">
+<meta property="og:locale" content="de_DE">
+<meta property="og:title" content="{e(full_title)}">
+<meta property="og:description" content="{e(desc)}">
+<meta property="og:url" content="{SITE_URL}{path + '/' if path else ''}">
+<meta property="og:image" content="{SITE_URL}assets/img/gmg-vorschau.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="630">
+<meta property="og:image:alt" content="GMG – Modulare Greifersysteme direkt vom Erfinder">
+<meta name="twitter:card" content="summary_large_image">
 <link rel="icon" href="{r}assets/img/gmg-logo-mark.png">
+<link rel="apple-touch-icon" href="{r}assets/img/apple-touch-icon.png">
 <link rel="stylesheet" href="{r}assets/css/style.css">
 </head>
 <body>
