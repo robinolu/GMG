@@ -409,6 +409,12 @@ function updateFacts() {
 }
 
 // ---------- Vorschlag ----------
+// Aufklappliste der Greifer schließt bei Klick außerhalb (einmal angemeldet, gilt für jede neu gezeichnete Liste)
+document.addEventListener('click', (e) => {
+  const dd = $('#kfg-vorschlag .kfg__dd');
+  if (!dd || !dd.classList.contains('is-open') || dd.contains(e.target)) return;
+  dd.classList.remove('is-open'); dd.querySelector('.kfg__dd-list').hidden = true; dd.querySelector('.kfg__dd-btn').setAttribute('aria-expanded', 'false');
+});
 function suggest() {
   if (!facts) return;
   const rangeText = (g) => `außen ${fmt(g.range.aussen[0])}–${fmt(g.range.aussen[1])} mm` + (g.range.innen ? ` · innen ${fmt(g.range.innen[0])}–${fmt(g.range.innen[1])} mm` : ' · kein Innengreifen');
@@ -417,14 +423,25 @@ function suggest() {
   const sig = A.id + Object.values(GRIPPERS).map((g) => g.ready).join();
   if ($('#kfg-vorschlag').dataset.sig !== sig) {
   $('#kfg-vorschlag').dataset.sig = sig;
-  $('#kfg-vorschlag').innerHTML = Object.values(GRIPPERS).map((g) => {
-    return `<button type="button" class="kfg__card${g === A ? ' is-active' : ''}" data-greifer="${g.id}" aria-pressed="${g === A}">
-      <span class="kfg__rank">${g === A ? 'Im Test' : 'Zum Testen anklicken'}</span>
-      <strong>${g.code}</strong> <span class="kfg__fam">${g.name}</span>
-      <span class="kfg__why">Greifweite ${rangeText(g)}</span>
-      <span class="kfg__note">${g.note}</span>
-    </button>`; }).join('');
-  $('#kfg-vorschlag').querySelectorAll('[data-greifer]').forEach((b) => b.addEventListener('click', () => b.dataset.greifer !== A.id && selectGripper(b.dataset.greifer)));
+  // Auswahl als Aufklappliste: zu sehen ist nur der aktive Greifer, Details erst beim Öffnen
+  $('#kfg-vorschlag').innerHTML = `<div class="kfg__dd">
+    <button type="button" class="kfg__dd-btn" aria-expanded="false" aria-haspopup="listbox">
+      <span><strong>${A.code}</strong> <span class="kfg__fam">${A.name}</span><span class="kfg__why">Greifweite ${rangeText(A)}</span></span>
+      <span class="kfg__dd-arrow" aria-hidden="true">▾</span></button>
+    <div class="kfg__dd-list" role="listbox" hidden>${Object.values(GRIPPERS).map((g) => `
+      <button type="button" class="kfg__card${g === A ? ' is-active' : ''}" role="option" data-greifer="${g.id}" aria-selected="${g === A}">
+        <span class="kfg__rank">${g === A ? 'Ausgewählt' : 'Auswählen'}</span>
+        <strong>${g.code}</strong> <span class="kfg__fam">${g.name}</span>
+        <span class="kfg__why">Greifweite ${rangeText(g)}</span>
+        <span class="kfg__note">${g.note}</span>
+      </button>`).join('')}
+      <p class="kfg__small muted">Greifer mit 3D-Modell. Weitere GMG-Greifer folgen.</p>
+    </div></div>`;
+  const dd = $('#kfg-vorschlag .kfg__dd'), btn = dd.querySelector('.kfg__dd-btn'), list = dd.querySelector('.kfg__dd-list');
+  const toggle = (open) => { list.hidden = !open; btn.setAttribute('aria-expanded', String(open)); dd.classList.toggle('is-open', open); };
+  btn.addEventListener('click', () => toggle(list.hidden));
+  dd.addEventListener('keydown', (e) => { if (e.key === 'Escape') { toggle(false); btn.focus(); } });
+  list.querySelectorAll('[data-greifer]').forEach((b) => b.addEventListener('click', () => { toggle(false); if (b.dataset.greifer !== A.id) selectGripper(b.dataset.greifer); }));
   }
   const body = [
     'Guten Tag,', '', 'über den Greifer-Konfigurator möchte ich folgendes Teil anfragen:',
@@ -783,6 +800,7 @@ root.classList.add('is-ready');
 (function loop() { requestAnimationFrame(loop); controls.update(); renderer.render(scene, camera); })();
 // Simulator unter dem Konfigurator: übernimmt Greifer und Teil
 initSimulator({
+  base: BASE,
   active: () => A,
   grippers: () => GRIPPERS,
   select: async (id) => { await selectGripper(id); suggest(); },

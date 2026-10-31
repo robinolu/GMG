@@ -323,7 +323,16 @@ td a { font-weight: 600; }
 .kfg__facts { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; margin: 0; font-size: .92rem; padding: 12px 14px; background: var(--bg-alt); border-radius: 8px; }
 .kfg__facts dt { color: var(--muted); }
 .kfg__facts dd { margin: 0; color: var(--ink); font-weight: 600; }
-.kfg__list { display: grid; gap: 8px; }
+.kfg__dd { position: relative; }
+.kfg__dd-btn { width: 100%; display: flex; align-items: center; gap: 12px; text-align: left; font: inherit; padding: 10px 14px; border: 1px solid #cbd2da; border-radius: 8px; background: #fff; cursor: pointer; }
+.kfg__dd-btn > span:first-child { display: grid; gap: 1px; flex: 1; }
+.kfg__dd-btn strong { color: var(--ink); font-size: 1.05rem; }
+.kfg__dd-btn:hover, .kfg__dd.is-open .kfg__dd-btn { border-color: var(--blue); }
+.kfg__dd-arrow { color: var(--blue); font-size: 1.1rem; transition: transform .15s; }
+.kfg__dd.is-open .kfg__dd-arrow { transform: rotate(180deg); }
+.kfg__dd-list { position: absolute; z-index: 20; left: 0; right: 0; top: calc(100% + 6px); display: grid; gap: 8px; padding: 10px; background: #fff;
+  border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 12px 32px rgba(16, 24, 40, .16); max-height: 70vh; overflow-y: auto; }
+.kfg__dd-list[hidden] { display: none; }
 .kfg__card { display: grid; gap: 2px; padding: 12px 14px; border: 1px solid var(--line); border-radius: 8px; color: var(--text); background: #fff; }
 .kfg__card:hover { border-color: var(--blue); text-decoration: none; }
 .kfg__card.is-best { border-color: var(--blue); box-shadow: 0 0 0 3px var(--blue-soft); }
@@ -491,9 +500,12 @@ button.kfg__card { font: inherit; text-align: left; cursor: pointer; width: 100%
 .sim__tile:hover { border-color: #9dbbd8; }
 .sim__tile.is-active { border-color: var(--blue); box-shadow: 0 0 0 2px var(--blue) inset; }
 .sim__result { display: flex; flex-wrap: wrap; align-items: center; gap: 14px 28px; padding: 16px 18px; border-top: 1px solid var(--line); }
-.sim__kpi { display: flex; gap: 28px; margin: 0; }
-.sim__kpi dt { font-size: .78rem; color: var(--muted); }
-.sim__kpi dd { margin: 0; font-size: 1.35rem; font-weight: 750; color: var(--ink); }
+.sim__tempo { flex: 1 1 320px; max-width: 460px; }
+.sim__tempo label { display: block; font-weight: 650; color: var(--ink); font-size: .92rem; margin-bottom: 2px; }
+.sim__tempo input { width: 100%; accent-color: var(--blue); }
+.sim__tempo-scale { display: flex; justify-content: space-between; font-size: .75rem; color: var(--muted); margin-top: -2px; }
+.sim__kpi { display: flex; gap: 22px; margin-top: 4px; font-size: .92rem; color: var(--text); }
+.sim__kpi strong { font-size: 1.2rem; color: var(--ink); }
 .sim__note { flex: 1 1 260px; margin: 0; font-size: .88rem; }
 .sim__cta { display: flex; flex-wrap: wrap; gap: 10px; flex-basis: 100%; }
 @media (max-width: 1080px) {
@@ -866,8 +878,7 @@ button.kfg__card { font: inherit; text-align: left; cursor: pointer; width: 100%
         <button type="button" class="btn btn--ghost btn--xs" id="kfg-dreh-z">⤿ zur Seite kippen</button></div>
 
       <div class="kfg__step"><span class="kfg__num">2</span><h3>Greifer</h3></div>
-      <div id="kfg-vorschlag" class="kfg__list"></div>
-      <p class="kfg__small muted">Hier erscheinen die Greifer, für die ein 3D-Modell vorliegt. Weitere GMG-Greifer folgen.</p>
+      <div id="kfg-vorschlag"></div>
 
     </div>
     <div class="kfg__stage">
@@ -927,7 +938,12 @@ button.kfg__card { font: inherit; text-align: left; cursor: pointer; width: 100%
     </div>
     <div class="sim__result">
       <button type="button" class="btn btn--primary" id="sim-run">Simulation starten</button>
-      <dl class="sim__kpi"><div><dt>Taktzeit (ca.)</dt><dd id="sim-takt">–</dd></div><div><dt>Teile pro Stunde (ca.)</dt><dd id="sim-stunde">–</dd></div></dl>
+      <div class="sim__tempo">
+        <label for="sim-tempo">Tempo der Anlage</label>
+        <input id="sim-tempo" type="range" min="0" max="100" step="1" value="50" aria-describedby="sim-tempo-wert">
+        <div class="sim__tempo-scale"><span>langsamer</span><span>schneller</span></div>
+        <div id="sim-tempo-wert" class="sim__kpi"><span><strong id="sim-stunde">–</strong> Teile pro Stunde</span><span>Taktzeit <strong id="sim-takt">–</strong></span></div>
+      </div>
       <p class="sim__note muted" id="sim-hinweis">Die Simulation zeigt den Ablauf. Ob und wie sicher ein Greifer Ihr Teil hält, klären wir gern persönlich.</p>
       <div class="sim__cta">
         <a class="btn btn--primary" id="sim-anfrage" href="mailto:info@gmg-system.com">Angebot für diese Anlage anfragen <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>

@@ -20,7 +20,7 @@
 <link rel="icon" href="../assets/logo/gmg-3d-dezent-bildmarke.svg" type="image/svg+xml">
 <link rel="alternate icon" href="../assets/img/gmg-bildmarke-3d.png" type="image/png">
 <link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
-<link rel="stylesheet" href="../assets/css/style.css?v=202610310948">
+<link rel="stylesheet" href="../assets/css/style.css?v=202610310959">
 </head>
 <body>
 <div class="draft">Entwurf / Testversion der neuen GMG-Webseite. Inhalte von gmg-system.com übernommen.</div>
@@ -90,8 +90,7 @@
         <button type="button" class="btn btn--ghost btn--xs" id="kfg-dreh-z">⤿ zur Seite kippen</button></div>
 
       <div class="kfg__step"><span class="kfg__num">2</span><h3>Greifer</h3></div>
-      <div id="kfg-vorschlag" class="kfg__list"></div>
-      <p class="kfg__small muted">Hier erscheinen die Greifer, für die ein 3D-Modell vorliegt. Weitere GMG-Greifer folgen.</p>
+      <div id="kfg-vorschlag"></div>
 
     </div>
     <div class="kfg__stage">
@@ -151,7 +150,12 @@
     </div>
     <div class="sim__result">
       <button type="button" class="btn btn--primary" id="sim-run">Simulation starten</button>
-      <dl class="sim__kpi"><div><dt>Taktzeit (ca.)</dt><dd id="sim-takt">–</dd></div><div><dt>Teile pro Stunde (ca.)</dt><dd id="sim-stunde">–</dd></div></dl>
+      <div class="sim__tempo">
+        <label for="sim-tempo">Tempo der Anlage</label>
+        <input id="sim-tempo" type="range" min="0" max="100" step="1" value="50" aria-describedby="sim-tempo-wert">
+        <div class="sim__tempo-scale"><span>langsamer</span><span>schneller</span></div>
+        <div id="sim-tempo-wert" class="sim__kpi"><span><strong id="sim-stunde">–</strong> Teile pro Stunde</span><span>Taktzeit <strong id="sim-takt">–</strong></span></div>
+      </div>
       <p class="sim__note muted" id="sim-hinweis">Die Simulation zeigt den Ablauf. Ob und wie sicher ein Greifer Ihr Teil hält, klären wir gern persönlich.</p>
       <div class="sim__cta">
         <a class="btn btn--primary" id="sim-anfrage" href="mailto:info@gmg-system.com">Angebot für diese Anlage anfragen <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
@@ -216,6 +220,6 @@
   <a class="btn btn--ghost" href="../konfigurator/index.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 16V8a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7l7 4a2 2 0 0 0 2 0l7-4a2 2 0 0 0 1-1.7z"/><path d="M3.3 7 12 12l8.7-5M12 22V12"/></svg>Konfigurator</a>
   <a class="btn btn--primary" href="../kontakt/index.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>Anfrage</a>
 </div>
-<script src="../assets/js/main.js?v=202610310948"></script><script src="../assets/js/konfigurator.js?v=202610310948" defer></script>
+<script src="../assets/js/main.js?v=202610310959"></script><script src="../assets/js/konfigurator.js?v=202610310959" defer></script>
 </body>
 </html>

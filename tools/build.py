@@ -550,8 +550,7 @@ def configurator_block(r):
         <button type="button" class="btn btn--ghost btn--xs" id="kfg-dreh-z">⤿ zur Seite kippen</button></div>
 
       <div class="kfg__step"><span class="kfg__num">2</span><h3>Greifer</h3></div>
-      <div id="kfg-vorschlag" class="kfg__list"></div>
-      <p class="kfg__small muted">Hier erscheinen die Greifer, für die ein 3D-Modell vorliegt. Weitere GMG-Greifer folgen.</p>
+      <div id="kfg-vorschlag"></div>
 
     </div>
     <div class="kfg__stage">
@@ -615,7 +614,12 @@ def simulator_block():
     </div>
     <div class="sim__result">
       <button type="button" class="btn btn--primary" id="sim-run">Simulation starten</button>
-      <dl class="sim__kpi"><div><dt>Taktzeit (ca.)</dt><dd id="sim-takt">–</dd></div><div><dt>Teile pro Stunde (ca.)</dt><dd id="sim-stunde">–</dd></div></dl>
+      <div class="sim__tempo">
+        <label for="sim-tempo">Tempo der Anlage</label>
+        <input id="sim-tempo" type="range" min="0" max="100" step="1" value="50" aria-describedby="sim-tempo-wert">
+        <div class="sim__tempo-scale"><span>langsamer</span><span>schneller</span></div>
+        <div id="sim-tempo-wert" class="sim__kpi"><span><strong id="sim-stunde">–</strong> Teile pro Stunde</span><span>Taktzeit <strong id="sim-takt">–</strong></span></div>
+      </div>
       <p class="sim__note muted" id="sim-hinweis">Die Simulation zeigt den Ablauf. Ob und wie sicher ein Greifer Ihr Teil hält, klären wir gern persönlich.</p>
       <div class="sim__cta">
         <a class="btn btn--primary" id="sim-anfrage" href="mailto:{MAIL}">Angebot für diese Anlage anfragen {icon('arrow')}</a>

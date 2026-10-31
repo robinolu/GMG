@@ -5,7 +5,7 @@
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
-import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
+import { mergeGeometries, toCreasedNormals } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
 import { kennzahlen } from './sim-regeln.js';
 
 const fmt = (v, d = 0) => v.toLocaleString('de-DE', { maximumFractionDigits: d, minimumFractionDigits: d });
@@ -27,8 +27,7 @@ const M = {
   presse: new THREE.MeshStandardMaterial({ color: 0x4a6b8a, metalness: 0.3, roughness: 0.55 }),
   roboter: new THREE.MeshStandardMaterial({ color: 0xf1f2f4, roughness: 0.45 }),
   gelenk: new THREE.MeshStandardMaterial({ color: 0x0061aa, metalness: 0.3, roughness: 0.45 }),
-  zaun: new THREE.MeshStandardMaterial({ color: 0xf2b230, roughness: 0.5 }),
-  gitter: new THREE.MeshStandardMaterial({ color: 0x8a939c, transparent: true, opacity: 0.18, side: THREE.DoubleSide, depthWrite: false }),
+  abbFuss: new THREE.MeshStandardMaterial({ color: 0xdfe2e6, roughness: 0.5 }),
   papier: new THREE.MeshStandardMaterial({ color: 0xe9dcc3, roughness: 0.9 }),
   schale: new THREE.MeshStandardMaterial({ color: 0x3a4148, roughness: 0.5 }),
   sensor: new THREE.MeshStandardMaterial({ color: 0x1f2830, roughness: 0.4 }),
@@ -222,7 +221,7 @@ function buildTarget(id, P, p3, dreh = 0) {
     for (const [w, d, x, z] of [[W, 6, 0, D / 2], [W, 6, 0, -D / 2], [6, D, W / 2, 0], [6, D, -W / 2, 0]]) g.add(box(w, H, d, cm, x, 700 + H / 2, z));
     g.add(box(W, 6, D, cm, 0, 703, 0));
     for (const s of [-1, 1]) { const flap = box(W, 4, D * 0.45, cm, 0, 700 + H, s * (D / 2 + D * 0.2)); flap.rotation.x = s * 0.5; g.add(flap); }
-    return { group: g, top: 706, half: W / 2 + 200, flow: false, stack: { pat, lagen: Number(p3.lagen) || 1, zwischen: p3.zwischen === 'ja' } };
+    return { group: g, top: 706, wall: 700 + H + 80, half: W / 2 + 200, flow: false, stack: { pat, lagen: Number(p3.lagen) || 1, zwischen: p3.zwischen === 'ja' } };
   }
   // KLT auf kurzer Rollenbahn
   const g = new THREE.Group();
@@ -231,49 +230,63 @@ function buildTarget(id, P, p3, dreh = 0) {
   for (const s of [-1, 1]) g.add(box(W + 300, 70, 30, M.alu, 0, 575, s * (D / 2 + 75)), box(40, 540, 40, M.alu, -W / 2 - 100, 270, s * (D / 2 + 75)), box(40, 540, 40, M.alu, W / 2 + 100, 270, s * (D / 2 + 75)));
   for (const [w, d, x, z] of [[W, 8, 0, D / 2], [W, 8, 0, -D / 2], [8, D, W / 2, 0], [8, D, -W / 2, 0]]) g.add(box(w, H, d, M.klt, x, 600 + H / 2, z));
   g.add(box(W, 8, D, M.klt, 0, 604, 0));
-  return { group: g, top: 608, half: W / 2 + 200, flow: false, stack: { pat, lagen: Number(p3.lagen) || 1, zwischen: p3.zwischen === 'ja' } };
+  return { group: g, top: 608, wall: 600 + H, half: W / 2 + 200, flow: false, stack: { pat, lagen: Number(p3.lagen) || 1, zwischen: p3.zwischen === 'ja' } };
 }
 
 // ---------------------------------------------------------------- Geräte
 // Jedes Gerät: group, reach(flange: Vector3) stellt die Gelenke so, dass der Flansch dort liegt (Werkzeug senkrecht nach unten)
+// 6-Achs-Roboter: echtes Modell ABB IRB 120 (STEP von ABB, aufbereitet mit tools/roboter/export.py),
+// für die Anlage auf ca. 3,3-fache Größe gebracht. Kinematik wie auf der Startseite (tools/roboter/roboter3d.js):
+// Achse 2 bei y = 290, Unterarm 270, Handgelenk (Achse 5) 302 vor und 70 über Achse 3, Flansch 72 vor Achse 5.
+const ABB_S = 3.3;
+let ABB = null;          // Geometrien je Glied, einmal geladen
+export async function loadABB(base) {
+  if (ABB) return ABB;
+  const data = (await (await fetch(base + 'data/3d/roboter-szene.json')).json()).roboter;
+  ABB = {};
+  for (const [k, g] of Object.entries(data)) {
+    let geo = new THREE.BufferGeometry();
+    geo.setAttribute('position', new THREE.Float32BufferAttribute(g.v, 3));
+    geo.setIndex(g.i);
+    ABB[k] = toCreasedNormals(geo, THREE.MathUtils.degToRad(40));
+  }
+  return ABB;
+}
+const ABB_JOINTS = { glied1: [0, 0, 0], glied2: [0, 290, 0], glied3: [0, 560, 0], glied4: [0, 630, 0], glied5: [-302, 630, 0] };
+const A2 = new THREE.Vector2(0, 290), L2 = 270, W0 = new THREE.Vector2(-302, 70), FL = 72;
+const B0 = Math.atan2(W0.y, W0.x), LB = W0.length();
 function buildArm(ped = 0) {
-  const c = { ped, base: 300, hs: 520, L2: 1000, L3: 1050, f: 180, r: 120, mat: M.roboter, joint: M.dunkel };
   const g = new THREE.Group();
-  if (c.ped) g.add(box(420, c.ped, 420, M.alu, 0, c.ped / 2, 0));
-  const y0 = c.ped;
-  const base = cyl(c.r * 1.6, c.base, c.mat, 32); base.position.y = y0 + c.base / 2; g.add(base);
-  const j1 = new THREE.Group(); j1.position.y = y0 + c.base; g.add(j1);
-  const turret = cyl(c.r * 1.3, c.hs - 40, c.mat, 32); turret.position.y = (c.hs - 40) / 2; j1.add(turret);
-  const j2 = new THREE.Group(); j2.position.y = c.hs; j1.add(j2);
-  const shoulder = cyl(c.r * 1.05, c.r * 2.4, c.joint, 28); shoulder.rotation.x = Math.PI / 2; j2.add(shoulder);
-  const upper = box(c.r * 1.3, c.L2, c.r * 1.1, c.mat, 0, c.L2 / 2, 0); j2.add(upper);
-  const j3 = new THREE.Group(); j3.position.y = c.L2; j2.add(j3);
-  const elbow = cyl(c.r * 0.9, c.r * 2.1, c.joint, 28); elbow.rotation.x = Math.PI / 2; j3.add(elbow);
-  const fore = cyl(c.r * 0.62, c.L3, c.mat, 24); fore.position.y = c.L3 / 2; j3.add(fore);
-  const j4 = new THREE.Group(); j4.position.y = c.L3; j3.add(j4);
-  const wrist = cyl(c.r * 0.55, c.r * 1.4, c.joint, 24); wrist.rotation.x = Math.PI / 2; j4.add(wrist);
-  const tool = cyl(c.r * 0.45, c.f, c.mat, 24); tool.position.y = c.f / 2; j4.add(tool);
-  const flange = cyl(c.r * 0.5, 12, M.stahl, 24); flange.position.y = c.f; j4.add(flange);
-  const sh = new THREE.Vector3(), d2 = new THREE.Vector2();
+  if (ped) g.add(box(760, ped, 760, M.alu, 0, ped / 2, 0));
+  const robot = new THREE.Group(); robot.position.y = ped; robot.scale.setScalar(ABB_S); g.add(robot);
+  const L = {};
+  let parent = robot, prev = [0, 0, 0];
+  for (const k of ['basis', 'glied1', 'glied2', 'glied3', 'glied4', 'glied5']) {
+    const at = ABB_JOINTS[k] || [0, 0, 0];
+    const j = new THREE.Group(); j.position.set(at[0] - prev[0], at[1] - prev[1], at[2] - prev[2]);
+    const m = new THREE.Mesh(ABB[k], k === 'basis' ? M.abbFuss : M.roboter);
+    m.position.set(-at[0], -at[1], -at[2]); m.castShadow = m.receiveShadow = true; m.userData.keepGeo = true;
+    j.add(m); parent.add(j); L[k] = j; parent = j; prev = at;
+  }
+  const tip = new THREE.Object3D(); tip.position.set(-FL, 0, 0); L.glied5.add(tip);   // Flanschmitte
+  const lp = new THREE.Vector3(), d = new THREE.Vector2(), v1 = new THREE.Vector2();
   return {
-    group: g, cfg: c,
-    tip: (v) => flange.getWorldPosition(v),   // Flansch, wie die Gelenke tatsächlich stehen
+    group: g,
+    tip: (v) => tip.getWorldPosition(v),
     reach(F) {
-      // Handgelenk senkrecht über dem Flansch; Ebene des Arms durch Fuß und Ziel
-      const W = new THREE.Vector3(F.x, F.y + c.f, F.z);
-      const gp = g.position;
-      const hx = W.x - gp.x, hz = W.z - gp.z;
-      const q1 = Math.atan2(-hz, hx);
-      sh.set(0, y0 + c.base + c.hs, 0);
-      d2.set(Math.hypot(hx, hz), W.y - gp.y - sh.y);
-      const len = Math.min(d2.length(), c.L2 + c.L3 - 1);
-      const a1 = Math.atan2(d2.y, d2.x) + Math.acos(clamp((c.L2 * c.L2 + len * len - c.L3 * c.L3) / (2 * c.L2 * len), -1, 1));
-      const ex = c.L2 * Math.cos(a1), ey = c.L2 * Math.sin(a1);
-      const a2 = Math.atan2(d2.y - ey, d2.x - ex);
-      j1.rotation.y = q1;
-      j2.rotation.z = a1 - Math.PI / 2;
-      j3.rotation.z = a2 - a1;
-      j4.rotation.z = -Math.PI / 2 - a2;   // Werkzeug zeigt senkrecht nach unten
+      // Ziel in Roboterkoordinaten (Modellmaß), Werkzeug senkrecht nach unten, Achsen 4 und 6 bleiben auf 0
+      g.updateMatrixWorld(true);
+      robot.worldToLocal(lp.copy(F));
+      const q1 = Math.atan2(lp.z, -lp.x), r = Math.hypot(lp.x, lp.z);
+      d.set(-r, lp.y + FL).sub(A2);
+      const len = Math.min(d.length(), L2 + LB - 1);
+      const a1 = Math.atan2(d.y, d.x) - Math.acos(clamp((L2 * L2 + len * len - LB * LB) / (2 * L2 * len), -1, 1));
+      v1.set(Math.cos(a1), Math.sin(a1)).multiplyScalar(L2);
+      const a2 = Math.atan2(d.y - v1.y, d.x - v1.x), q2 = a1 - Math.PI / 2, phi = a2 - B0;
+      L.glied1.rotation.y = q1;
+      L.glied2.rotation.z = q2;
+      L.glied3.rotation.z = phi - q2;
+      L.glied5.rotation.z = THREE.MathUtils.euclideanModulo(-1.5 * Math.PI - phi + Math.PI, 2 * Math.PI) - Math.PI;
     },
   };
 }
@@ -286,8 +299,7 @@ function buildLinear(x0, x1) {
   for (const s of [-1, 1]) g.add(box(L, 40, 60, M.stahl, cx, 180, s * 180));
   for (let x = x0 - 500; x <= x1 + 500; x += 900) g.add(box(120, 30, 560, M.dunkel, x, 15, 0));
   const arm = buildArm(260);
-  const sled = box(620, 60, 620, M.gelenk, 0, 230, 0);
-  arm.group.add(sled);
+  arm.group.add(box(820, 50, 820, M.gelenk, 0, 235, 0));
   arm.group.children[0].material = M.presse;           // Sockel als Schlitten
   g.add(arm.group);
   return {
@@ -359,30 +371,14 @@ function buildPortal(cx, cz, pickX, placeX, H) {
   };
 }
 
-function fence(group, w, d, cx, cz) {
-  const H = 1800;
-  const panel = (len, x, z, rot) => {
-    const p = new THREE.Group();
-    p.add(box(len, 40, 40, M.zaun, 0, H, 0), box(len, 40, 40, M.zaun, 0, 120, 0));
-    const net = new THREE.Mesh(new THREE.PlaneGeometry(len, H - 120), M.gitter); net.position.y = (H + 120) / 2; p.add(net);
-    p.position.set(x, 0, z); p.rotation.y = rot; group.add(p);
-  };
-  for (let x = -w / 2; x <= w / 2 + 1; x += w / Math.ceil(w / 1500)) group.add(box(50, H, 50, M.zaun, cx + x, H / 2, cz - d));
-  panel(w, cx, cz - d, 0);
-  panel(d * 1.2, cx - w / 2, cz - d * 0.4, Math.PI / 2);
-  panel(d * 1.2, cx + w / 2, cz - d * 0.4, Math.PI / 2);
-}
-
 // ---------------------------------------------------------------- Parameter
 const BAND = { k: 'band', label: 'Bandgeschwindigkeit', opts: [['langsam', 'langsam'], ['mittel', 'mittel'], ['schnell', 'schnell']], def: 'mittel' };
 const P1 = [
   { k: 'lage', label: 'Lage des Produkts', opts: [['ausgerichtet', 'ausgerichtet'], ['chaotisch', 'chaotisch (mit Kamera)']], def: 'ausgerichtet' },
 ];
 const P2 = [
-  { k: 'speed', label: 'Geschwindigkeit', range: [10, 100, 5], unit: '%', def: 70 },
   { k: 'hub', label: 'Hubhöhe', range: [0.1, 1, 0.05], unit: 'm', def: 0.3, dec: 2 },
   { k: 'dreh', label: 'Drehung des Produkts', opts: [['0', 'keine'], ['90', '90°'], ['180', '180°']], def: '0' },
-  { k: 'zaun', label: 'Schutzzaun', opts: [['ja', 'ein'], ['nein', 'aus']], def: 'ja', when: (m) => m !== 'delta' },
 ];
 const P3 = [
   { k: 'lagenbild', label: 'Lagenbild', opts: [['1x1', '1 × 1'], ['2x1', '2 × 1'], ['2x2', '2 × 2'], ['3x2', '3 × 2']], def: '2x2', when: (m) => !FLOW.includes(m) },
@@ -397,7 +393,7 @@ const VORLAGEN = {
   reifenPal: { name: 'Automobil: Reifen palettieren', produkt: 'reifen', s1: { modul: 'rollenbahn' }, s2: { modul: 'roboter6', speed: 70 }, s3: { modul: 'palette', lagenbild: '2x1', lagen: 3 } },
   presse: { name: 'Automobil: Presse entnehmen', produkt: 'blech', s1: { modul: 'presse' }, s2: { modul: 'portal', speed: 80 }, s3: { modul: 'klt', lagenbild: '1x1', lagen: 4, zwischen: 'ja' } },
   reifenDepal: { name: 'Automobil: Reifen depalettieren', produkt: 'reifen', s1: { modul: 'palette' }, s2: { modul: 'roboter6', speed: 70 }, s3: { modul: 'rollenbahn' } },
-  backwaren: { name: 'Lebensmittel: Backwaren in Schalen', produkt: 'broetchen', s1: { modul: 'modulband', lage: 'chaotisch' }, s2: { modul: 'delta', speed: 90, zaun: 'nein' }, s3: { modul: 'schalenband', lagenbild: '2x2' } },
+  backwaren: { name: 'Lebensmittel: Backwaren in Schalen', produkt: 'broetchen', s1: { modul: 'modulband', lage: 'chaotisch' }, s2: { modul: 'delta', speed: 90 }, s3: { modul: 'schalenband', lagenbild: '2x2' } },
   kartons: { name: 'Lebensmittel: Kartons palettieren', produkt: 'karton', s1: { modul: 'gurtband' }, s2: { modul: 'linear', speed: 60, dreh: '90' }, s3: { modul: 'palette', lagenbild: '2x2', lagen: 3 } },
 };
 
@@ -414,7 +410,7 @@ export function initSimulator(K) {
   const S = { vorlage: 'reifenPal', produkt: { typ: 'reifen', groesse: 100 }, s1: null, s2: null, s3: null };
   let aktiv = 'produkt';
   function applyTemplate(key) {
-    S.vorlage = key;
+    S.vorlage = key; S.tph = null;
     if (key === 'leer') {
       S.produkt = { typ: 'eigen', groesse: 100 }; S.s1 = S.s2 = S.s3 = null; aktiv = 'produkt';
     } else {
@@ -533,21 +529,28 @@ export function initSimulator(K) {
     const src = S.s1 ? buildSource(S.s1.modul, P, S.s1) : null;
     const tgt = S.s3 ? buildTarget(S.s3.modul, P, S.s3, S.s2 ? S.s2.dreh : 0) : null;
     const pickX = -(gap + (src ? src.half : 300)), placeX = gap + (tgt ? tgt.half : 300);
+    let layer = 0;
     const zone = (x, w, d, color, slot, label) => {
-      const m = new THREE.Mesh(new THREE.PlaneGeometry(w, d), new THREE.MeshStandardMaterial({ color, transparent: true, opacity: 0.55, roughness: 1 }));
-      m.rotation.x = -Math.PI / 2; m.position.set(x, 3, zLine); m.receiveShadow = true; m.userData.slot = slot; world.add(m);
+      layer++;
+      const m = new THREE.Mesh(new THREE.PlaneGeometry(w, d), new THREE.MeshStandardMaterial({ color, transparent: true, opacity: 0.32, roughness: 1,
+        depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2 * layer, polygonOffsetUnits: -2 * layer }));
+      m.rotation.x = -Math.PI / 2; m.position.set(x, 2 + layer * 2, zLine); m.renderOrder = layer; m.userData.slot = slot; world.add(m);
       if (!label) return;
       const cv = document.createElement('canvas'); cv.width = 512; cv.height = 96;
       const c = cv.getContext('2d'); c.fillStyle = '#ffffff'; c.font = '600 44px system-ui, sans-serif'; c.fillText(label, 24, 64);
       const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace;
-      const lab = new THREE.Mesh(new THREE.PlaneGeometry(1000, 190), new THREE.MeshBasicMaterial({ map: t, transparent: true }));
-      lab.rotation.x = -Math.PI / 2; lab.position.set(x - w / 2 + 520, 5, zLine + d / 2 - 120); lab.userData.slot = slot; world.add(lab);
+      const lab = new THREE.Mesh(new THREE.PlaneGeometry(1000, 190), new THREE.MeshBasicMaterial({ map: t, transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -10, polygonOffsetUnits: -10 }));
+      lab.rotation.x = -Math.PI / 2; lab.position.set(x - w / 2 + 520, 12, zLine + d / 2 - 120); lab.renderOrder = 10; lab.userData.slot = slot; world.add(lab);
     };
+    // Bodenflächen lückenlos nebeneinander, ohne Überlappung: Ankunft | Gerät | Weitertransport
     const srcW = src && src.flow ? 2700 : (src ? src.half * 2 + 200 : 1400);
     const tgtW = tgt && tgt.flow ? 2700 : (tgt ? tgt.half * 2 + 200 : 1400);
-    zone(pickX - (src && src.flow ? 1050 : 0), srcW, 1900, 0x2f7fc1, 'slot1', '1  Ankunft');
-    zone(placeX + (tgt && tgt.flow ? 1050 : 0), tgtW, 1900, 0x2e9d5b, 'slot3', '3  Weitertransport');
-    zone(0, Math.max(1200, gap * 2 + 400), dev === 'roboter6' ? 2400 : 1900, 0xe07b1f, 'slot2', '');
+    const sC = pickX - (src && src.flow ? 1050 : 0), tC = placeX + (tgt && tgt.flow ? 1050 : 0);
+    let sL = sC - srcW / 2, sR = sC + srcW / 2, tL = tC - tgtW / 2, tR = tC + tgtW / 2;
+    if (sR > tL) { const mid = (pickX + placeX) / 2; sR = Math.min(sR, mid); tL = Math.max(tL, mid); }
+    zone((sL + sR) / 2, sR - sL, 1900, 0x2f7fc1, 'slot1', '1  Ankunft');
+    zone((tL + tR) / 2, tR - tL, 1900, 0x2e9d5b, 'slot3', '3  Weitertransport');
+    if (tL - sR > 10) zone((sR + tL) / 2, tL - sR, 1900, 0xe07b1f, 'slot2', '');
     if (src) { src.group.position.set(pickX, 0, zLine); src.group.userData.slot = 'slot1'; world.add(src.group); }
     if (tgt) { tgt.group.position.set(placeX, 0, zLine); tgt.group.userData.slot = 'slot3'; world.add(tgt.group); }
     // Erkennung an der Quelle
@@ -572,7 +575,6 @@ export function initSimulator(K) {
       else device = buildPortal(0, zLine, pickX, placeX, 2400);
       device.group.userData.slot = 'slot2';
       world.add(device.group);
-      if (S.s2.zaun === 'ja' && m !== 'delta') fence(world, placeX - pickX + (m === 'portal' ? 2000 : 1400), m === 'portal' ? 1200 : 900, 0, m === 'portal' ? zLine : 0);
     }
     world.add(g.holder);
     g.holder.visible = !!device;
@@ -585,7 +587,11 @@ export function initSimulator(K) {
     const trays = tgt && tgt.trays ? [0, 1].map(() => { const m = trayMesh(placeX, tgt.top, zLine, tgt.trays); world.add(m); return m; }) : [];
     const sheets = tgt && tgt.stack && tgt.stack.zwischen ? Array.from({ length: tgt.stack.lagen - 1 }, (_, l) => {
       const m = box(tgt.stack.pat.w, 4, tgt.stack.pat.d, M.papier, placeX, tgt.top + (l + 1) * (P.size[1] + 6) - 3, zLine); world.add(m); return m; }) : [];
-    A = { P, src, tgt, device, g, pickX, placeX, zLine, take, pool, trays, sheets };
+    // höchste Kante, über die das Teil hinweg muss: Stapel, Behälterwände, Teile auf den Bändern
+    const hP = P.size[1];
+    const srcTop = !src ? 0 : src.stack ? src.top + src.stack.lagen * (hP + 4) : src.bin ? 880 : src.top + hP;
+    const tgtTop = !tgt ? 0 : Math.max(tgt.wall || 0, tgt.stack ? tgt.top + tgt.stack.lagen * (hP + 6) : tgt.trays ? tgt.top + 48 + hP : tgt.top + hP);
+    A = { P, src, tgt, device, g, pickX, placeX, zLine, take, pool, trays, sheets, clear: Math.max(srcTop, tgtTop) };
     // Weg des Produkts als gestrichelte Linie
     if (src && tgt && device) {
       const yP = src.top + P.size[1] + 60, yT = tgt.top + P.size[1] + 60, hub = Number(S.s2.hub) * 1000;
@@ -597,7 +603,7 @@ export function initSimulator(K) {
     // Kamera nur nachführen, wenn sich die Anlage selbst ändert (nicht bei jedem Regler)
     const layout = [S.produkt.typ, S.s1 && S.s1.modul, S.s2 && S.s2.modul, S.s3 && S.s3.modul].join();
     if (layout !== lastLayout) { lastLayout = layout; fitCamera(); }
-    t0 = performance.now(); frameState(0);
+    frameState(cyc);
     evaluate();
   }
   let lastLayout = '';
@@ -613,10 +619,10 @@ export function initSimulator(K) {
   }
 
   // ---------- Ablauf ----------
-  let running = false, t0 = 0, simTime = 0;
+  let running = false, cyc = 0, lastNow = 0;   // cyc: Fortschritt in Greifzyklen
   const tcp = new THREE.Vector3(), flange = new THREE.Vector3(), tmp = new THREE.Vector3();
   const off0 = new THREE.Vector3(), pP = new THREE.Vector3(), pQ = new THREE.Vector3(), pN = new THREE.Vector3();
-  const cycleLen = () => clamp(lastEval ? lastEval.takt : 3, 2.2, 7);
+  const cycleLen = () => clamp(lastEval ? lastEval.takt : 3, 0.9, 30);
   // Lage des n-ten Produkts an der Quelle (Unterkante Mitte) und seine Drehung
   function sourcePos(n, k, a) {
     const { src, P, pickX, zLine } = A;
@@ -663,7 +669,7 @@ export function initSimulator(K) {
   }
   const speedOf = (v) => ({ langsam: 0.6, mittel: 1, schnell: 1.6 }[v] || 1);
 
-  function frameState(time) {
+  function frameState(c) {
     if (!A) return;
     const { src, tgt, device, g, P } = A;
     if (!src || !tgt || !device) {
@@ -673,7 +679,7 @@ export function initSimulator(K) {
       return;
     }
     const T = cycleLen();
-    const n = Math.floor(time / T), p = time / T - n;
+    const n = Math.floor(c), p = c - n, time = c * T;
     const hub = Number(S.s2.hub) * 1000;
     const r = g.range;
     let inside = !(r.aussen && P.griff >= r.aussen[0] && P.griff <= r.aussen[1]) && r.innen && P.innen && P.innen >= r.innen[0] && P.innen <= r.innen[1];
@@ -698,16 +704,17 @@ export function initSimulator(K) {
     const tp = targetPos(n);
     const dreh = THREE.MathUtils.degToRad(Number(S.s2.dreh) || 0);
     const PP = off(sp.yaw, pP).add(sp.p), QQ = off(dreh, pQ).add(tp.p);   // Greifpunkt an Aufnahme und Ablage
-    const safe = Math.max(PP.y, QQ.y) + hub;
+    // immer dieselbe Fahrhöhe: Teilunterkante mit Abstand über der höchsten Kante, dazu die Hubhöhe
+    const safe = Math.max(PP.y, QQ.y, A.clear + off0.y + 40) + hub;
     let x, y, z, yaw;
-    if (p < 0.38) { x = PP.x; z = PP.z; y = THREE.MathUtils.lerp(PP.y + hub, PP.y, down1) + (safe - PP.y) * up1; yaw = sp.yaw; }
-    else if (p < 0.62) { x = THREE.MathUtils.lerp(PP.x, QQ.x, move); z = THREE.MathUtils.lerp(PP.z, QQ.z, move); y = safe + Math.sin(move * Math.PI) * 80; yaw = THREE.MathUtils.lerp(sp.yaw, dreh, move); }
-    else if (p < 0.9) { x = QQ.x; z = QQ.z; y = THREE.MathUtils.lerp(safe, QQ.y, down2) + hub * up2; yaw = dreh; }
+    if (p < 0.38) { x = PP.x; z = PP.z; y = safe + (PP.y - safe) * down1 + (safe - PP.y) * up1; yaw = sp.yaw; }
+    else if (p < 0.62) { x = THREE.MathUtils.lerp(PP.x, QQ.x, move); z = THREE.MathUtils.lerp(PP.z, QQ.z, move); y = safe; yaw = THREE.MathUtils.lerp(sp.yaw, dreh, move); }
+    else if (p < 0.9) { x = QQ.x; z = QQ.z; y = safe + (QQ.y - safe) * down2 + (safe - QQ.y) * up2; yaw = dreh; }
     else {
       const nx = sourcePos(n + 1, 0, 0) || sp;
       const NN = off(nx.yaw, pN).add(nx.p);
       x = THREE.MathUtils.lerp(QQ.x, NN.x, back); z = THREE.MathUtils.lerp(QQ.z, NN.z, back);
-      y = THREE.MathUtils.lerp(QQ.y + hub, NN.y + hub, back) + Math.sin(back * Math.PI) * 80; yaw = THREE.MathUtils.lerp(dreh, nx.yaw, back);
+      y = safe; yaw = THREE.MathUtils.lerp(dreh, nx.yaw, back);
     }
     g.set(inside ? 1 - (1 - tGrip) * close * (1 - open) : tGrip * close * (1 - open));
     flange.set(x, y + g.length, z);
@@ -785,13 +792,21 @@ export function initSimulator(K) {
 
   // ---------- Kennzahlen ----------
   let lastEval = null;
+  // Tempo: Regler 0…100 (logarithmisch) ↔ 120…6000 Teile pro Stunde; ohne eigene Wahl der Richtwert des Geräts
+  const TPH_MIN = 120, TPH_MAX = 6000;
+  const toTph = (v) => TPH_MIN * Math.pow(TPH_MAX / TPH_MIN, v / 100);
+  const fromTph = (t) => 100 * Math.log(clamp(t, TPH_MIN, TPH_MAX) / TPH_MIN) / Math.log(TPH_MAX / TPH_MIN);
+  const tempo = $('#sim-tempo');
+  tempo.addEventListener('input', () => { S.tph = toTph(Number(tempo.value)); evaluate(); });
   function evaluate() {
     const ready = S.s1 && S.s2 && S.s3;
-    $('#sim-run').disabled = !ready;
+    $('#sim-run').disabled = !ready; tempo.disabled = !ready;
     if (!ready) { lastEval = null; $('#sim-takt').textContent = $('#sim-stunde').textContent = '–'; return; }
-    const e = lastEval = kennzahlen(S.s2);
-    $('#sim-takt').textContent = `${fmt(e.takt, 1)} s`;
-    $('#sim-stunde').textContent = fmt(Math.round(e.stunde / 10) * 10);
+    const tph = S.tph || kennzahlen(S.s2).stunde;
+    const e = lastEval = { takt: 3600 / tph, stunde: tph };
+    if (document.activeElement !== tempo) tempo.value = fromTph(tph);
+    $('#sim-takt').textContent = `${fmt(e.takt, e.takt < 10 ? 1 : 0)} s`;
+    $('#sim-stunde').textContent = fmt(tph >= 1000 ? Math.round(tph / 10) * 10 : Math.round(tph));
     mail(produkt(), e);
   }
   function mail(P, e) {
@@ -856,7 +871,7 @@ export function initSimulator(K) {
     box.querySelectorAll('[data-modul]').forEach((b) => b.addEventListener('click', () => {
       const m = b.dataset.modul;
       S[key] = { ...defaults(plist), ...(S[key] || {}), modul: m };
-      if (key === 's2') S.s2.zaun = m === 'delta' ? 'nein' : 'ja';
+      if (key === 's2') S.tph = null;
       stop(); build(); renderPanels();
     }));
     box.querySelectorAll('[data-k]').forEach((el) => {
@@ -908,7 +923,6 @@ export function initSimulator(K) {
   runBtn.addEventListener('click', () => {
     running = !running;
     runBtn.textContent = running ? 'Simulation anhalten' : 'Simulation fortsetzen';
-    if (running) t0 = performance.now() - simTime * 1000;
     renderPanels();
   });
   $('#sim-teilen').addEventListener('click', async () => {
@@ -925,22 +939,23 @@ export function initSimulator(K) {
     requestAnimationFrame(loop);
     if (!visible || ui.hidden) return;
     if (G && G.id !== K.active().id && K.active().ready) { G = null; build(); renderPanels(); }
-    if (running) simTime = (performance.now() - t0) / 1000;
-    frameState(simTime);
+    const now = performance.now(), dt = Math.min(0.1, (now - (lastNow || now)) / 1000); lastNow = now;
+    if (running) cyc += dt / cycleLen();
+    frameState(cyc);
     controls.update();
     renderer.render(scene, camera);
   }
 
   async function open(state) {
-    if (!started) { started = true; init3d(); loop(); }
+    if (!started) { started = true; await loadABB(K.base || ''); init3d(); loop(); }
     if (state) {
       if (state.g && state.g !== K.active().id) await K.select(state.g);
-      for (const k of ['vorlage', 'produkt', 's1', 's2', 's3']) if (k in state) S[k] = state[k];
+      for (const k of ['vorlage', 'produkt', 's1', 's2', 's3', 'tph']) if (k in state) S[k] = state[k];
       if (S.s2 && !GERAETE_UI[S.s2.modul]) S.s2.modul = 'linear';   // ältere Links (Cobot)
       tpl.value = S.vorlage;
     } else applyTemplate(tpl.value);
     G = null; build(); renderPanels();
-    running = true; runBtn.textContent = 'Simulation anhalten'; t0 = performance.now(); simTime = 0;
+    running = true; runBtn.textContent = 'Simulation anhalten'; cyc = 0;
   }
   // Neues oder geändertes Teil im Konfigurator: der Simulator arbeitet damit weiter
   K.onPart(() => { if (!started) return; if (S.produkt.typ !== 'eigen') S.produkt = { typ: 'eigen', groesse: 100 }; build(); renderPanels(); });
@@ -954,5 +969,5 @@ export function initSimulator(K) {
     const io = new IntersectionObserver((e) => { if (e[0].isIntersecting) { io.disconnect(); open(); } }, { rootMargin: '600px 0px' });
     io.observe(sec);
   }
-  window.__sim = { open, S, belts: () => ({ src: A.src.tex ? A.src.tex.offset.x : A.src.rollers && A.src.rollers[0] ? A.src.rollers[0].rotation.y : null, tgt: A.tgt.tex ? A.tgt.tex.offset.x : null }), frame: (t) => { simTime = t; running = false; }, eval: () => lastEval, A: () => A, gap: () => { const v = new THREE.Vector3(); A.device.tip(v); const bb = new THREE.Box3().setFromObject(A.g.holder); return { top: bb.max.y - v.y, dx: Math.hypot((bb.min.x + bb.max.x) / 2 - v.x, (bb.min.z + bb.max.z) / 2 - v.z), want: v.toArray().map(Math.round) }; }, build: () => { build(); renderPanels(); } };
+  window.__sim = { open, S, belts: () => ({ src: A.src.tex ? A.src.tex.offset.x : A.src.rollers && A.src.rollers[0] ? A.src.rollers[0].rotation.y : null, tgt: A.tgt.tex ? A.tgt.tex.offset.x : null }), frame: (t) => { cyc = t / cycleLen(); running = false; }, eval: () => lastEval, A: () => A, gap: () => { const v = new THREE.Vector3(); A.device.tip(v); const bb = new THREE.Box3().setFromObject(A.g.holder); return { top: bb.max.y - v.y, dx: Math.hypot((bb.min.x + bb.max.x) / 2 - v.x, (bb.min.z + bb.max.z) / 2 - v.z), want: v.toArray().map(Math.round) }; }, build: () => { build(); renderPanels(); } };
 }

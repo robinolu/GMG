@@ -11,7 +11,7 @@ export const GERAETE = {
 
 export function kennzahlen(s2) {
   const d = GERAETE[s2.modul];
-  const speed = Math.max(10, Number(s2.speed) || 50) / 100;
+  const speed = Math.max(10, Number(s2.speed) || 70) / 100;
   let takt = d.takt * Math.pow(1 / speed, 0.8) + (Number(s2.hub) || 0.3) * 0.8;
   if (Number(s2.dreh)) takt += 0.3;
   takt = Math.max(0.4, takt);
