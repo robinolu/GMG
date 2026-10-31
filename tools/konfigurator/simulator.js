@@ -857,7 +857,7 @@ export function initSimulator(K) {
   }
 
   // ---------- Bedienoberfläche ----------
-  $('#sim-reset').addEventListener('click', () => { applyTemplate(); stop(); lastLayout = ''; build(); renderPanels(); });
+  $('#sim-reset').addEventListener('click', () => { applyTemplate(); lastLayout = ''; build(); renderPanels(); });
 
   function renderPanels() {
     const P = produkt();
@@ -902,7 +902,7 @@ export function initSimulator(K) {
       const m = b.dataset.modul;
       S[key] = { ...defaults(plist), ...(S[key] || {}), modul: m };
       if (key === 's2') S.tph = null;
-      stop(); build(); renderPanels();
+      build(); renderPanels();   // Lauf/Halt bleibt, wie es war
     }));
     box.querySelectorAll('[data-k]').forEach((el) => {
       const p = plist.find((x) => x.k === el.dataset.k);
@@ -949,7 +949,6 @@ export function initSimulator(K) {
 
   // ---------- Start / Stop ----------
   const runBtn = $('#sim-run');
-  function stop() { running = false; runBtn.textContent = 'Simulation starten'; }
   runBtn.addEventListener('click', () => {
     running = !running;
     runBtn.textContent = running ? 'Simulation anhalten' : 'Simulation fortsetzen';
