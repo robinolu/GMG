@@ -112,7 +112,7 @@ p { margin: 0 0 1em; }
 }
 .hero::after {
   content: ""; position: absolute; inset: 0;
-  background: linear-gradient(90deg, var(--bg-alt) 30%, rgba(244,246,248,.55) 65%, rgba(244,246,248,0));
+  background: linear-gradient(90deg, rgba(244,246,248,.9) 32%, rgba(244,246,248,.45) 52%, rgba(244,246,248,0) 72%);
   pointer-events: none;
 }
 .hero__inner { position: relative; z-index: 1; display: grid; grid-template-columns: 1.05fr 1fr; gap: 48px; align-items: center; padding: 88px 24px 96px; }
@@ -518,9 +518,9 @@ button.kfg__card { font: inherit; text-align: left; cursor: pointer; width: 100%
 .hero__bg { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
 .hero__bg-layer { position: absolute; inset: -10% 0; transform: translate3d(0, var(--py, 0px), 0); will-change: transform; }
 .hero__bg-layer img { position: absolute; height: auto; transform: translate(-50%, 0) rotate(var(--rot)); animation: heroFloat var(--dur) ease-in-out var(--del) infinite alternate; }
-.hero__bg-layer--far img { opacity: .16; filter: grayscale(1) blur(2.5px); }
-.hero__bg-layer--mid img { opacity: .26; filter: grayscale(.7) blur(1px); }
-.hero__bg-layer--near img { opacity: .42; filter: grayscale(.3) drop-shadow(0 18px 24px rgba(16,24,40,.18)); }
+.hero__bg-layer--far img { opacity: .3; filter: grayscale(.8) blur(1.5px); }
+.hero__bg-layer--mid img { opacity: .5; filter: grayscale(.4) blur(.4px); }
+.hero__bg-layer--near img { opacity: .75; filter: drop-shadow(0 18px 24px rgba(16,24,40,.22)); }
 @keyframes heroFloat {
   from { transform: translate(-50%, 0) rotate(var(--rot)); }
   to { transform: translate(calc(-50% + 18px), -26px) rotate(calc(var(--rot) + 6deg)); }
@@ -575,12 +575,13 @@ button.kfg__card { font: inherit; text-align: left; cursor: pointer; width: 100%
 }
 @media (max-width: 860px) {
   .kunden { grid-template-columns: repeat(2, 1fr); }
-  .hero__bg-layer--near img { opacity: .25; }
+  .hero__bg-layer--near img { opacity: .45; }
 }
 @media (max-width: 520px) {
   .procs, .branchen { grid-template-columns: 1fr; }
 }
 /* heller Schein hinter dem Roboter, damit er sich vom Greifer-Hintergrund abhebt */
 .hero__visual { position: relative; }
-.hero__visual::before { content: ""; position: absolute; inset: -6% -10%; background: radial-gradient(closest-side, rgba(244,246,248,.97) 55%, rgba(244,246,248,0)); pointer-events: none; }
+.hero__visual::before { content: ""; position: absolute; inset: -6% -10%; background: radial-gradient(closest-side, rgba(244,246,248,.9) 45%, rgba(244,246,248,0)); pointer-events: none; }
 .hero3d, .hero3d__note { position: relative; }
+.hero3d__note { width: fit-content; margin-inline: auto; padding: 2px 8px; border-radius: 4px; background: rgba(244,246,248,.85); }
