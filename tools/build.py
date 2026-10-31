@@ -410,7 +410,7 @@ def build_home():
     <div>
       <span class="eyebrow">Über 25 Jahre Erfahrung · Made in Soest</span>
       <h1>GMG entwickelt die Greifer <span>für die nächste Roboter-Generation.</span></h1>
-      <p class="lead">Wir entwickeln, fertigen und vertreiben ausschließlich Greifer: technische Hände für Roboter, Maschinen und Anlagen. Modular aufgebaut, und wo nichts von der Stange passt, als Sonderanfertigung.</p>
+      <p class="lead">Wir entwickeln, fertigen und vertreiben ausschließlich Greifer: technische Hände für Roboter, Maschinen und Anlagen. Modular aufgebaut oder individuelle Sonderanfertigungen.</p>
       <div class="btn-row">
         <a class="btn btn--primary" href="kontakt/index.html">Greiferlösung anfragen {icon('arrow')}</a>
         <a class="btn btn--ghost" href="konfigurator/index.html">{icon('cube')}Greifer im Konfigurator testen</a>
@@ -445,7 +445,7 @@ def build_home():
   <div class="wrap">
     <div class="section__head">
       <span class="eyebrow">Greifer nach Prozess</span>
-      <h2>Was soll Ihr Greifer tun?</h2>
+      <h2>Fertige Lösungen oder Sonderanfertigung</h2>
       <p class="lead">Wählen Sie nach Ihrer Aufgabe, nicht nach Typenbezeichnung. Zu jedem Prozess zeigen wir die passenden Baureihen.</p>
     </div>
     {process_cards(r)}
@@ -571,7 +571,7 @@ def build_overview():
   <p class="lead">Neun Produktfamilien mit über 20 Baureihen: Greifer für Roboter, Maschinen und Handhabungsgeräte, modular aufgebaut und auf Wunsch kundenspezifisch.</p>
 </div></section>
 <section class="section"><div class="wrap">
-  <div class="section__head"><span class="eyebrow">Nach Prozess</span><h2>Was soll Ihr Greifer tun?</h2></div>
+  <div class="section__head"><span class="eyebrow">Nach Prozess</span><h2>Fertige Lösungen oder Sonderanfertigung</h2></div>
   {process_cards(r)}
 </div></section>
 <section class="section section--alt"><div class="wrap">
