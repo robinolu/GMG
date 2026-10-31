@@ -299,6 +299,32 @@ def build_home():
   </div>
 </section>
 
+<section class="section promo3d">
+  <div class="wrap">
+    <div class="section__head">
+      <span class="eyebrow">Neu: Greifer in 3D testen</span>
+      <h2>Ihr Teil, unser Greifer, Ihre Anlage</h2>
+      <p class="lead">Laden Sie Ihr Teil, legen Sie fest, wo der Greifer zufasst, und sehen Sie ihn danach in einer kleinen Anlage arbeiten. Direkt im Browser, ohne Anmeldung.</p>
+    </div>
+    <div class="promo3d__grid">
+      <a class="promo3d__card" href="konfigurator/index.html">
+        <div class="promo3d__img"><img src="assets/img/teaser-kfg.webp" alt="Greifer-Konfigurator: Greifer fasst ein Teil" width="960" height="600" loading="lazy"></div>
+        <div class="promo3d__body"><span class="promo3d__step">1</span><div>
+          <h3>Greifer-Konfigurator</h3>
+          <p>STEP- oder STL-Datei laden oder Grundform wählen. Dann Greifer auswählen und festlegen, wo er greift: von außen oder von innen, in welcher Höhe und an welcher Stelle. Ihre Datei bleibt auf Ihrem Rechner.</p>
+          <span class="card__more">Konfigurator öffnen {icon('arrow')}</span></div></div>
+      </a>
+      <a class="promo3d__card" href="konfigurator/index.html#simulator">
+        <div class="promo3d__img"><img src="assets/img/teaser-sim.webp" alt="Anlagen-Simulator: Delta-Roboter setzt Backwaren in Schalen" width="960" height="600" loading="lazy"></div>
+        <div class="promo3d__body"><span class="promo3d__step">2</span><div>
+          <h3>Anlagen-Simulator</h3>
+          <p>Ihr Teil und Ihr Greifer laufen in einer kleinen Anlage: Förderband, Palette oder Presse, dazu Roboter, Delta-Roboter oder Linearportal. Geschwindigkeit, Hubhöhe und Drehung stellen Sie selbst ein.</p>
+          <span class="card__more">Simulator ansehen {icon('arrow')}</span></div></div>
+      </a>
+    </div>
+  </div>
+</section>
+
 <section class="facts">
   <div class="wrap facts__grid">
     <div class="fact"><div class="fact__value">1992</div><div class="fact__label">gegründet in Soest</div></div>
@@ -551,6 +577,7 @@ def configurator_block(r):
       </div>
       <button type="button" class="btn btn--ghost btn--xs kfg__center" id="kfg-zentrieren">⌖ Greifer über dem Teil zentrieren</button>
       <p id="kfg-status" class="kfg__status is-info" role="status">Teil wird geladen …</p>
+      <p class="kfg__small muted kfg__simnote">Diese Greifposition (innen oder außen, Höhe und Lage) übernimmt der <a href="#simulator">Simulator</a> weiter unten.</p>
       <a id="kfg-anfrage" class="btn btn--primary" href="mailto:{MAIL}">Anfrage mit diesem Teil {icon('arrow')}</a>
       </div>
     </div>
@@ -564,13 +591,9 @@ def simulator_block():
   <div class="section__head">
     <span class="eyebrow">Greifer-Simulator</span>
     <h2>Ihr Greifer in Ihrer Anlage</h2>
-    <p class="lead">Stellen Sie aus drei Stationen eine kleine Anlage zusammen: wie das Produkt ankommt, welches Gerät den Greifer führt und wohin das Produkt geht. Der Greifer aus dem Konfigurator wird übernommen.</p>
+    <p class="lead">Ihr Teil und Ihr Greifer aus dem Konfigurator in einer kleinen Anlage: wie das Produkt ankommt, welches Gerät den Greifer führt und wohin das Produkt geht. Die Greifposition, die Sie oben einstellen, übernimmt der Simulator.</p>
   </div>
-  <div class="sim__intro">
-    <button type="button" class="btn btn--primary" id="sim-open">{icon('cube')}Anlage aufbauen</button>
-    <span class="muted">Am besten am Computer.</span>
-  </div>
-  <div class="sim" hidden>
+  <div class="sim">
     <div class="sim__bar">
       <div class="sim__gripper"><span class="muted">Greifer</span> <strong id="sim-greifer">–</strong></div>
       <label class="sim__tpl"><span class="muted">Vorlage</span>

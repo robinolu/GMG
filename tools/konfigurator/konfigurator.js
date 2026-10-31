@@ -19,6 +19,7 @@ const $ = (s) => root.querySelector(s);
 const MAX_BYTES = 100 * 1024 * 1024;   // darüber wird es im Browser zäh (Speicher, Rechenzeit)
 const SLOW_BYTES = 25 * 1024 * 1024;
 const partListeners = [];   // Simulator: wird benachrichtigt, wenn sich das Teil ändert
+let lastGrip = null;        // zuletzt eingestellte Greifposition (für den Simulator)
 const fmt = (v, d = 0) => v.toLocaleString('de-DE', { maximumFractionDigits: d, minimumFractionDigits: d });
 
 // ---------- Szene ----------
@@ -470,6 +471,7 @@ function update() {
     } else state = v >= 0.99 ? 'leer' : 'offen';
   }
   A.set(phi);
+  lastGrip = { x: A.root.position.x, y: A.root.position.y, z: A.root.position.z, t: phi, state, inside };
   const depth = s.y - A.root.position.y;   // wie weit die Backen-/Fingerspitzen unter der Oberkante sind
   A.paint(state);
   const what = inside ? `an den Innenwänden (Innenmaß ${fmt(facts.grip)} mm)` : `am Teil (Greifbreite ${fmt(facts.grip)} mm)`;
@@ -760,7 +762,7 @@ initSimulator({
   grippers: () => GRIPPERS,
   select: async (id) => { await selectGripper(id); suggest(); },
   restore: () => { A.set(0); if (part) update(); },
-  part: () => part && facts ? { geo: part.geometry, size: facts.s.clone(), mass: facts.mass, soft: facts.soft, label: partLabel, grip: facts.grip, inside: mode === 'innen' } : null,
+  part: () => part && facts ? { geo: part.geometry, size: facts.s.clone(), mass: facts.mass, soft: facts.soft, label: partLabel, grip: facts.grip, inside: mode === 'innen', pose: lastGrip } : null,
   onPart: (f) => partListeners.push(f),
 });
 window.__kfg = { sample, update, setMode, selectGripper, gripper: () => A.id, move: (x, z) => { $('#kfg-x').value = x; $('#kfg-z').value = z; update(); }, set: (h, z) => { $('#kfg-hoehe').value = h; $('#kfg-zu').value = z; update(); }, status: () => $('#kfg-status').textContent };

@@ -393,6 +393,7 @@ const P3 = [
 const defaults = (list) => Object.fromEntries(list.map((p) => [p.k, p.def]));
 
 const VORLAGEN = {
+  eigen: { name: 'Ihr Teil: Förderband → Roboter → KLT', produkt: 'eigen', s1: { modul: 'gurtband' }, s2: { modul: 'roboter6', speed: 70 }, s3: { modul: 'klt', lagenbild: '2x1', lagen: 2 } },
   reifenPal: { name: 'Automobil: Reifen palettieren', produkt: 'reifen', s1: { modul: 'rollenbahn' }, s2: { modul: 'roboter6', speed: 70 }, s3: { modul: 'palette', lagenbild: '2x1', lagen: 3 } },
   presse: { name: 'Automobil: Presse entnehmen', produkt: 'blech', s1: { modul: 'presse' }, s2: { modul: 'portal', speed: 80 }, s3: { modul: 'klt', lagenbild: '1x1', lagen: 4, zwischen: 'ja' } },
   reifenDepal: { name: 'Automobil: Reifen depalettieren', produkt: 'reifen', s1: { modul: 'palette' }, s2: { modul: 'roboter6', speed: 70 }, s3: { modul: 'rollenbahn' } },
@@ -614,6 +615,7 @@ export function initSimulator(K) {
   // ---------- Ablauf ----------
   let running = false, t0 = 0, simTime = 0;
   const tcp = new THREE.Vector3(), flange = new THREE.Vector3(), tmp = new THREE.Vector3();
+  const off0 = new THREE.Vector3(), pP = new THREE.Vector3(), pQ = new THREE.Vector3(), pN = new THREE.Vector3();
   const cycleLen = () => clamp(lastEval ? lastEval.takt : 3, 2.2, 7);
   // Lage des n-ten Produkts an der Quelle (Unterkante Mitte) und seine Drehung
   function sourcePos(n, k, a) {
@@ -669,28 +671,38 @@ export function initSimulator(K) {
     const n = Math.floor(time / T), p = time / T - n;
     const hub = Number(S.s2.hub) * 1000;
     const r = g.range;
-    const inside = !(r.aussen && P.griff >= r.aussen[0] && P.griff <= r.aussen[1]) && r.innen && P.innen && P.innen >= r.innen[0] && P.innen <= r.innen[1];
+    let inside = !(r.aussen && P.griff >= r.aussen[0] && P.griff <= r.aussen[1]) && r.innen && P.innen && P.innen >= r.innen[0] && P.innen <= r.innen[1];
     const w = inside ? P.innen : P.griff, rr = inside ? r.innen : r.aussen;
-    const tGrip = clamp((rr[1] - w) / Math.max(1, rr[1] - rr[0]), 0, 1);
-    const tFree = inside ? 1 : 0;
+    let tGrip = clamp((rr[1] - w) / Math.max(1, rr[1] - rr[0]), 0, 1);
     const depth = Math.min(P.size[1] * 0.6, g.reach * 0.8);
+    // Greifpunkt relativ zum Teil (Mitte Unterkante). Eigenes Teil: genau die Greifposition aus dem
+    // Konfigurator (Höhe, links/rechts, vorne/hinten, innen/außen, Schließgrad)
+    off0.set(0, P.size[1] - depth, 0);
+    const pose = P.typ === 'eigen' && K.part() ? K.part().pose : null;
+    if (pose) {
+      off0.set(pose.x, pose.y, pose.z).multiplyScalar(P.f);
+      inside = pose.inside;
+      if (pose.state === 'gegriffen') tGrip = pose.t;
+      else if (inside && r.innen) tGrip = clamp((r.innen[1] - P.griff) / Math.max(1, r.innen[1] - r.innen[0]), 0, 1);
+    }
+    const off = (yaw, v) => v.copy(off0).applyAxisAngle(UP, yaw);
     // Phasen eines Zyklus
     const down1 = seg(p, 0, 0.14), close = seg(p, 0.14, 0.24), up1 = seg(p, 0.24, 0.38), move = seg(p, 0.38, 0.62);
     const down2 = seg(p, 0.62, 0.75), open = seg(p, 0.76, 0.84), up2 = seg(p, 0.84, 0.9), back = seg(p, 0.9, 1);
     const sp = sourcePos(n, 0, 0) || { p: new THREE.Vector3(A.pickX, src.top, A.zLine), yaw: 0 };
     const tp = targetPos(n);
     const dreh = THREE.MathUtils.degToRad(Number(S.s2.dreh) || 0);
-    const yPick = sp.p.y + P.size[1] - depth, yPlace = tp.p.y + P.size[1] - depth;
-    const safe = Math.max(yPick, yPlace) + hub;
+    const PP = off(sp.yaw, pP).add(sp.p), QQ = off(dreh, pQ).add(tp.p);   // Greifpunkt an Aufnahme und Ablage
+    const safe = Math.max(PP.y, QQ.y) + hub;
     let x, y, z, yaw;
-    if (p < 0.38) { x = sp.p.x; z = sp.p.z; y = THREE.MathUtils.lerp(yPick + hub, yPick, down1) + (safe - yPick) * up1; yaw = sp.yaw; }
-    else if (p < 0.62) { x = THREE.MathUtils.lerp(sp.p.x, tp.p.x, move); z = THREE.MathUtils.lerp(sp.p.z, tp.p.z, move); y = safe + Math.sin(move * Math.PI) * 80; yaw = THREE.MathUtils.lerp(sp.yaw, dreh, move); }
-    else if (p < 0.9) { x = tp.p.x; z = tp.p.z; y = THREE.MathUtils.lerp(safe, yPlace, down2) + (yPlace + hub - yPlace) * up2; yaw = dreh; }
+    if (p < 0.38) { x = PP.x; z = PP.z; y = THREE.MathUtils.lerp(PP.y + hub, PP.y, down1) + (safe - PP.y) * up1; yaw = sp.yaw; }
+    else if (p < 0.62) { x = THREE.MathUtils.lerp(PP.x, QQ.x, move); z = THREE.MathUtils.lerp(PP.z, QQ.z, move); y = safe + Math.sin(move * Math.PI) * 80; yaw = THREE.MathUtils.lerp(sp.yaw, dreh, move); }
+    else if (p < 0.9) { x = QQ.x; z = QQ.z; y = THREE.MathUtils.lerp(safe, QQ.y, down2) + hub * up2; yaw = dreh; }
     else {
       const nx = sourcePos(n + 1, 0, 0) || sp;
-      x = THREE.MathUtils.lerp(tp.p.x, nx.p.x, back); z = THREE.MathUtils.lerp(tp.p.z, nx.p.z, back);
-      const yN = nx.p.y + P.size[1] - depth;
-      y = THREE.MathUtils.lerp(yPlace + hub, yN + hub, back) + Math.sin(back * Math.PI) * 80; yaw = THREE.MathUtils.lerp(dreh, nx.yaw, back);
+      const NN = off(nx.yaw, pN).add(nx.p);
+      x = THREE.MathUtils.lerp(QQ.x, NN.x, back); z = THREE.MathUtils.lerp(QQ.z, NN.z, back);
+      y = THREE.MathUtils.lerp(QQ.y + hub, NN.y + hub, back) + Math.sin(back * Math.PI) * 80; yaw = THREE.MathUtils.lerp(dreh, nx.yaw, back);
     }
     g.set(inside ? 1 - (1 - tGrip) * close * (1 - open) : tGrip * close * (1 - open));
     flange.set(x, y + g.length, z);
@@ -712,7 +724,7 @@ export function initSimulator(K) {
     // gegriffenes Teil
     if (held) {
       const m = A.take(used++); m.visible = true;
-      m.position.set(x, y - (P.size[1] - depth), z); m.rotation.set(0, yaw, 0);
+      m.position.copy(tcp).sub(off(yaw, pN)); m.rotation.set(0, yaw, 0);
     }
     // abgelegte Teile am Ziel
     const vT = speedOf(S.s3.band) * 260;   // mm/s auf dem Band
@@ -909,8 +921,6 @@ export function initSimulator(K) {
   }
 
   async function open(state) {
-    ui.hidden = false;
-    $('#sim-open').closest('.sim__intro').hidden = true;
     if (!started) { started = true; init3d(); loop(); }
     if (state) {
       if (state.g && state.g !== K.active().id) await K.select(state.g);
@@ -921,14 +931,17 @@ export function initSimulator(K) {
     G = null; build(); renderPanels();
     running = true; runBtn.textContent = 'Simulation anhalten'; t0 = performance.now(); simTime = 0;
   }
-  $('#sim-open').addEventListener('click', () => open());
-  K.onPart(() => { if (started && S.produkt.typ === 'eigen') { build(); renderPanels(); } else if (started) renderPanels(); });
-  // geteilter Link: #sim=…
+  // Neues oder geändertes Teil im Konfigurator: der Simulator arbeitet damit weiter
+  K.onPart(() => { if (!started) return; if (S.produkt.typ !== 'eigen') S.produkt = { typ: 'eigen', groesse: 100 }; build(); renderPanels(); });
+  // Simulator ist immer offen; die 3D-Szene startet, sobald der Abschnitt in die Nähe kommt
+  let shared = null;
   if (location.hash.startsWith('#sim=')) {
-    try {
-      const st = JSON.parse(decodeURIComponent(escape(atob(location.hash.slice(5)))));
-      open(st).then(() => sec.scrollIntoView());
-    } catch (e) { /* ungültiger Link: normal starten */ }
+    try { shared = JSON.parse(decodeURIComponent(escape(atob(location.hash.slice(5))))); } catch (e) { /* ungültiger Link: normal starten */ }
+  }
+  if (shared) open(shared).then(() => sec.scrollIntoView());
+  else {
+    const io = new IntersectionObserver((e) => { if (e[0].isIntersecting) { io.disconnect(); open(); } }, { rootMargin: '600px 0px' });
+    io.observe(sec);
   }
   window.__sim = { open, S, frame: (t) => { simTime = t; running = false; }, eval: () => lastEval, A: () => A, gap: () => { const v = new THREE.Vector3(); A.device.tip(v); const bb = new THREE.Box3().setFromObject(A.g.holder); return { top: bb.max.y - v.y, dx: Math.hypot((bb.min.x + bb.max.x) / 2 - v.x, (bb.min.z + bb.max.z) / 2 - v.z), want: v.toArray().map(Math.round) }; }, build: () => { build(); renderPanels(); } };
 }
