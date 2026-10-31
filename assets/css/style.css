@@ -72,17 +72,29 @@ p { margin: 0 0 1em; }
   position: sticky; top: 0; z-index: 50; background: rgba(255,255,255,.96);
   backdrop-filter: blur(8px); border-bottom: 1px solid var(--line);
 }
-.header__inner { display: flex; align-items: center; gap: 32px; height: var(--header-h); }
+.header__inner { display: flex; align-items: center; gap: 24px; height: var(--header-h); }
 .brand { display: flex; align-items: center; gap: 12px; color: var(--ink); text-decoration: none !important; }
 .brand img { height: 46px; width: auto; }
 .brand__text { display: flex; flex-direction: column; line-height: 1.15; }
 .brand__name { font-weight: 800; font-size: 1.15rem; letter-spacing: .02em; }
-.brand__tag { font-size: .75rem; color: var(--muted); }
+.brand__tag { font-size: .75rem; color: var(--muted); white-space: nowrap; }
 .nav { display: flex; gap: 4px; margin-left: auto; }
 .nav a {
-  color: var(--ink); font-weight: 550; padding: 8px 14px; border-radius: 6px; font-size: .97rem;
+  color: var(--ink); font-weight: 550; padding: 8px 12px; border-radius: 6px; font-size: .97rem; white-space: nowrap;
 }
 .nav a:hover, .nav a[aria-current="page"] { background: var(--blue-soft); color: var(--blue); text-decoration: none; }
+.nav a.nav__kfg { display: inline-flex; align-items: center; gap: 6px; color: var(--blue); box-shadow: inset 0 0 0 1px #b9d0e8; }
+.nav a.nav__kfg svg { width: 16px; height: 16px; }
+.header.is-open .nav a.nav__kfg { box-shadow: none; }
+/* Produktseiten: Hinweis auf den Konfigurator */
+.kfg-banner { display: flex; align-items: center; gap: 14px; margin: 0 0 22px; padding: 12px 16px; border: 1px solid #b9d0e8; border-radius: var(--radius);
+  background: #fff; color: var(--ink); max-width: 760px; transition: border-color .15s, box-shadow .15s; }
+.kfg-banner:hover { border-color: var(--blue); box-shadow: var(--shadow); text-decoration: none; }
+.kfg-banner > svg { width: 28px; height: 28px; color: var(--blue); flex: none; }
+.kfg-banner > span:first-of-type { display: flex; flex-direction: column; line-height: 1.35; }
+.kfg-banner > span:first-of-type span { color: var(--muted); font-size: .92rem; }
+.kfg-banner__go { margin-left: auto; display: inline-flex; align-items: center; gap: 6px; color: var(--blue); font-weight: 650; white-space: nowrap; }
+.kfg-banner__go svg { width: 16px; height: 16px; }
 .header__cta { display: flex; align-items: center; gap: 16px; }
 .header__phone { color: var(--ink); font-weight: 650; display: flex; align-items: center; gap: 8px; white-space: nowrap; }
 .header__phone svg { width: 18px; height: 18px; color: var(--blue); }
@@ -254,8 +266,6 @@ td a { font-weight: 600; }
 /* Konfigurator */
 .btn--xs { padding: 6px 12px; font-size: .85rem; border-width: 1px; }
 .kfg-section { padding-top: 40px; }
-.kfg-home { padding-bottom: 40px; }
-.kfg-home .kfg-section { padding: 0; }
 .kfg { display: grid; grid-template-columns: 400px 1fr; gap: 28px; align-items: start; }
 .kfg__panel { display: grid; gap: 14px; }
 .kfg__step { display: flex; align-items: center; gap: 10px; margin-top: 10px; }
@@ -344,6 +354,9 @@ button.kfg__card { font: inherit; text-align: left; cursor: pointer; width: 100%
 /* Mobile contact bar */
 .mobilebar { display: none; }
 
+@media (max-width: 1240px) {
+  .header__phone { display: none; }
+}
 @media (max-width: 1080px) {
   .nav, .header__phone { display: none; }
   .burger { display: block; }
@@ -381,11 +394,12 @@ button.kfg__card { font: inherit; text-align: left; cursor: pointer; width: 100%
   .header__cta .btn { display: none; }
   .brand__tag { display: none; }
   .mobilebar {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 8px; position: fixed; left: 0; right: 0; bottom: 0; z-index: 60;
+    display: grid; grid-template-columns: 1fr 1.25fr 1fr; gap: 6px; position: fixed; left: 0; right: 0; bottom: 0; z-index: 60;
     padding: 8px 12px calc(8px + env(safe-area-inset-bottom)); background: #fff; border-top: 1px solid var(--line);
     box-shadow: 0 -4px 16px rgba(16,24,40,.08);
   }
-  .mobilebar .btn { padding: 12px; }
+  .mobilebar .btn { padding: 12px 6px; font-size: .9rem; gap: 6px; }
+  .kfg-banner__go { display: none; }
   .card__img { height: 200px; }
   .gallery__main { height: 300px; }
 }

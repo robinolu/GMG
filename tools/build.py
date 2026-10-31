@@ -102,7 +102,9 @@ def page(path, title, body, active="", description="", scripts=()):
            ("Über GMG", "ueber-gmg/index.html", "ueber"),
            ("Downloads", "downloads/index.html", "downloads"), ("Kontakt", "kontakt/index.html", "kontakt")]
     nav_html = "".join(
-        f'<a href="{r}{href}"{" aria-current=\"page\"" if key == active else ""}>{label}</a>' for label, href, key in nav)
+        f'<a href="{r}{href}"{" class=\"nav__kfg\"" if key == "konfigurator" else ""}'
+        f'{" aria-current=\"page\"" if key == active else ""}>{icon("cube") if key == "konfigurator" else ""}{label}</a>'
+        for label, href, key in nav)
     fam_links = "".join(f'<li><a href="{r}produkte/{f["slug"]}/index.html">{e(f["name"])}</a></li>' for f in FAMILIES[:9])
     full_title = f"{title} | GMG – Modulare Greifersysteme" if title else "GMG – Modulare Greifersysteme aus Soest"
     desc = description or ('GMG – Gesellschaft für modulare Greifersysteme mbH, Soest. Der Erfinder der modularen '
@@ -178,6 +180,7 @@ def page(path, title, body, active="", description="", scripts=()):
 </footer>
 <div class="mobilebar">
   <a class="btn btn--ghost" href="{PHONE_LINK}">{icon('phone')}Anrufen</a>
+  <a class="btn btn--ghost" href="{r}konfigurator/index.html">{icon('cube')}Konfigurator</a>
   <a class="btn btn--primary" href="{r}kontakt/index.html">{icon('mail')}Anfrage</a>
 </div>
 <script src="{r}assets/js/main.js?v={BUILD}"></script>{"".join(f'<script src="{r}{s}?v={BUILD}" defer></script>' for s in scripts)}
@@ -200,6 +203,13 @@ def crumbs(r, items):
         parts.append('<span aria-hidden="true">/</span>')
         parts.append(f'<a href="{r}{href}">{e(label)}</a>' if href else f"<span>{e(label)}</span>")
     return f'<nav class="crumbs" aria-label="Brotkrumen">{"".join(parts)}</nav>'
+
+
+def kfg_banner(r):
+    """Hinweis oben auf den Produktseiten: direkt zum Konfigurator."""
+    return (f'<a class="kfg-banner" href="{r}konfigurator/index.html">{icon("cube")}'
+            '<span><strong>Greifer-Konfigurator</strong><span>Ihr Teil als STEP/STL laden und den Greifer direkt in 3D testen</span></span>'
+            f'<span class="kfg-banner__go">Jetzt testen {icon("arrow")}</span></a>')
 
 
 def rel(path):
@@ -271,7 +281,7 @@ def build_home():
       <p class="lead">GMG entwickelt, fertigt und vertreibt ausschließlich Greifer: technische Hände für Roboter, Maschinen und Anlagen. Form, Fingeranzahl, Bewegung und Fingerlänge wählen Sie frei.</p>
       <div class="btn-row">
         <a class="btn btn--primary" href="kontakt/index.html">Greiferlösung anfragen {icon('arrow')}</a>
-        <a class="btn btn--ghost" href="{PHONE_LINK}">{icon('phone')}{PHONE}</a>
+        <a class="btn btn--ghost" href="konfigurator/index.html">{icon('cube')}Greifer im Konfigurator testen</a>
       </div>
       <div class="hero__meta">
         <span>{icon('check')}International patentiert</span>
@@ -287,15 +297,6 @@ def build_home():
       <p class="hero3d__note">3D-Testszene mit Testgreifer Tentra T3 – wird durch einen GMG-Greifer ersetzt</p>
     </div>
   </div>
-</section>
-
-<section class="section kfg-home" id="konfigurator">
-  <div class="wrap"><div class="section__head">
-    <span class="eyebrow">Greifer testen</span>
-    <h2>Ihr Teil, unser Greifer – direkt hier ausprobieren</h2>
-    <p class="lead">Laden Sie Ihr Teil als STEP- oder STL-Datei oder wählen Sie eine Grundform. Dann den Greifer verfahren, absenken und zugreifen lassen. Die Datei bleibt auf Ihrem Rechner.</p>
-  </div></div>
-  {configurator_block(r)}
 </section>
 
 <section class="facts">
@@ -354,7 +355,7 @@ def build_home():
 
 {cta_band(r)}
 """
-    page("", "", body, scripts=["assets/js/roboter3d.js", "assets/js/konfigurator.js"])
+    page("", "", body, scripts=["assets/js/roboter3d.js"])
 
 
 def build_overview():
@@ -368,6 +369,7 @@ def build_overview():
     body = f"""
 <section class="page-head"><div class="wrap">
   {crumbs(r, [('Produkte', None)])}
+  {kfg_banner(r)}
   <h1>Produkte</h1>
   <p class="lead">Neun Produktfamilien mit über 20 Baureihen: Greifer für Roboter, Maschinen und Handhabungsgeräte, modular aufgebaut und auf Wunsch kundenspezifisch.</p>
 </div></section>
@@ -392,6 +394,7 @@ def build_family(fam):
     body = f"""
 <section class="page-head"><div class="wrap">
   {crumbs(r, [('Produkte', 'produkte/index.html'), (fam['name'], None)])}
+  {kfg_banner(r)}
   <h1>{e(fam['name'])}</h1>
   <p class="lead">{e(fam['teaser'])}</p>
 </div></section>
@@ -441,6 +444,7 @@ def build_product(fam, p, path):
     body = f"""
 <section class="page-head"><div class="wrap">
   {crumbs(r, trail)}
+  {kfg_banner(r)}
   <span class="eyebrow">{e(fam['name'])}</span>
   <h1>{e(code)} <span class="muted" style="font-weight:500">{e(desc)}</span></h1>
 </div></section>
