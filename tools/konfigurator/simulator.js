@@ -10,10 +10,7 @@ import { EffectComposer } from 'three/examples/jsm/postprocessing/EffectComposer
 import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { GTAOPass } from 'three/examples/jsm/postprocessing/GTAOPass.js';
 import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
-import { WebGLPathTracer, GradientEquirectTexture } from 'three-gpu-pathtracer';
 import { kennzahlen } from './sim-regeln.js';
-// three r160 kennt scene.environmentRotation/backgroundRotation noch nicht; der Path-Tracer liest sie
-if (!('environmentRotation' in THREE.Scene.prototype)) Object.assign(THREE.Scene.prototype, { environmentRotation: new THREE.Euler(), backgroundRotation: new THREE.Euler() });
 
 const fmt = (v, d = 0) => v.toLocaleString('de-DE', { maximumFractionDigits: d, minimumFractionDigits: d });
 const clamp = THREE.MathUtils.clamp;
@@ -457,7 +454,6 @@ export function initSimulator(K) {
   let A = null;     // aktuelle Anlage
   function build() {
     if (!renderer) return;
-    if (foto) fotoStop();
     if (world) {
       if (G) world.remove(G.holder);            // Greifer-Geometrie gehört dem Konfigurator
       scene.remove(world); world.traverse((o) => { if (o.geometry && !o.userData.keepGeo) o.geometry.dispose(); });
@@ -786,68 +782,9 @@ export function initSimulator(K) {
     return url;
   }
 
-  // ---------- Fotorealistische Aufnahme ----------
-  // Path-Tracing (three-gpu-pathtracer): Licht wird physikalisch korrekt verfolgt – weiche Schatten,
-  // Spiegelungen auf Lack und Stahl, indirektes Licht. Die Simulation hält dafür an; Drehen der Kamera
-  // rendert neu, ein zweiter Klick kehrt zur Simulation zurück.
-  const FOTO_SAMPLES = 600;
-  let foto = null;          // { pt, wasRunning, env, bg, save }
-  const fotoBtn = $('#sim-foto'), fotoStatus = $('#sim-foto-status'), fotoSave = $('#sim-foto-save');
-  async function fotoStart() {
-    if (foto || !renderer) return;
-    foto = { wasRunning: running, env: scene.environment, bg: scene.background, envI: scene.environmentIntensity, fog: scene.fog };
-    running = false;
-    fotoBtn.textContent = '✕ Zurück zur Simulation';
-    fotoStatus.hidden = false; fotoStatus.textContent = 'Szene wird vorbereitet …';
-    // Hallenlicht als Umgebung: heller Himmel oben, grauer Boden unten (equirektangular, wie der Path-Tracer es braucht)
-    const sky = new GradientEquirectTexture(); sky.topColor.set(0xffffff); sky.bottomColor.set(0x7c828a); sky.update();
-    scene.environment = sky; scene.background = new THREE.Color(0xd9dde2); scene.environmentIntensity = 0.9; scene.fog = null;
-    // Bodenschilder gehören zur Bedienung, nicht ins Foto
-    foto.hidden = world.children.filter((o) => o.renderOrder === 10 && o.visible);
-    foto.hidden.forEach((o) => { o.visible = false; });
-    const pt = new WebGLPathTracer(renderer);
-    pt.tiles.set(2, 2); pt.bounces = 6; pt.filterGlossyFactor = 0.4; pt.minSamples = 1; pt.renderDelay = 0; pt.fadeDuration = 300;
-    pt.dynamicLowRes = true;
-    foto.pt = pt; foto.sky = sky;
-    await new Promise((r) => setTimeout(r, 60));   // kurz warten, damit die Statusanzeige erscheint
-    if (!foto) return;
-    try { pt.setScene(scene, camera); } catch (e) { console.error('Foto-Modus:', e); fotoStop(); fotoStatus.hidden = false; fotoStatus.textContent = 'Foto-Modus wird von dieser Grafik nicht unterstützt'; return; }
-    if (!foto) return;
-    foto.ready = true;
-    controls.addEventListener('change', fotoCam);
-    renderPanels();
-  }
-  function fotoCam() { if (foto && foto.ready) foto.pt.updateCamera(); }
-  function fotoStop() {
-    if (!foto) return;
-    controls.removeEventListener('change', fotoCam);
-    scene.environment = foto.env; scene.background = foto.bg; scene.environmentIntensity = foto.envI; scene.fog = foto.fog;
-    try { if (foto.pt) foto.pt.dispose(); } catch (e) { /* halb aufgebauter Path-Tracer */ }
-    if (foto.sky) foto.sky.dispose();
-    (foto.hidden || []).forEach((o) => { o.visible = true; });
-    running = foto.wasRunning;
-    foto = null;
-    fotoBtn.textContent = '📷 Foto rendern'; fotoStatus.hidden = true; fotoSave.hidden = true;
-    resize(); renderPanels();
-  }
-  fotoBtn.addEventListener('click', () => { if (foto) fotoStop(); else fotoStart(); });
-  fotoSave.addEventListener('click', () => { if (foto) foto.save = true; });
-  function fotoFrame() {
-    const pt = foto.pt;
-    if (pt.samples < FOTO_SAMPLES) pt.renderSample();
-    const n = Math.floor(pt.samples);
-    fotoStatus.textContent = n < FOTO_SAMPLES ? `Rendert … ${Math.round(n / FOTO_SAMPLES * 100)} %` : 'Fertig gerendert';
-    fotoSave.hidden = n < 30;
-    if (foto.save) {   // direkt nach dem Zeichnen auslesen, solange der Bildpuffer noch gefüllt ist
-      foto.save = false;
-      const a = document.createElement('a'); a.download = 'GMG-Greifer-Simulation.png'; a.href = canvas.toDataURL('image/png'); a.click();
-    }
-  }
-
   // ---------- Start / Stop ----------
   const runBtn = $('#sim-run');
   runBtn.addEventListener('click', () => {
-    if (foto) fotoStop();
     running = !running;
     runBtn.textContent = running ? 'Simulation anhalten' : 'Simulation fortsetzen';
     renderPanels();
@@ -867,7 +804,6 @@ export function initSimulator(K) {
     if (!visible || ui.hidden) return;
     if (G && G.id !== K.active().id && K.active().ready) { G = null; build(); renderPanels(); }
     const now = performance.now(), dt = Math.min(0.1, (now - (lastNow || now)) / 1000); lastNow = now;
-    if (foto) { controls.update(); if (foto.ready) fotoFrame(); return; }
     if (running) cyc += dt / cycleLen();
     frameState(cyc);
     controls.update();

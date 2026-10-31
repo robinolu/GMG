@@ -510,7 +510,7 @@ def build_home():
         <div class="promo3d__img"><img src="assets/img/teaser-sim.webp" alt="Anlagen-Simulator: Industrieroboter setzt ein Teil von einem Förderband auf das andere" width="960" height="600" loading="lazy"></div>
         <div class="promo3d__body"><span class="promo3d__step">2</span><div>
           <h3>Anlagen-Simulator</h3>
-          <p>Ein fest montierter Industrieroboter setzt Ihr Teil mit Ihrem Greifer von einem Förderband auf das andere, fotorealistisch in einer Halle. Geschwindigkeit, Hubhöhe und Drehung stellen Sie selbst ein.</p>
+          <p>Ein fest montierter Industrieroboter setzt Ihr Teil mit Ihrem Greifer von einem Förderband auf das andere, realistisch in einer Werkhalle dargestellt. Geschwindigkeit, Hubhöhe und Drehung stellen Sie selbst ein.</p>
           <span class="card__more">Simulator ansehen {icon('arrow')}</span></div></div>
       </a>
     </div>
@@ -784,11 +784,6 @@ def simulator_block():
       <div class="sim__view"><canvas></canvas>
         <div class="sim__hint">Ziehen zum Drehen · Scrollen zum Zoomen · Band oder Roboter anklicken zum Einstellen</div>
         <div class="sim__empty" id="sim-empty" hidden>Wählen Sie links für jede Station ein Modul.</div>
-        <div class="sim__foto">
-          <button type="button" class="btn btn--white btn--xs" id="sim-foto">📷 Foto rendern</button>
-          <span class="sim__foto-status" id="sim-foto-status" hidden></span>
-          <button type="button" class="btn btn--white btn--xs" id="sim-foto-save" hidden>Bild speichern</button>
-        </div>
       </div>
       <div class="sim__params" id="sim-params"></div>
     </div>
