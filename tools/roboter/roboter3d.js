@@ -323,7 +323,7 @@ const fromScroll = () => {
     aim();
     const dodging = dodge.distanceTo(dodgeGoal) > 0.5;
     if (Math.abs(progress - current) < 1e-4 && !dirty && !dodging) return;
-    dodge.lerp(dodgeGoal, 0.1);
+    dodge.lerp(dodgeGoal, 0.035);                 // träge: weicht langsam aus und kommt langsam zurück
     current += (progress - current) * (still ? 1 : 0.12);
     update(current);
     renderer.render(scene, camera);
