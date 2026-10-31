@@ -103,24 +103,22 @@ function productGeometry(typ, K) {
 // ---------------------------------------------------------------- Module
 // Quelle/Ziel: Aufnahme- bzw. Ablagepunkt liegt im lokalen Ursprung, Förderrichtung +X.
 // Jedes Modul: group, top (Höhe der Auflage), half (halbe Länge in X für den Abstand zum Gerät), flow (Band ja/nein)
-const FLOW = ['gurtband', 'modulband', 'rollenbahn'];
+const FLOW = ['foerderband'];
 const QUELLEN = {
-  gurtband: { name: 'Gurtförderband', info: 'Allround, Kartons, Teile' },
-  modulband: { name: 'Modulband (weiß)', info: 'Lebensmittel, hygienisch' },
-  rollenbahn: { name: 'Rollenbahn', info: 'Reifen, KLT, Kisten' },
+  foerderband: { name: 'Förderband', info: 'Teile kommen auf dem Gurt an' },
   palette: { name: 'Palette (Depalettieren)', info: 'Gestapelte Ware, Reifen' },
   klt: { name: 'Kiste / KLT', info: 'Griff in die Kiste' },
   presse: { name: 'Maschine: Presse', info: 'Blechteile, Automobil' },
 };
 const ZIELE = {
-  gurtband: { name: 'Gurtförderband', info: 'Abtransport' },
-  modulband: { name: 'Modulband (weiß)', info: 'Lebensmittel, hygienisch' },
-  rollenbahn: { name: 'Rollenbahn', info: 'Reifen, KLT, Kisten' },
+  foerderband: { name: 'Förderband', info: 'Abtransport' },
   palette: { name: 'Palettierung mit Lagenbild', info: 'Reifen, Kartons' },
-  schalenband: { name: 'Band mit Schalen', info: 'Lebensmittel' },
+  schalenband: { name: 'Förderband mit Schalen', info: 'Lebensmittel' },
   karton: { name: 'Karton / Verpackung', info: 'Endverpackung' },
   klt: { name: 'KLT auf Rollenbahn', info: 'Kleinteile, Blechteile' },
 };
+// ältere Links und Vorlagen: frühere Bandarten → Förderband
+const ALT = { gurtband: 'foerderband', modulband: 'foerderband', rollenbahn: 'foerderband', cobot: 'linear' };
 const GERAETE_UI = {
   roboter6: { name: '6-Achs-Industrieroboter', info: 'Schwere Teile, Palettieren' },
   linear: { name: 'Roboter auf Linearachse', info: '7. Achse für lange Wege' },
@@ -128,27 +126,54 @@ const GERAETE_UI = {
   portal: { name: 'Linearportal', info: 'Maschinenentnahme, große Wege' },
 };
 
-function conveyor(kind, len, width, dir, opts = {}) {
+// Gurtförderband wie aus dem Katalog: Aluprofil-Rahmen, Antriebs- und Umlenktrommel, Getriebemotor an der
+// Abgabeseite, Stützen mit Stellfüßen und Querstreben, Seitenführung. hell = weißer Lebensmittel-Gurt.
+function conveyor(hell, len, width, dir) {
   // Band von x = 0 bis x = len·dir (dir = −1: Quelle, endet am Ursprung; +1: Ziel, beginnt dort)
   const g = new THREE.Group();
-  const top = kind === 'rollenbahn' ? 700 : kind === 'modulband' ? 820 : 800;
+  const top = 800, R = 48;
   const x0 = dir < 0 ? -len + 150 : -150, x1 = dir < 0 ? 150 : len - 150, L = x1 - x0, cx = (x0 + x1) / 2;
-  const w = width;
-  let tex = null;
-  const rollers = [];
-  if (kind === 'rollenbahn') {
-    for (let x = x0 + 40; x < x1; x += 90) { const r = cyl(28, w, M.rolle, 16); r.rotation.x = Math.PI / 2; r.position.set(x, top - 28, 0); g.add(r); rollers.push(r); }
-  } else {
-    tex = kind === 'modulband' ? stripes('#f4f6f8', '#d9dee3', 6) : stripes('#3a4047', '#2c3137', 3);
-    tex.repeat.set(L / 300, 1);
-    const belt = box(L, 12, w, new THREE.MeshStandardMaterial({ map: tex, roughness: kind === 'modulband' ? 0.6 : 0.85 }), cx, top - 6, 0);
-    g.add(belt);
-    g.add(box(L, 60, w - 20, M.dunkel, cx, top - 45, 0));
+  const w = width, zs = w / 2 + 22;
+  const tex = hell ? stripes('#f3f5f7', '#dde2e7', 8) : stripes('#2f3439', '#262a2e', 4);
+  tex.repeat.set(L / 300, 1);
+  const beltMat = new THREE.MeshStandardMaterial({ map: tex, roughness: hell ? 0.55 : 0.8 });
+  const beltSide = new THREE.MeshStandardMaterial({ color: hell ? 0xe9edf0 : 0x2a2e33, roughness: 0.8 });
+  // Gurt oben und Rücklauf unten, an den Enden um die Trommeln gelegt
+  g.add(box(L, 6, w, beltMat, cx, top - 3, 0), box(L, 6, w - 10, beltSide, cx, top - 2 * R - 3, 0));
+  for (const x of [x0, x1]) {
+    const drum = cyl(R, w, beltSide, 32); drum.rotation.x = Math.PI / 2; drum.position.set(x, top - R, 0); g.add(drum);
+    const axle = cyl(14, w + 70, M.stahl, 16); axle.rotation.x = Math.PI / 2; axle.position.set(x, top - R, 0); g.add(axle);
   }
-  for (const s of [-1, 1]) g.add(box(L, 70, 30, M.alu, cx, top - 25, s * (w / 2 + 15)));
-  for (let x = x0 + 100; x < x1; x += Math.max(600, L / 3)) for (const s of [-1, 1]) g.add(box(40, top - 60, 40, M.alu, x, (top - 60) / 2, s * (w / 2 + 10)));
-  g.add(box(40, top - 60, 40, M.alu, x1 - 60, (top - 60) / 2, w / 2 + 10), box(40, top - 60, 40, M.alu, x1 - 60, (top - 60) / 2, -w / 2 - 10));
-  return { group: g, top, tex, rollers, half: 150, flow: true, len: L, dir, x0, x1 };
+  // Rahmen: Aluprofile mit Nut, Endplatten an den Trommeln
+  for (const s of [-1, 1]) {
+    g.add(box(L, 90, 40, M.alu, cx, top - 55, s * zs));
+    g.add(box(L, 8, 6, M.dunkel, cx, top - 55, s * (zs + 20)));                   // Nut im Profil
+    for (const x of [x0, x1]) g.add(box(150, 140, 12, M.alu, x, top - R, s * (zs + 12)));
+    // Seitenführung auf kleinen Haltern
+    g.add(box(L - 120, 14, 14, M.stahl, cx, top + 45, s * (w / 2 - 6)));
+    for (let x = x0 + 150; x < x1 - 100; x += 600) g.add(box(10, 50, 10, M.stahl, x, top + 22, s * (w / 2 - 6)));
+  }
+  // Stützen mit Stellfüßen, Querstreben, Längsstrebe unten
+  const legH = top - 100;
+  const legs = [x0 + 120];
+  for (let x = x0 + 120 + 1100; x < x1 - 300; x += 1100) legs.push(x);
+  legs.push(x1 - 120);
+  for (const x of legs) {
+    for (const s of [-1, 1]) {
+      g.add(box(50, legH - 40, 50, M.alu, x, 40 + (legH - 40) / 2, s * zs));
+      const foot = cyl(38, 14, M.dunkel, 20); foot.position.set(x, 7, s * zs); g.add(foot);
+      const rod = cyl(9, 30, M.stahl, 10); rod.position.set(x, 28, s * zs); g.add(rod);
+    }
+    g.add(box(40, 40, 2 * zs, M.alu, x, 260, 0), box(40, 40, 2 * zs, M.alu, x, legH - 30, 0));
+  }
+  for (const s of [-1, 1]) g.add(box(legs[legs.length - 1] - legs[0], 40, 40, M.alu, (legs[0] + legs[legs.length - 1]) / 2, 260, s * zs));
+  // Getriebemotor an der Abgabeseite (Quelle: am Roboter, Ziel: am fernen Ende), hinten am Rahmen
+  const xm = dir < 0 ? x1 : x1;
+  const gear = box(170, 170, 120, M.presse, xm, top - R, -(zs + 90)); g.add(gear);
+  const motor = cyl(70, 260, M.presse, 24); motor.rotation.x = Math.PI / 2; motor.position.set(xm, top - R - 130, -(zs + 110)); g.add(motor);
+  const fan = cyl(72, 30, M.dunkel, 24); fan.rotation.x = Math.PI / 2; fan.position.set(xm, top - R - 130, -(zs + 255)); g.add(fan);
+  g.add(box(60, 140, 60, M.presse, xm, top - R - 60, -(zs + 90)));
+  return { group: g, top, tex, half: 150, flow: true, len: L, dir, x0, x1 };
 }
 
 function pallet() {
@@ -170,7 +195,7 @@ function pattern(spec, size) {
 
 function buildSource(id, P, p1) {
   const size = P.size;
-  if (FLOW.includes(id)) return conveyor(id, 2400, Math.max(420, size[2] + 160), -1);
+  if (FLOW.includes(id)) return conveyor(false, 2400, Math.max(420, size[2] + 160), -1);
   if (id === 'palette') {
     const g = pallet();
     const pat = pattern(size[0] > 500 ? '2x1' : size[0] > 300 ? '2x2' : '3x2', size);
@@ -202,14 +227,14 @@ function buildSource(id, P, p1) {
 function buildTarget(id, P, p3, dreh = 0) {
   // bei 90° gedrehter Ablage liegen Länge und Breite vertauscht im Behälter
   const size = Number(dreh) % 180 === 90 ? [P.size[2], P.size[1], P.size[0]] : P.size;
-  if (FLOW.includes(id)) return conveyor(id, 2400, Math.max(420, size[2] + 160), 1);
+  if (FLOW.includes(id)) return conveyor(false, 2400, Math.max(420, size[2] + 160), 1);
   const pat = pattern(p3.lagenbild, size);
   pat.d += 20; pat.w += 20;   // etwas Luft zur Behälterwand
   if (id === 'palette') {
     return { group: pallet(), top: 144, half: Math.max(650, pat.w / 2 + 50), flow: false, stack: { pat, lagen: Number(p3.lagen) || 1, zwischen: p3.zwischen === 'ja' } };
   }
   if (id === 'schalenband') {
-    const c = conveyor('modulband', 2400, Math.max(420, pat.d + 120), 1);
+    const c = conveyor(true, 2400, Math.max(420, pat.d + 120), 1);
     c.trays = { pat, w: pat.w + 40, d: pat.d + 40 };
     return c;
   }
@@ -388,14 +413,9 @@ const P3 = [
 ];
 const defaults = (list) => Object.fromEntries(list.map((p) => [p.k, p.def]));
 
-const VORLAGEN = {
-  eigen: { name: 'Ihr Teil: Förderband → Roboter → KLT', produkt: 'eigen', s1: { modul: 'gurtband' }, s2: { modul: 'roboter6', speed: 70 }, s3: { modul: 'klt', lagenbild: '2x1', lagen: 2 } },
-  reifenPal: { name: 'Automobil: Reifen palettieren', produkt: 'reifen', s1: { modul: 'rollenbahn' }, s2: { modul: 'roboter6', speed: 70 }, s3: { modul: 'palette', lagenbild: '2x1', lagen: 3 } },
-  presse: { name: 'Automobil: Presse entnehmen', produkt: 'blech', s1: { modul: 'presse' }, s2: { modul: 'portal', speed: 80 }, s3: { modul: 'klt', lagenbild: '1x1', lagen: 4, zwischen: 'ja' } },
-  reifenDepal: { name: 'Automobil: Reifen depalettieren', produkt: 'reifen', s1: { modul: 'palette' }, s2: { modul: 'roboter6', speed: 70 }, s3: { modul: 'rollenbahn' } },
-  backwaren: { name: 'Lebensmittel: Backwaren in Schalen', produkt: 'broetchen', s1: { modul: 'modulband', lage: 'chaotisch' }, s2: { modul: 'delta', speed: 90 }, s3: { modul: 'schalenband', lagenbild: '2x2' } },
-  kartons: { name: 'Lebensmittel: Kartons palettieren', produkt: 'karton', s1: { modul: 'gurtband' }, s2: { modul: 'linear', speed: 60, dreh: '90' }, s3: { modul: 'palette', lagenbild: '2x2', lagen: 3 } },
-};
+// Ausgangsanlage: Ihr Teil kommt auf dem Förderband, der ABB-Roboter auf der Linearachse dreht es um 90°
+// und palettiert es im Lagenbild 2 × 2 mit Zwischenlagen
+const VORLAGE = { produkt: 'eigen', s1: { modul: 'foerderband' }, s2: { modul: 'linear', speed: 70, dreh: '90' }, s3: { modul: 'palette', lagenbild: '2x2', lagen: 3, zwischen: 'ja' } };
 
 // ---------------------------------------------------------------- Simulator
 export function initSimulator(K) {
@@ -407,18 +427,14 @@ export function initSimulator(K) {
   let started = false;
 
   // Zustand
-  const S = { vorlage: 'reifenPal', produkt: { typ: 'reifen', groesse: 100 }, s1: null, s2: null, s3: null };
+  const S = { produkt: { typ: 'eigen', groesse: 100 }, s1: null, s2: null, s3: null };
   let aktiv = 'produkt';
-  function applyTemplate(key) {
-    S.vorlage = key; S.tph = null;
-    if (key === 'leer') {
-      S.produkt = { typ: 'eigen', groesse: 100 }; S.s1 = S.s2 = S.s3 = null; aktiv = 'produkt';
-    } else {
-      const t = VORLAGEN[key];
-      S.produkt = { typ: t.produkt, groesse: 100 };
-      S.s1 = { ...defaults(P1), ...t.s1 }; S.s2 = { ...defaults(P2), ...t.s2 }; S.s3 = { ...defaults(P3), ...t.s3 };
-      aktiv = 'slot1';
-    }
+  function applyTemplate() {
+    const t = VORLAGE;
+    S.tph = null;
+    S.produkt = { typ: t.produkt, groesse: 100 };
+    S.s1 = { ...defaults(P1), ...t.s1 }; S.s2 = { ...defaults(P2), ...t.s2 }; S.s3 = { ...defaults(P3), ...t.s3 };
+    aktiv = 'slot1';
   }
 
   // Produktdaten (Größe skaliert, eigenes Teil aus dem Konfigurator)
@@ -530,17 +546,26 @@ export function initSimulator(K) {
     const tgt = S.s3 ? buildTarget(S.s3.modul, P, S.s3, S.s2 ? S.s2.dreh : 0) : null;
     const pickX = -(gap + (src ? src.half : 300)), placeX = gap + (tgt ? tgt.half : 300);
     let layer = 0;
-    const zone = (x, w, d, color, slot, label) => {
+    const zone = (x, w, d, color, slot) => {
       layer++;
       const m = new THREE.Mesh(new THREE.PlaneGeometry(w, d), new THREE.MeshStandardMaterial({ color, transparent: true, opacity: 0.32, roughness: 1,
         depthWrite: false, polygonOffset: true, polygonOffsetFactor: -2 * layer, polygonOffsetUnits: -2 * layer }));
       m.rotation.x = -Math.PI / 2; m.position.set(x, 2 + layer * 2, zLine); m.renderOrder = layer; m.userData.slot = slot; world.add(m);
-      if (!label) return;
-      const cv = document.createElement('canvas'); cv.width = 512; cv.height = 96;
-      const c = cv.getContext('2d'); c.fillStyle = '#ffffff'; c.font = '600 44px system-ui, sans-serif'; c.fillText(label, 24, 64);
-      const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace;
-      const lab = new THREE.Mesh(new THREE.PlaneGeometry(1000, 190), new THREE.MeshBasicMaterial({ map: t, transparent: true, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -10, polygonOffsetUnits: -10 }));
-      lab.rotation.x = -Math.PI / 2; lab.position.set(x - w / 2 + 520, 12, zLine + d / 2 - 120); lab.renderOrder = 10; lab.userData.slot = slot; world.add(lab);
+    };
+    // Schild vor der Zone: Nummer, Zone und gewähltes Modul, gut lesbar auf dem Boden
+    const sign = (x, z, w, num, color, title, sub, slot) => {
+      const cv = document.createElement('canvas'); cv.width = 1024; cv.height = 220;
+      const c = cv.getContext('2d');
+      c.fillStyle = '#ffffff'; c.beginPath(); c.roundRect(4, 4, 1016, 212, 36); c.fill();
+      c.lineWidth = 6; c.strokeStyle = color; c.stroke();
+      c.fillStyle = color; c.beginPath(); c.arc(112, 110, 70, 0, Math.PI * 2); c.fill();
+      c.fillStyle = '#ffffff'; c.font = '700 86px system-ui, sans-serif'; c.textAlign = 'center'; c.fillText(num, 112, 140);
+      c.textAlign = 'left'; c.fillStyle = '#13171d'; c.font = '700 70px system-ui, sans-serif'; c.fillText(title, 214, 98);
+      c.fillStyle = '#3a424d'; c.font = '600 54px system-ui, sans-serif'; c.fillText(sub, 216, 174);
+      const t = new THREE.CanvasTexture(cv); t.colorSpace = THREE.SRGBColorSpace; t.anisotropy = 8;
+      const h = w * 220 / 1024;
+      const lab = new THREE.Mesh(new THREE.PlaneGeometry(w, h), new THREE.MeshBasicMaterial({ map: t, transparent: true, toneMapped: false, depthWrite: false, polygonOffset: true, polygonOffsetFactor: -10, polygonOffsetUnits: -10 }));
+      lab.rotation.x = -Math.PI / 2; lab.position.set(x, 12, z + h / 2); lab.renderOrder = 10; lab.userData.slot = slot; world.add(lab);
     };
     // Bodenflächen lückenlos nebeneinander, ohne Überlappung: Ankunft | Gerät | Weitertransport
     const srcW = src && src.flow ? 2700 : (src ? src.half * 2 + 200 : 1400);
@@ -548,9 +573,16 @@ export function initSimulator(K) {
     const sC = pickX - (src && src.flow ? 1050 : 0), tC = placeX + (tgt && tgt.flow ? 1050 : 0);
     let sL = sC - srcW / 2, sR = sC + srcW / 2, tL = tC - tgtW / 2, tR = tC + tgtW / 2;
     if (sR > tL) { const mid = (pickX + placeX) / 2; sR = Math.min(sR, mid); tL = Math.max(tL, mid); }
-    zone((sL + sR) / 2, sR - sL, 1900, 0x2f7fc1, 'slot1', '1  Ankunft');
-    zone((tL + tR) / 2, tR - tL, 1900, 0x2e9d5b, 'slot3', '3  Weitertransport');
-    if (tL - sR > 10) zone((sR + tL) / 2, tL - sR, 1900, 0xe07b1f, 'slot2', '');
+    const D = 1900, front = zLine + D / 2 + 120;
+    zone((sL + sR) / 2, sR - sL, D, 0x2f7fc1, 'slot1');
+    zone((tL + tR) / 2, tR - tL, D, 0x2e9d5b, 'slot3');
+    if (tL - sR > 10) zone((sR + tL) / 2, tL - sR, D, 0xe07b1f, 'slot2');
+    // drei Schilder in einer Reihe vor den Zonen, mit Mindestabstand, damit sie sich nicht überdecken
+    const sw = 1700, gapS = sw + 150, mid = (sR + tL) / 2;
+    const xs = [Math.min((sL + sR) / 2, mid - gapS), mid, Math.max((tL + tR) / 2, mid + gapS)];
+    sign(xs[0], front, sw, '1', '#2f7fc1', 'Ankunft', src ? QUELLEN[S.s1.modul].name : 'Modul wählen', 'slot1');
+    sign(xs[1], front, sw, '2', '#e07b1f', 'Hebevorgang', S.s2 ? GERAETE_UI[S.s2.modul].name : 'Gerät wählen', 'slot2');
+    sign(xs[2], front, sw, '3', '#2e9d5b', 'Weitertransport', tgt ? ZIELE[S.s3.modul].name : 'Modul wählen', 'slot3');
     if (src) { src.group.position.set(pickX, 0, zLine); src.group.userData.slot = 'slot1'; world.add(src.group); }
     if (tgt) { tgt.group.position.set(placeX, 0, zLine); tgt.group.userData.slot = 'slot3'; world.add(tgt.group); }
     // Erkennung an der Quelle
@@ -609,7 +641,7 @@ export function initSimulator(K) {
   let lastLayout = '';
   function fitCamera() {
     const bb = new THREE.Box3();
-    world.children.forEach((o) => { if (o.isMesh && o.geometry.type === 'PlaneGeometry') return; bb.expandByObject(o); });
+    world.children.forEach((o) => { if (o.isMesh && o.geometry.type === 'PlaneGeometry' && o.renderOrder < 10) return; bb.expandByObject(o); });
     if (bb.isEmpty()) return;
     const c = bb.getCenter(new THREE.Vector3()), sz = bb.getSize(new THREE.Vector3());
     const r = Math.max(sz.x, sz.z * 1.3, sz.y * 1.6) * 0.52 / Math.tan(THREE.MathUtils.degToRad(camera.fov / 2)) / Math.max(1, camera.aspect * 0.75);
@@ -825,9 +857,7 @@ export function initSimulator(K) {
   }
 
   // ---------- Bedienoberfläche ----------
-  const tpl = $('#sim-vorlage');
-  tpl.innerHTML = Object.entries(VORLAGEN).map(([k, v]) => `<option value="${k}">${v.name}</option>`).join('') + '<option value="leer">Leer starten</option>';
-  tpl.addEventListener('change', () => { applyTemplate(tpl.value); stop(); build(); renderPanels(); });
+  $('#sim-reset').addEventListener('click', () => { applyTemplate(); stop(); lastLayout = ''; build(); renderPanels(); });
 
   function renderPanels() {
     const P = produkt();
@@ -842,7 +872,7 @@ export function initSimulator(K) {
     $('#sim-slots').querySelectorAll('[data-slot]').forEach((b) => b.addEventListener('click', () => { aktiv = b.dataset.slot; renderPanels(); }));
     $('#sim-greifer').textContent = `${K.active().code} (aus dem Konfigurator)`;
     // Schrittanzeige
-    const step = !S.vorlage ? 0 : running ? 3 : (S.s1 && S.s2 && S.s3) ? 2 : 1;
+    const step = running ? 2 : (S.s1 && S.s2 && S.s3) ? 1 : 0;
     $('#sim-steps').querySelectorAll('li').forEach((li, i) => { li.className = i < step ? 'is-done' : i === step ? 'is-current' : ''; });
     // Parameter des aktiven Slots
     const box = $('#sim-params');
@@ -950,10 +980,9 @@ export function initSimulator(K) {
     if (!started) { started = true; await loadABB(K.base || ''); init3d(); loop(); }
     if (state) {
       if (state.g && state.g !== K.active().id) await K.select(state.g);
-      for (const k of ['vorlage', 'produkt', 's1', 's2', 's3', 'tph']) if (k in state) S[k] = state[k];
-      if (S.s2 && !GERAETE_UI[S.s2.modul]) S.s2.modul = 'linear';   // ältere Links (Cobot)
-      tpl.value = S.vorlage;
-    } else applyTemplate(tpl.value);
+      for (const k of ['produkt', 's1', 's2', 's3', 'tph']) if (k in state) S[k] = state[k];
+      for (const k of ['s1', 's2', 's3']) if (S[k] && ALT[S[k].modul]) S[k].modul = ALT[S[k].modul];
+    } else applyTemplate();
     G = null; build(); renderPanels();
     running = true; runBtn.textContent = 'Simulation anhalten'; cyc = 0;
   }

@@ -176,6 +176,7 @@ def page(path, title, body, active="", description="", scripts=()):
     <div class="footer__bottom">
       <span>© GMG Gesellschaft für modulare Greifersysteme mbH</span>
       <span><a href="{r}impressum/index.html">Impressum</a> · <a href="{r}datenschutz/index.html">Datenschutz</a></span>
+      <span class="footer__credit">Designed by Robin Olu</span>
     </div>
   </div>
 </footer>
@@ -600,9 +601,8 @@ def simulator_block():
   <div class="sim">
     <div class="sim__bar">
       <div class="sim__gripper"><span class="muted">Greifer</span> <strong id="sim-greifer">–</strong></div>
-      <label class="sim__tpl"><span class="muted">Vorlage</span>
-        <select id="sim-vorlage"></select></label>
-      <ol class="sim__steps" id="sim-steps"><li>Vorlage</li><li>Produkt</li><li>Stationen</li><li>Simulation</li></ol>
+      <button type="button" class="btn btn--ghost btn--xs" id="sim-reset">↺ Ausgangsanlage</button>
+      <ol class="sim__steps" id="sim-steps"><li>Produkt</li><li>Stationen</li><li>Simulation</li></ol>
     </div>
     <div class="sim__body">
       <div class="sim__slots" id="sim-slots"></div>
