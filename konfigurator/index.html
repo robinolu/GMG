@@ -20,7 +20,7 @@
 <link rel="icon" href="../assets/logo/gmg-3d-dezent-bildmarke.svg" type="image/svg+xml">
 <link rel="alternate icon" href="../assets/img/gmg-bildmarke-3d.png" type="image/png">
 <link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
-<link rel="stylesheet" href="../assets/css/style.css?v=202610311652">
+<link rel="stylesheet" href="../assets/css/style.css?v=202610312317">
 </head>
 <body>
 <div class="draft">Entwurf / Testversion der neuen GMG-Webseite. Inhalte von gmg-system.com übernommen.</div>
@@ -131,19 +131,24 @@
   <div class="section__head">
     <span class="eyebrow">Greifer-Simulator</span>
     <h2>Ihr Greifer in Ihrer Anlage</h2>
-    <p class="lead">Ihr Teil und Ihr Greifer aus dem Konfigurator in einer kleinen Anlage: wie das Produkt ankommt, welches Gerät den Greifer führt und wohin das Produkt geht. Die Greifposition, die Sie oben einstellen, übernimmt der Simulator.</p>
+    <p class="lead">Ihr Teil und Ihr Greifer aus dem Konfigurator in einer realistischen Anlage: Ein fest montierter Industrieroboter setzt das Teil vom Zuführband auf das Abführband, auf Wunsch gedreht. Die Greifposition, die Sie oben einstellen, übernimmt der Simulator.</p>
   </div>
   <div class="sim">
     <div class="sim__bar">
       <div class="sim__gripper"><span class="muted">Greifer</span> <strong id="sim-greifer">–</strong></div>
       <button type="button" class="btn btn--ghost btn--xs" id="sim-reset">↺ Ausgangsanlage</button>
-      <ol class="sim__steps" id="sim-steps"><li>Produkt</li><li>Stationen</li><li>Simulation</li></ol>
+      <ol class="sim__steps" id="sim-steps"><li>Produkt</li><li>Anlage</li><li>Simulation</li></ol>
     </div>
     <div class="sim__body">
       <div class="sim__slots" id="sim-slots"></div>
       <div class="sim__view"><canvas></canvas>
-        <div class="sim__hint">Ziehen zum Drehen · Scrollen zum Zoomen · Station anklicken zum Ändern</div>
+        <div class="sim__hint">Ziehen zum Drehen · Scrollen zum Zoomen · Band oder Roboter anklicken zum Einstellen</div>
         <div class="sim__empty" id="sim-empty" hidden>Wählen Sie links für jede Station ein Modul.</div>
+        <div class="sim__foto">
+          <button type="button" class="btn btn--white btn--xs" id="sim-foto">📷 Foto rendern</button>
+          <span class="sim__foto-status" id="sim-foto-status" hidden></span>
+          <button type="button" class="btn btn--white btn--xs" id="sim-foto-save" hidden>Bild speichern</button>
+        </div>
       </div>
       <div class="sim__params" id="sim-params"></div>
     </div>
@@ -220,6 +225,6 @@
   <a class="btn btn--ghost" href="../konfigurator/index.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 16V8a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7l7 4a2 2 0 0 0 2 0l7-4a2 2 0 0 0 1-1.7z"/><path d="M3.3 7 12 12l8.7-5M12 22V12"/></svg>Konfigurator</a>
   <a class="btn btn--primary" href="../kontakt/index.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>Anfrage</a>
 </div>
-<script src="../assets/js/main.js?v=202610311652"></script><script src="../assets/js/konfigurator.js?v=202610311652" defer></script>
+<script src="../assets/js/main.js?v=202610312317"></script><script src="../assets/js/konfigurator.js?v=202610312317" defer></script>
 </body>
 </html>

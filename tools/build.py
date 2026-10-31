@@ -507,10 +507,10 @@ def build_home():
           <span class="card__more">Konfigurator öffnen {icon('arrow')}</span></div></div>
       </a>
       <a class="promo3d__card" href="konfigurator/index.html#simulator">
-        <div class="promo3d__img"><img src="assets/img/teaser-sim.webp" alt="Anlagen-Simulator: Delta-Roboter setzt Backwaren in Schalen" width="960" height="600" loading="lazy"></div>
+        <div class="promo3d__img"><img src="assets/img/teaser-sim.webp" alt="Anlagen-Simulator: Industrieroboter setzt ein Teil von einem Förderband auf das andere" width="960" height="600" loading="lazy"></div>
         <div class="promo3d__body"><span class="promo3d__step">2</span><div>
           <h3>Anlagen-Simulator</h3>
-          <p>Ihr Teil und Ihr Greifer laufen in einer kleinen Anlage: Förderband, Palette oder Presse, dazu Roboter, Delta-Roboter oder Linearportal. Geschwindigkeit, Hubhöhe und Drehung stellen Sie selbst ein.</p>
+          <p>Ein fest montierter Industrieroboter setzt Ihr Teil mit Ihrem Greifer von einem Förderband auf das andere, fotorealistisch in einer Halle. Geschwindigkeit, Hubhöhe und Drehung stellen Sie selbst ein.</p>
           <span class="card__more">Simulator ansehen {icon('arrow')}</span></div></div>
       </a>
     </div>
@@ -766,24 +766,29 @@ def configurator_block(r):
 
 
 def simulator_block():
-    """Greifer-Simulator unter dem Konfigurator: Mini-Anlage aus drei Stationen, Logik in tools/konfigurator/simulator.js."""
+    """Greifer-Simulator unter dem Konfigurator: Roboter setzt das Teil von Band zu Band um, Logik in tools/konfigurator/simulator.js."""
     return f"""<section class="section section--alt sim-section" id="simulator" data-simulator data-mail="{MAIL}"><div class="wrap">
   <div class="section__head">
     <span class="eyebrow">Greifer-Simulator</span>
     <h2>Ihr Greifer in Ihrer Anlage</h2>
-    <p class="lead">Ihr Teil und Ihr Greifer aus dem Konfigurator in einer kleinen Anlage: wie das Produkt ankommt, welches Gerät den Greifer führt und wohin das Produkt geht. Die Greifposition, die Sie oben einstellen, übernimmt der Simulator.</p>
+    <p class="lead">Ihr Teil und Ihr Greifer aus dem Konfigurator in einer realistischen Anlage: Ein fest montierter Industrieroboter setzt das Teil vom Zuführband auf das Abführband, auf Wunsch gedreht. Die Greifposition, die Sie oben einstellen, übernimmt der Simulator.</p>
   </div>
   <div class="sim">
     <div class="sim__bar">
       <div class="sim__gripper"><span class="muted">Greifer</span> <strong id="sim-greifer">–</strong></div>
       <button type="button" class="btn btn--ghost btn--xs" id="sim-reset">↺ Ausgangsanlage</button>
-      <ol class="sim__steps" id="sim-steps"><li>Produkt</li><li>Stationen</li><li>Simulation</li></ol>
+      <ol class="sim__steps" id="sim-steps"><li>Produkt</li><li>Anlage</li><li>Simulation</li></ol>
     </div>
     <div class="sim__body">
       <div class="sim__slots" id="sim-slots"></div>
       <div class="sim__view"><canvas></canvas>
-        <div class="sim__hint">Ziehen zum Drehen · Scrollen zum Zoomen · Station anklicken zum Ändern</div>
+        <div class="sim__hint">Ziehen zum Drehen · Scrollen zum Zoomen · Band oder Roboter anklicken zum Einstellen</div>
         <div class="sim__empty" id="sim-empty" hidden>Wählen Sie links für jede Station ein Modul.</div>
+        <div class="sim__foto">
+          <button type="button" class="btn btn--white btn--xs" id="sim-foto">📷 Foto rendern</button>
+          <span class="sim__foto-status" id="sim-foto-status" hidden></span>
+          <button type="button" class="btn btn--white btn--xs" id="sim-foto-save" hidden>Bild speichern</button>
+        </div>
       </div>
       <div class="sim__params" id="sim-params"></div>
     </div>

@@ -603,3 +603,8 @@ button.kfg__card { font: inherit; text-align: left; cursor: pointer; width: 100%
 .hero3d, .hero3d__note { position: relative; }
 .hero3d__note { width: fit-content; margin-inline: auto; padding: 2px 8px; border-radius: 4px; background: rgba(244,246,248,.85); }
 .hero h1, .hero .lead, .hero__meta, .hero .eyebrow { text-shadow: 0 0 14px rgba(244,246,248,.95), 0 0 4px rgba(244,246,248,.9); }
+
+/* Simulator: fotorealistische Aufnahme (Path-Tracing) */
+.sim__foto { position: absolute; right: 12px; top: 12px; display: flex; gap: 8px; align-items: center; flex-wrap: wrap; justify-content: flex-end; }
+.sim__foto .btn { box-shadow: 0 2px 8px rgba(16,24,40,.15); }
+.sim__foto-status { font-size: .8rem; background: rgba(19,23,29,.82); color: #fff; padding: 5px 10px; border-radius: 999px; }
