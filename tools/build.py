@@ -568,7 +568,7 @@ def simulator_block():
   </div>
   <div class="sim__intro">
     <button type="button" class="btn btn--primary" id="sim-open">{icon('cube')}Anlage aufbauen</button>
-    <span class="muted">Am besten am Computer. Die Bewertung ist eine erste Einschätzung nach einfachen Regeln.</span>
+    <span class="muted">Am besten am Computer.</span>
   </div>
   <div class="sim" hidden>
     <div class="sim__bar">
@@ -587,10 +587,8 @@ def simulator_block():
     </div>
     <div class="sim__result">
       <button type="button" class="btn btn--primary" id="sim-run">Simulation starten</button>
-      <div class="sim__ampel" id="sim-ampel" aria-live="polite"><span></span><span></span><span></span></div>
-      <div class="sim__verdict"><strong id="sim-urteil">Noch nicht bewertet</strong><span id="sim-gruende" class="muted"></span></div>
-      <dl class="sim__kpi"><div><dt>Taktzeit</dt><dd id="sim-takt">–</dd></div><div><dt>Teile pro Stunde</dt><dd id="sim-stunde">–</dd></div></dl>
-      <p class="sim__tip" id="sim-tipp"></p>
+      <dl class="sim__kpi"><div><dt>Taktzeit (ca.)</dt><dd id="sim-takt">–</dd></div><div><dt>Teile pro Stunde (ca.)</dt><dd id="sim-stunde">–</dd></div></dl>
+      <p class="sim__note muted" id="sim-hinweis">Die Simulation zeigt den Ablauf. Ob und wie sicher ein Greifer Ihr Teil hält, klären wir gern persönlich.</p>
       <div class="sim__cta">
         <a class="btn btn--primary" id="sim-anfrage" href="mailto:{MAIL}">Angebot für diese Anlage anfragen {icon('arrow')}</a>
         <button type="button" class="btn btn--ghost" id="sim-teilen">Anlage teilen</button>

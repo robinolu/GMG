@@ -1,13 +1,12 @@
 // Greifer-Simulator: Der Kunde baut aus drei Stationen eine kleine Anlage (Ankunft, Hebevorgang,
 // Weitertransport) und sieht seinen Greifer aus dem Konfigurator mit seinem Produkt im Kreislauf.
-// Keine Physik: Ablauf als feste Animation, Bewertung nach Regeln (sim-regeln.js).
+// Keine Physik und keine Bewertung, ob der Greifer das Teil hält: der Simulator zeigt den Ablauf.
 // Einheit: Millimeter, Y nach oben. Produkte fließen in +X: Quelle links, Ziel rechts, Gerät dahinter.
 import * as THREE from 'three';
 import { OrbitControls } from 'three/examples/jsm/controls/OrbitControls.js';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
 import { mergeGeometries } from 'three/examples/jsm/utils/BufferGeometryUtils.js';
-import SPECS from '../../data/greifer-specs.json';
-import { bewerten, GERAETE } from './sim-regeln.js';
+import { kennzahlen } from './sim-regeln.js';
 
 const fmt = (v, d = 0) => v.toLocaleString('de-DE', { maximumFractionDigits: d, minimumFractionDigits: d });
 const clamp = THREE.MathUtils.clamp;
@@ -28,7 +27,6 @@ const M = {
   presse: new THREE.MeshStandardMaterial({ color: 0x4a6b8a, metalness: 0.3, roughness: 0.55 }),
   roboter: new THREE.MeshStandardMaterial({ color: 0xf1f2f4, roughness: 0.45 }),
   gelenk: new THREE.MeshStandardMaterial({ color: 0x0061aa, metalness: 0.3, roughness: 0.45 }),
-  cobot: new THREE.MeshStandardMaterial({ color: 0xfafbfc, roughness: 0.35 }),
   zaun: new THREE.MeshStandardMaterial({ color: 0xf2b230, roughness: 0.5 }),
   gitter: new THREE.MeshStandardMaterial({ color: 0x8a939c, transparent: true, opacity: 0.18, side: THREE.DoubleSide, depthWrite: false }),
   papier: new THREE.MeshStandardMaterial({ color: 0xe9dcc3, roughness: 0.9 }),
@@ -60,14 +58,14 @@ function stripes(c1, c2, n) {
 }
 
 // ---------------------------------------------------------------- Produkte
-// Größe in mm (x = Länge in Förderrichtung, y = Höhe, z = Greifbreite), Gewicht in kg
+// Größe in mm (x = Länge in Förderrichtung, y = Höhe, z = Greifbreite)
 const PRODUKTE = {
   eigen: { name: 'Ihr Teil aus dem Konfigurator', branche: '' },
-  reifen: { name: 'Pkw-Reifen', branche: 'Automobil', kg: 9, size: [632, 205, 632], innen: 406, weich: false, info: 'Gummi, formstabil' },
-  blech: { name: 'Blechteil', branche: 'Automobil', kg: 3, size: [600, 40, 400], weich: false, info: 'glatt, evtl. ölig' },
-  broetchen: { name: 'Brötchen / Backware', branche: 'Lebensmittel', kg: 0.06, size: [100, 55, 70], weich: true, info: 'weich, empfindlich' },
-  karton: { name: 'Karton / Verpackung', branche: 'beide', kg: 8, size: [400, 250, 300], weich: false, info: 'glatt, formstabil' },
-  schale: { name: 'Schale / Becher', branche: 'Lebensmittel', kg: 0.3, size: [180, 50, 130], innen: 124, weich: false, info: 'Kunststoff, leicht' },
+  reifen: { name: 'Pkw-Reifen', branche: 'Automobil', size: [632, 205, 632], innen: 406, info: 'Gummi, formstabil' },
+  blech: { name: 'Blechteil', branche: 'Automobil', size: [600, 40, 400], info: 'glatt, evtl. ölig' },
+  broetchen: { name: 'Brötchen / Backware', branche: 'Lebensmittel', size: [100, 55, 70], info: 'weich, empfindlich' },
+  karton: { name: 'Karton / Verpackung', branche: 'beide', size: [400, 250, 300], info: 'glatt, formstabil' },
+  schale: { name: 'Schale / Becher', branche: 'Lebensmittel', size: [180, 50, 130], innen: 124, info: 'Kunststoff, leicht' },
 };
 function productGeometry(typ, K) {
   if (typ === 'reifen') {
@@ -126,9 +124,9 @@ const ZIELE = {
 };
 const GERAETE_UI = {
   roboter6: { name: '6-Achs-Industrieroboter', info: 'Schwere Teile, Palettieren' },
+  linear: { name: 'Roboter auf Linearachse', info: '7. Achse für lange Wege' },
   delta: { name: 'Delta-Roboter', info: 'Sehr schnell, leichte Teile' },
   portal: { name: 'Linearportal', info: 'Maschinenentnahme, große Wege' },
-  cobot: { name: 'Cobot', info: 'Ohne Schutzzaun, neben Menschen' },
 };
 
 function conveyor(kind, len, width, dir, opts = {}) {
@@ -186,21 +184,27 @@ function buildSource(id, P, p1) {
     g.add(box(W, 8, D, M.klt, 0, 604, 0));
     return { group: g, top: 608, half: W / 2 + 60, flow: false, bin: { W, D } };
   }
-  // Presse: Teil liegt auf dem Werkzeug im Ursprung, der Stößel fährt zwischen den Teilen
+  // Presse links daneben; das fertige Teil wird auf einen Ablagetisch im Ursprung ausgegeben,
+  // dort greift das Gerät – so fährt nichts in die Maschine hinein
   const g = new THREE.Group();
   const W = Math.max(1100, size[0] + 500), D = Math.max(800, size[2] + 300);
-  g.add(box(W + 300, 900, D, M.presse, 0, 450, 0));
-  for (const s of [-1, 1]) g.add(box(260, 1500, D, M.presse, s * (W / 2 + 20), 1650, 0));
-  g.add(box(W + 300, 500, D, M.presse, 0, 2600, 0));
-  const ram = box(W - 60, 300, D - 80, M.stahl, 0, 1900, 0);
-  g.add(ram, box(W - 100, 60, D - 120, M.dunkel, 0, 930, 0));
-  return { group: g, top: 960, half: W / 2 + 200, flow: false, ram };
+  const TW = Math.max(500, size[0] + 160), TD = Math.max(500, size[2] + 160);
+  const px = -(TW / 2 + 120 + (W + 300) / 2);
+  g.add(box(W + 300, 900, D, M.presse, px, 450, 0));
+  for (const s of [-1, 1]) g.add(box(260, 1500, D, M.presse, px + s * (W / 2 + 20), 1650, 0));
+  g.add(box(W + 300, 500, D, M.presse, px, 2600, 0));
+  const ram = box(W - 60, 300, D - 80, M.stahl, px, 1900, 0);
+  g.add(ram, box(W - 100, 60, D - 120, M.dunkel, px, 930, 0));
+  g.add(box(TW, 60, TD, M.stahl, 0, 930, 0), box(TW - 60, 900, TD - 60, M.alu, 0, 450, 0));
+  return { group: g, top: 960, half: TW / 2 + 60, flow: false, ram };
 }
 
-function buildTarget(id, P, p3) {
-  const size = P.size;
+function buildTarget(id, P, p3, dreh = 0) {
+  // bei 90° gedrehter Ablage liegen Länge und Breite vertauscht im Behälter
+  const size = Number(dreh) % 180 === 90 ? [P.size[2], P.size[1], P.size[0]] : P.size;
   if (FLOW.includes(id)) return conveyor(id, 2400, Math.max(420, size[2] + 160), 1);
   const pat = pattern(p3.lagenbild, size);
+  pat.d += 20; pat.w += 20;   // etwas Luft zur Behälterwand
   if (id === 'palette') {
     return { group: pallet(), top: 144, half: Math.max(650, pat.w / 2 + 50), flow: false, stack: { pat, lagen: Number(p3.lagen) || 1, zwischen: p3.zwischen === 'ja' } };
   }
@@ -231,10 +235,8 @@ function buildTarget(id, P, p3) {
 
 // ---------------------------------------------------------------- Geräte
 // Jedes Gerät: group, reach(flange: Vector3) stellt die Gelenke so, dass der Flansch dort liegt (Werkzeug senkrecht nach unten)
-function buildArm(kind) {
-  const c = kind === 'cobot'
-    ? { ped: 600, base: 120, hs: 180, L2: 560, L3: 520, f: 110, r: 70, mat: M.cobot, joint: M.gelenk }
-    : { ped: 0, base: 300, hs: 520, L2: 900, L3: 950, f: 180, r: 120, mat: M.roboter, joint: M.dunkel };
+function buildArm(ped = 0) {
+  const c = { ped, base: 300, hs: 520, L2: 900, L3: 950, f: 180, r: 120, mat: M.roboter, joint: M.dunkel };
   const g = new THREE.Group();
   if (c.ped) g.add(box(420, c.ped, 420, M.alu, 0, c.ped / 2, 0));
   const y0 = c.ped;
@@ -270,6 +272,27 @@ function buildArm(kind) {
       j2.rotation.z = a1 - Math.PI / 2;
       j3.rotation.z = a2 - a1;
       j4.rotation.z = -Math.PI / 2 - a2;   // Werkzeug zeigt senkrecht nach unten
+    },
+  };
+}
+
+// Roboter auf Linearachse (7. Achse): fährt auf einer Schiene parallel zur Anlage mit
+function buildLinear(x0, x1) {
+  const g = new THREE.Group();
+  const L = x1 - x0 + 1200, cx = (x0 + x1) / 2;
+  g.add(box(L, 160, 500, M.alu, cx, 80, 0));
+  for (const s of [-1, 1]) g.add(box(L, 40, 60, M.stahl, cx, 180, s * 180));
+  for (let x = x0 - 500; x <= x1 + 500; x += 900) g.add(box(120, 30, 560, M.dunkel, x, 15, 0));
+  const arm = buildArm(260);
+  const sled = box(620, 60, 620, M.gelenk, 0, 230, 0);
+  arm.group.add(sled);
+  arm.group.children[0].material = M.presse;           // Sockel als Schlitten
+  g.add(arm.group);
+  return {
+    group: g,
+    reach(F) {
+      arm.group.position.x = clamp(F.x, x0, x1);         // Schlitten fährt mit, der Arm greift nach vorn
+      arm.reach(F);
     },
   };
 }
@@ -346,37 +369,31 @@ function fence(group, w, d, cx, cz) {
 }
 
 // ---------------------------------------------------------------- Parameter
+const BAND = { k: 'band', label: 'Bandgeschwindigkeit', opts: [['langsam', 'langsam'], ['mittel', 'mittel'], ['schnell', 'schnell']], def: 'mittel' };
 const P1 = [
-  { k: 'lage', label: 'Lage des Produkts', opts: [['exakt', 'exakt positioniert'], ['ausgerichtet', 'ausgerichtet'], ['chaotisch', 'chaotisch'], ['gestapelt', 'gestapelt'], ['lagen', 'in Lagen mit Zwischenlage']], def: 'ausgerichtet' },
-  { k: 'traeger', label: 'Ladungsträger', opts: [['lose', 'lose'], ['tray', 'Tray'], ['karton', 'Karton'], ['klt', 'KLT'], ['wst', 'Werkstückträger']], def: 'lose' },
-  { k: 'takt', label: 'Taktzahl', range: [1, 120, 1], unit: 'Teile/min', def: 10 },
-  { k: 'band', label: 'Bandgeschwindigkeit', opts: [['langsam', 'langsam'], ['mittel', 'mittel'], ['schnell', 'schnell']], def: 'mittel', when: (m) => FLOW.includes(m) },
-  { k: 'bewegung', label: 'Bewegung', opts: [['kontinuierlich', 'kontinuierlich'], ['stopgo', 'Stop and Go']], def: 'kontinuierlich', when: (m) => FLOW.includes(m) },
-  { k: 'erkennung', label: 'Erkennung', opts: [['lichtschranke', 'Lichtschranke'], ['kamera2d', 'Kamera 2D'], ['kamera3d', 'Kamera 3D']], def: 'lichtschranke' },
+  { k: 'lage', label: 'Lage des Produkts', opts: [['ausgerichtet', 'ausgerichtet'], ['chaotisch', 'chaotisch (mit Kamera)']], def: 'ausgerichtet' },
+  { ...BAND, when: (m) => FLOW.includes(m) },
 ];
 const P2 = [
-  { k: 'ablauf', label: 'Bewegungsablauf', opts: [['pickPlace', 'Pick and Place'], ['drehen', 'Pick and Place mit Drehen']], def: 'pickPlace' },
   { k: 'speed', label: 'Geschwindigkeit', range: [10, 100, 5], unit: '%', def: 70 },
   { k: 'hub', label: 'Hubhöhe', range: [0.1, 1, 0.05], unit: 'm', def: 0.3, dec: 2 },
-  { k: 'dreh', label: 'Drehwinkel des Produkts', opts: [['0', '0°'], ['90', '90°'], ['180', '180°']], def: '90', when: (m, s) => s.ablauf === 'drehen' },
-  { k: 'teile', label: 'Teile pro Griff', opts: [['1', '1'], ['2', '2 (Mehrfachgreifer)'], ['4', '4 (Mehrfachgreifer)']], def: '1' },
+  { k: 'dreh', label: 'Drehung des Produkts', opts: [['0', 'keine'], ['90', '90°'], ['180', '180°']], def: '0' },
   { k: 'zaun', label: 'Schutzzaun', opts: [['ja', 'ein'], ['nein', 'aus']], def: 'ja', when: (m) => m !== 'delta' },
 ];
 const P3 = [
-  { k: 'modus', label: 'Ablagemodus', opts: [['exakt', 'exakt positionieren'], ['lose', 'lose ablegen'], ['stapeln', 'stapeln'], ['faecher', 'in Fächer sortieren']], def: 'exakt' },
   { k: 'lagenbild', label: 'Lagenbild', opts: [['1x1', '1 × 1'], ['2x1', '2 × 1'], ['2x2', '2 × 2'], ['3x2', '3 × 2']], def: '2x2', when: (m) => !FLOW.includes(m) },
   { k: 'lagen', label: 'Anzahl Lagen', range: [1, 5, 1], unit: '', def: 2, when: (m) => m === 'palette' || m === 'karton' || m === 'klt' },
   { k: 'zwischen', label: 'Zwischenlage', opts: [['ja', 'ja'], ['nein', 'nein']], def: 'nein', when: (m) => m === 'palette' || m === 'karton' || m === 'klt' },
-  { k: 'band', label: 'Bandgeschwindigkeit', opts: [['langsam', 'langsam'], ['mittel', 'mittel'], ['schnell', 'schnell']], def: 'mittel', when: (m) => FLOW.includes(m) || m === 'schalenband' },
+  { ...BAND, when: (m) => FLOW.includes(m) || m === 'schalenband' },
 ];
 const defaults = (list) => Object.fromEntries(list.map((p) => [p.k, p.def]));
 
 const VORLAGEN = {
-  reifenPal: { name: 'Automobil: Reifen palettieren', produkt: 'reifen', s1: { modul: 'rollenbahn', takt: 6 }, s2: { modul: 'roboter6', speed: 70 }, s3: { modul: 'palette', lagenbild: '2x1', lagen: 3 } },
-  presse: { name: 'Automobil: Presse entnehmen', produkt: 'blech', s1: { modul: 'presse', takt: 12, lage: 'exakt' }, s2: { modul: 'portal', speed: 80 }, s3: { modul: 'klt', lagenbild: '1x1', lagen: 4, zwischen: 'ja' } },
-  reifenDepal: { name: 'Automobil: Reifen depalettieren', produkt: 'reifen', s1: { modul: 'palette', lage: 'gestapelt', takt: 6, erkennung: 'kamera2d' }, s2: { modul: 'roboter6', speed: 70 }, s3: { modul: 'rollenbahn' } },
-  backwaren: { name: 'Lebensmittel: Backwaren in Schalen', produkt: 'broetchen', s1: { modul: 'modulband', takt: 90, erkennung: 'kamera2d' }, s2: { modul: 'delta', speed: 90, zaun: 'nein' }, s3: { modul: 'schalenband', lagenbild: '2x2' } },
-  kartons: { name: 'Lebensmittel: Kartons palettieren', produkt: 'karton', s1: { modul: 'gurtband', takt: 8 }, s2: { modul: 'cobot', speed: 60, zaun: 'nein' }, s3: { modul: 'palette', lagenbild: '2x2', lagen: 3 } },
+  reifenPal: { name: 'Automobil: Reifen palettieren', produkt: 'reifen', s1: { modul: 'rollenbahn' }, s2: { modul: 'roboter6', speed: 70 }, s3: { modul: 'palette', lagenbild: '2x1', lagen: 3 } },
+  presse: { name: 'Automobil: Presse entnehmen', produkt: 'blech', s1: { modul: 'presse' }, s2: { modul: 'portal', speed: 80 }, s3: { modul: 'klt', lagenbild: '1x1', lagen: 4, zwischen: 'ja' } },
+  reifenDepal: { name: 'Automobil: Reifen depalettieren', produkt: 'reifen', s1: { modul: 'palette' }, s2: { modul: 'roboter6', speed: 70 }, s3: { modul: 'rollenbahn' } },
+  backwaren: { name: 'Lebensmittel: Backwaren in Schalen', produkt: 'broetchen', s1: { modul: 'modulband', lage: 'chaotisch' }, s2: { modul: 'delta', speed: 90, zaun: 'nein' }, s3: { modul: 'schalenband', lagenbild: '2x2' } },
+  kartons: { name: 'Lebensmittel: Kartons palettieren', produkt: 'karton', s1: { modul: 'gurtband' }, s2: { modul: 'linear', speed: 60, dreh: '90' }, s3: { modul: 'palette', lagenbild: '2x2', lagen: 3 } },
 };
 
 // ---------------------------------------------------------------- Simulator
@@ -389,15 +406,15 @@ export function initSimulator(K) {
   let started = false;
 
   // Zustand
-  const S = { vorlage: 'reifenPal', produkt: { typ: 'reifen', groesse: 100, kg: 9 }, s1: null, s2: null, s3: null };
+  const S = { vorlage: 'reifenPal', produkt: { typ: 'reifen', groesse: 100 }, s1: null, s2: null, s3: null };
   let aktiv = 'produkt';
   function applyTemplate(key) {
     S.vorlage = key;
     if (key === 'leer') {
-      S.produkt = { typ: 'eigen', groesse: 100, kg: null }; S.s1 = S.s2 = S.s3 = null; aktiv = 'produkt';
+      S.produkt = { typ: 'eigen', groesse: 100 }; S.s1 = S.s2 = S.s3 = null; aktiv = 'produkt';
     } else {
       const t = VORLAGEN[key];
-      S.produkt = { typ: t.produkt, groesse: 100, kg: PRODUKTE[t.produkt].kg };
+      S.produkt = { typ: t.produkt, groesse: 100 };
       S.s1 = { ...defaults(P1), ...t.s1 }; S.s2 = { ...defaults(P2), ...t.s2 }; S.s3 = { ...defaults(P3), ...t.s3 };
       aktiv = 'slot1';
     }
@@ -409,11 +426,11 @@ export function initSimulator(K) {
     if (typ === 'eigen') {
       const pt = K.part();
       const sz = pt ? [pt.size.x, pt.size.y, pt.size.z] : [100, 100, 100];
-      return { typ, name: pt ? pt.label.replace(/^Grundform: /, '') : 'Ihr Teil', size: sz.map((v) => v * f), kg: S.produkt.kg ?? (pt ? pt.mass * f ** 3 : 1),
-        griff: (pt ? pt.grip : 100) * f, innen: pt && pt.inside ? pt.grip * f : null, weich: pt ? pt.soft : false, f };
+      return { typ, name: pt ? pt.label.replace(/^Grundform: /, '') : 'Ihr Teil', size: sz.map((v) => v * f),
+        griff: (pt ? pt.grip : 100) * f, innen: pt && pt.inside ? pt.grip * f : null, f };
     }
     const d = PRODUKTE[typ];
-    return { typ, name: d.name, size: d.size.map((v) => v * f), kg: S.produkt.kg ?? d.kg, griff: d.size[2] * f, innen: d.innen ? d.innen * f : null, weich: d.weich, f };
+    return { typ, name: d.name, size: d.size.map((v) => v * f), griff: d.size[2] * f, innen: d.innen ? d.innen * f : null, f };
   }
 
   // ---------- 3D ----------
@@ -506,10 +523,10 @@ export function initSimulator(K) {
     const g = gripperCopy();
     // Abstände: Gerät in der Mitte, Quelle links, Ziel rechts
     const dev = S.s2 ? S.s2.modul : 'roboter6';
-    const gap = { roboter6: 650, cobot: 380, delta: 120, portal: 500 }[dev];
-    const zLine = dev === 'roboter6' ? 1100 : dev === 'cobot' ? 650 : 0;
+    const gap = { roboter6: 650, linear: 1500, delta: 120, portal: 500 }[dev];
+    const zLine = dev === 'roboter6' || dev === 'linear' ? 1100 : 0;
     const src = S.s1 ? buildSource(S.s1.modul, P, S.s1) : null;
-    const tgt = S.s3 ? buildTarget(S.s3.modul, P, S.s3) : null;
+    const tgt = S.s3 ? buildTarget(S.s3.modul, P, S.s3, S.s2 ? S.s2.dreh : 0) : null;
     const pickX = -(gap + (src ? src.half : 300)), placeX = gap + (tgt ? tgt.half : 300);
     const zone = (x, w, d, color, slot, label) => {
       const m = new THREE.Mesh(new THREE.PlaneGeometry(w, d), new THREE.MeshStandardMaterial({ color, transparent: true, opacity: 0.55, roughness: 1 }));
@@ -530,7 +547,7 @@ export function initSimulator(K) {
     if (tgt) { tgt.group.position.set(placeX, 0, zLine); tgt.group.userData.slot = 'slot3'; world.add(tgt.group); }
     // Erkennung an der Quelle
     if (src && S.s1) {
-      const e = S.s1.erkennung;
+      const e = S.s1.lage === 'chaotisch' ? 'kamera3d' : 'lichtschranke';
       if (e === 'lichtschranke') for (const s of [-1, 1]) { const p = box(40, 160, 40, M.sensor, pickX - 260, src.top + 80, zLine + s * (P.size[2] / 2 + 150)); p.userData.slot = 'slot1'; world.add(p); }
       else {
         const hgt = src.top + P.size[1] * 3 + 900;
@@ -544,12 +561,13 @@ export function initSimulator(K) {
     let device = null;
     if (S.s2) {
       const m = S.s2.modul;
-      if (m === 'roboter6' || m === 'cobot') { device = buildArm(m); device.group.position.set(0, 0, 0); }
+      if (m === 'roboter6') device = buildArm();
+      else if (m === 'linear') device = buildLinear(pickX + 400, placeX - 400);
       else if (m === 'delta') device = buildDelta(0, zLine, pickX, placeX);
       else device = buildPortal(0, zLine, pickX, placeX, 2400);
       device.group.userData.slot = 'slot2';
       world.add(device.group);
-      if (S.s2.zaun === 'ja' && (m === 'roboter6' || m === 'portal' || m === 'cobot')) fence(world, placeX - pickX + (m === 'portal' ? 2000 : 1400), m === 'roboter6' ? 900 : 1200, 0, m === 'roboter6' ? 0 : zLine);
+      if (S.s2.zaun === 'ja' && m !== 'delta') fence(world, placeX - pickX + (m === 'portal' ? 2000 : 1400), m === 'portal' ? 1200 : 900, 0, m === 'portal' ? zLine : 0);
     }
     world.add(g.holder);
     g.holder.visible = !!device;
@@ -592,7 +610,7 @@ export function initSimulator(K) {
   // ---------- Ablauf ----------
   let running = false, t0 = 0, simTime = 0;
   const tcp = new THREE.Vector3(), flange = new THREE.Vector3(), tmp = new THREE.Vector3();
-  const cycleLen = () => clamp(lastEval ? lastEval.takt : 3, 2.2, 6);
+  const cycleLen = () => clamp(lastEval ? lastEval.takt : 3, 2.2, 7);
   // Lage des n-ten Produkts an der Quelle (Unterkante Mitte) und seine Drehung
   function sourcePos(n, k, a) {
     const { src, P, pickX, zLine } = A;
@@ -657,7 +675,7 @@ export function initSimulator(K) {
     const down2 = seg(p, 0.62, 0.75), open = seg(p, 0.76, 0.84), up2 = seg(p, 0.84, 0.9), back = seg(p, 0.9, 1);
     const sp = sourcePos(n, 0, 0) || { p: new THREE.Vector3(A.pickX, src.top, A.zLine), yaw: 0 };
     const tp = targetPos(n);
-    const dreh = S.s2.ablauf === 'drehen' ? THREE.MathUtils.degToRad(Number(S.s2.dreh)) : 0;
+    const dreh = THREE.MathUtils.degToRad(Number(S.s2.dreh) || 0);
     const yPick = sp.p.y + P.size[1] - depth, yPlace = tp.p.y + P.size[1] - depth;
     const safe = Math.max(yPick, yPlace) + hub;
     let x, y, z, yaw;
@@ -738,55 +756,23 @@ export function initSimulator(K) {
     const m = new THREE.Mesh(trayGeo.get(key), M.schale); m.position.set(x, y, z); m.castShadow = m.receiveShadow = true; m.userData.keepGeo = true; return m;
   }
 
-  // ---------- Bewertung ----------
+  // ---------- Kennzahlen ----------
   let lastEval = null;
   function evaluate() {
-    const P = produkt(), g = K.active();
     const ready = S.s1 && S.s2 && S.s3;
     $('#sim-run').disabled = !ready;
-    if (!ready) {
-      lastEval = null;
-      setAmpel(null); $('#sim-urteil').textContent = 'Noch nicht vollständig'; $('#sim-gruende').textContent = 'Für jede Station ein Modul wählen.';
-      $('#sim-takt').textContent = $('#sim-stunde').textContent = '–'; $('#sim-tipp').textContent = '';
-      return;
-    }
-    const abstand = A ? A.placeX - A.pickX : 0;
-    const e = lastEval = bewerten({ greifer: { id: g.id, code: g.code, range: g.range }, produkt: P, s1: S.s1, s2: S.s2, s3: S.s3, abstand });
-    setAmpel(e.ampel);
-    $('#sim-urteil').textContent = { gruen: 'Greifer passt', gelb: 'Passt mit Einschränkung', rot: 'Passt so nicht' }[e.ampel];
-    $('#sim-gruende').textContent = e.gruende.join(' ');
+    if (!ready) { lastEval = null; $('#sim-takt').textContent = $('#sim-stunde').textContent = '–'; return; }
+    const e = lastEval = kennzahlen(S.s2);
     $('#sim-takt').textContent = `${fmt(e.takt, 1)} s`;
     $('#sim-stunde').textContent = fmt(Math.round(e.stunde / 10) * 10);
-    let tipp = e.tipp;
-    if (e.ampel !== 'gruen') tipp = alternative(P) + ' ' + tipp;
-    $('#sim-tipp').innerHTML = tipp;
-    const alt = sec.querySelector('[data-alt]');
-    if (alt) alt.addEventListener('click', async (ev) => { ev.preventDefault(); await K.select(alt.dataset.alt); G = null; build(); renderPanels(); });
-    mail(P, e);
-  }
-  function setAmpel(a) {
-    const el = $('#sim-ampel'); el.dataset.state = a || '';
-    el.setAttribute('aria-label', a ? `Ampel: ${{ gruen: 'grün', gelb: 'gelb', rot: 'rot' }[a]}` : 'Ampel: noch keine Bewertung');
-  }
-  // Besserer Greifer: erst unter den Testgreifern, sonst ein GMG-Greifer aus den Datenblättern
-  function alternative(P) {
-    for (const g of Object.values(K.grippers())) {
-      if (g.id === K.active().id) continue;
-      const e = bewerten({ greifer: { id: g.id, code: g.code, range: g.range }, produkt: P, s1: S.s1, s2: S.s2, s3: S.s3, abstand: A ? A.placeX - A.pickX : 0 });
-      if (e.ampel === 'gruen') return `Besser geeignet: <a href="#" data-alt="${g.id}">${g.code} testen</a>.`;
-    }
-    const w = P.griff;
-    const s = SPECS.greifer.filter((x) => x.weite && w >= x.weite[0] && w <= x.weite[1] && (!x.kraft || x.kraft / 9.81 / 4 >= P.kg))
-      .sort((a, b) => (a.weite[1] - a.weite[0]) - (b.weite[1] - b.weite[0]))[0];
-    return s ? `Für ${fmt(w)} mm Greifbreite passt z. B. der GMG ${s.code} (${s.familie}, Greifweite ${fmt(s.weite[0])}–${fmt(s.weite[1])} mm).`
-      : 'Für dieses Produkt baut GMG gern einen passenden Greifer.';
+    mail(produkt(), e);
   }
   function mail(P, e) {
     const L = (o, list, lib) => o ? `${lib[o.modul].name} (` + list.filter((p) => !p.when || p.when(o.modul, o)).map((p) => `${p.label}: ${label(p, o[p.k])}`).join(', ') + ')' : '–';
     const body = ['Guten Tag,', '', 'über den Greifer-Simulator habe ich folgende Anlage zusammengestellt:', '',
-      `Greifer: ${K.active().code}`, `Produkt: ${P.name}, ca. ${fmt(P.size[0])} × ${fmt(P.size[1])} × ${fmt(P.size[2])} mm, ${fmt(P.kg, 2)} kg`,
+      `Greifer: ${K.active().code}`, `Produkt: ${P.name}, ca. ${fmt(P.size[0])} × ${fmt(P.size[1])} × ${fmt(P.size[2])} mm`,
       `1 Ankunft: ${L(S.s1, P1, QUELLEN)}`, `2 Hebevorgang: ${L(S.s2, P2, GERAETE_UI)}`, `3 Weitertransport: ${L(S.s3, P3, ZIELE)}`, '',
-      `Bewertung im Simulator: ${$('#sim-urteil').textContent}. Taktzeit ca. ${fmt(e.takt, 1)} s, ca. ${fmt(e.stunde)} Teile pro Stunde.`, '',
+      `Simulation: Taktzeit ca. ${fmt(e.takt, 1)} s, ca. ${fmt(e.stunde)} Teile pro Stunde.`, '',
       `Link zur Anlage: ${shareUrl()}`, '', 'Bitte senden Sie mir ein Angebot.'].join('\n');
     $('#sim-anfrage').href = `mailto:${sec.dataset.mail}?subject=${encodeURIComponent('Anfrage über den Greifer-Simulator')}&body=${encodeURIComponent(body)}`;
   }
@@ -806,7 +792,7 @@ export function initSimulator(K) {
     const card = (slot, num, title, val, info) => `<button type="button" class="sim__card${aktiv === slot ? ' is-active' : ''}${val ? '' : ' is-empty'}" data-slot="${slot}">
       <span class="sim__num">${num}</span><span><span class="sim__ct">${title}</span><strong>${val || 'Modul wählen'}</strong><small>${info || ''}</small></span></button>`;
     $('#sim-slots').innerHTML =
-      card('produkt', '◆', 'Produkt', P.name, `${fmt(P.size[0])} × ${fmt(P.size[1])} × ${fmt(P.size[2])} mm · ${P.kg < 1 ? fmt(P.kg * 1000) + ' g' : fmt(P.kg, 1) + ' kg'}`) +
+      card('produkt', '◆', 'Produkt', P.name, `${fmt(P.size[0])} × ${fmt(P.size[1])} × ${fmt(P.size[2])} mm`) +
       card('slot1', '1', 'Ankunft', S.s1 && QUELLEN[S.s1.modul].name, S.s1 && QUELLEN[S.s1.modul].info) +
       card('slot2', '2', 'Hebevorgang', S.s2 && GERAETE_UI[S.s2.modul].name, S.s2 && `${K.active().code} am ${GERAETE_UI[S.s2.modul].name}`) +
       card('slot3', '3', 'Weitertransport', S.s3 && ZIELE[S.s3.modul].name, S.s3 && ZIELE[S.s3.modul].info);
@@ -821,13 +807,11 @@ export function initSimulator(K) {
       box.innerHTML = `<h3>Produkt</h3>
         <div class="field"><label for="sim-p-typ">Produktart</label><select id="sim-p-typ">${Object.entries(PRODUKTE).map(([k, v]) => `<option value="${k}"${k === S.produkt.typ ? ' selected' : ''}>${v.name}${v.branche ? ' · ' + v.branche : ''}</option>`).join('')}</select></div>
         <div class="field"><label for="sim-p-gr">Größe <output>${S.produkt.groesse} %</output></label><input id="sim-p-gr" type="range" min="50" max="200" step="5" value="${S.produkt.groesse}"></div>
-        <div class="field"><label for="sim-p-kg">Gewicht (kg)</label><input id="sim-p-kg" type="number" min="0.01" max="500" step="0.01" value="${fmt(P.kg, 2).replace(',', '.').replace(/\.?0+$/, '')}"></div>
-        <p class="muted sim__small">${P.typ === 'eigen' ? 'Maße und Gewicht kommen aus dem Konfigurator oben.' : PRODUKTE[P.typ].info}</p>`;
-      box.querySelector('#sim-p-typ').addEventListener('change', (e) => { S.produkt = { typ: e.target.value, groesse: 100, kg: e.target.value === 'eigen' ? null : PRODUKTE[e.target.value].kg }; build(); renderPanels(); });
+        <p class="muted sim__small">${P.typ === 'eigen' ? 'Die Maße kommen aus dem Konfigurator oben.' : PRODUKTE[P.typ].info}</p>`;
+      box.querySelector('#sim-p-typ').addEventListener('change', (e) => { S.produkt = { typ: e.target.value, groesse: 100 }; build(); renderPanels(); });
       const gr = box.querySelector('#sim-p-gr');
       gr.addEventListener('input', () => { gr.previousElementSibling.querySelector('output').textContent = gr.value + ' %'; });
       gr.addEventListener('change', () => { S.produkt.groesse = Number(gr.value); build(); renderPanels(); });
-      box.querySelector('#sim-p-kg').addEventListener('change', (e) => { S.produkt.kg = Math.max(0.01, Number(e.target.value) || 0.01); evaluate(); renderPanels(); });
       return;
     }
     const lib = aktiv === 'slot1' ? QUELLEN : aktiv === 'slot2' ? GERAETE_UI : ZIELE;
@@ -843,7 +827,7 @@ export function initSimulator(K) {
     box.querySelectorAll('[data-modul]').forEach((b) => b.addEventListener('click', () => {
       const m = b.dataset.modul;
       S[key] = { ...defaults(plist), ...(S[key] || {}), modul: m };
-      if (key === 's2') S.s2.zaun = m === 'cobot' || m === 'delta' ? 'nein' : 'ja';
+      if (key === 's2') S.s2.zaun = m === 'delta' ? 'nein' : 'ja';
       stop(); build(); renderPanels();
     }));
     box.querySelectorAll('[data-k]').forEach((el) => {
@@ -875,7 +859,8 @@ export function initSimulator(K) {
     let grp;
     if (slot === 'slot1') grp = buildSource(m, P, defaults(P1)).group;
     else if (slot === 'slot3') grp = buildTarget(m, P, defaults(P3)).group;
-    else grp = m === 'roboter6' || m === 'cobot' ? (() => { const a = buildArm(m); a.reach(new THREE.Vector3(900, 900, 0)); return a.group; })()
+    else grp = m === 'roboter6' ? (() => { const a = buildArm(); a.reach(new THREE.Vector3(900, 900, 0)); return a.group; })()
+      : m === 'linear' ? (() => { const a = buildLinear(-900, 900); a.reach(new THREE.Vector3(300, 900, 1000)); return a.group; })()
       : m === 'delta' ? (() => { const d = buildDelta(0, 0, -400, 400); d.reach(new THREE.Vector3(0, 1200, 0)); return d.group; })()
         : (() => { const d = buildPortal(0, 0, -600, 600, 2000); d.reach(new THREE.Vector3(200, 900, 0)); return d.group; })();
     sc.add(grp);
@@ -924,6 +909,7 @@ export function initSimulator(K) {
     if (state) {
       if (state.g && state.g !== K.active().id) await K.select(state.g);
       for (const k of ['vorlage', 'produkt', 's1', 's2', 's3']) if (k in state) S[k] = state[k];
+      if (S.s2 && !GERAETE_UI[S.s2.modul]) S.s2.modul = 'linear';   // ältere Links (Cobot)
       tpl.value = S.vorlage;
     } else applyTemplate(tpl.value);
     G = null; build(); renderPanels();
@@ -938,5 +924,5 @@ export function initSimulator(K) {
       open(st).then(() => sec.scrollIntoView());
     } catch (e) { /* ungültiger Link: normal starten */ }
   }
-  window.__sim = { open, S, frame: (t) => { simTime = t; running = false; }, eval: () => lastEval, A: () => A };
+  window.__sim = { open, S, frame: (t) => { simTime = t; running = false; }, eval: () => lastEval, A: () => A, build: () => { build(); renderPanels(); } };
 }
