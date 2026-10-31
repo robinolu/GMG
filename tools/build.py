@@ -337,11 +337,15 @@ def hero_bg(r):
             y = rnd.uniform(-5, 85)
             w = size * rnd.uniform(0.8, 1.2)
             rot = rnd.uniform(-28, 28)
-            dur = rnd.uniform(14, 26)
+            dur = rnd.uniform(16, 30)
+            ax, ay = rnd.uniform(30, 70) * rnd.choice((-1, 1)), rnd.uniform(25, 55) * rnd.choice((-1, 1))
             items.append(f'<img src="{img(r, b)}" alt="" loading="lazy" decoding="async" '
-                         f'style="left:{x:.1f}%;top:{y:.1f}%;width:{w:.0f}px;--rot:{rot:.0f}deg;--dur:{dur:.1f}s;--del:-{rnd.uniform(0, dur):.1f}s">')
+                         f'style="left:{x:.1f}%;top:{y:.1f}%;width:{w:.0f}px;--rot:{rot:.0f}deg;--ax:{ax:.0f}px;--ay:{ay:.0f}px;'
+                         f'--ar:{rnd.uniform(6, 14) * rnd.choice((-1, 1)):.0f}deg;--dur:{dur:.1f}s;--del:-{rnd.uniform(0, dur):.1f}s">')
         out.append(f'<div class="hero__bg-layer hero__bg-layer--{lage}" data-depth="{depth}">{"".join(items)}</div>')
-    return f'<div class="hero__bg" aria-hidden="true">{"".join(out)}</div>'
+    # ein großer Greifer im Vordergrund, der immer wieder unten aus dem Bild ragt und anderes überdeckt
+    vorn = f'<div class="hero__front" aria-hidden="true"><img src="{img(r, "s310")}" alt="" loading="lazy" decoding="async"></div>'
+    return f'<div class="hero__bg" aria-hidden="true">{"".join(out)}</div>{vorn}'
 
 
 def process_cards(r):
@@ -416,7 +420,6 @@ def build_home():
         <img class="hero3d__fallback" src="{img(r, 'b02')}" alt="GMG-Greifer B02">
         <canvas aria-label="3D-Szene: Roboter mit Greifer setzt beim Scrollen ein Kugellager von einem Tisch auf den anderen"></canvas>
       </div>
-      <p class="hero3d__note">3D-Testszene mit Testgreifer Tentra T3 – wird durch einen GMG-Greifer ersetzt</p>
     </div>
   </div>
 </section>

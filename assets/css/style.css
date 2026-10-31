@@ -112,7 +112,7 @@ p { margin: 0 0 1em; }
 }
 .hero::after {
   content: ""; position: absolute; inset: 0;
-  background: linear-gradient(90deg, rgba(244,246,248,.9) 32%, rgba(244,246,248,.45) 52%, rgba(244,246,248,0) 72%);
+  background: linear-gradient(90deg, rgba(244,246,248,.72) 30%, rgba(244,246,248,.35) 52%, rgba(244,246,248,0) 72%);
   pointer-events: none;
 }
 .hero__inner { position: relative; z-index: 1; display: grid; grid-template-columns: 1.05fr 1fr; gap: 48px; align-items: center; padding: 88px 24px 96px; }
@@ -522,10 +522,27 @@ button.kfg__card { font: inherit; text-align: left; cursor: pointer; width: 100%
 .hero__bg-layer--mid img { opacity: .5; filter: grayscale(.4) blur(.4px); }
 .hero__bg-layer--near img { opacity: .75; filter: drop-shadow(0 18px 24px rgba(16,24,40,.22)); }
 @keyframes heroFloat {
-  from { transform: translate(-50%, 0) rotate(var(--rot)); }
-  to { transform: translate(calc(-50% + 18px), -26px) rotate(calc(var(--rot) + 6deg)); }
+  0%   { transform: translate(-50%, 0) rotate(var(--rot)); }
+  25%  { transform: translate(calc(-50% + var(--ax)), calc(var(--ay) * -.6)) rotate(calc(var(--rot) + var(--ar))); }
+  50%  { transform: translate(calc(-50% + var(--ax) * .4), calc(var(--ay) * -1)) rotate(calc(var(--rot) - var(--ar) * .5)); }
+  75%  { transform: translate(calc(-50% - var(--ax) * .5), calc(var(--ay) * -.3)) rotate(calc(var(--rot) + var(--ar) * .7)); }
+  100% { transform: translate(-50%, 0) rotate(var(--rot)); }
 }
-@media (prefers-reduced-motion: reduce) { .hero__bg-layer img { animation: none; } }
+.hero__bg-layer img { animation-direction: normal; animation-timing-function: ease-in-out; }
+/* Vordergrund-Greifer: taucht unten auf, ragt ins Bild, überdeckt kurz andere Elemente und sinkt wieder ab */
+.hero__front { position: absolute; left: 50%; bottom: 0; width: 360px; height: 0; z-index: 2; pointer-events: none; }
+.hero__front img { position: absolute; left: 0; top: 0; width: 100%; height: auto; transform: translate(-50%, 10%) rotate(-12deg);
+  filter: drop-shadow(0 30px 40px rgba(16,24,40,.35)); animation: heroPeek 17s ease-in-out 3s infinite; }
+@keyframes heroPeek {
+  0%, 30%   { transform: translate(-50%, 10%) rotate(-12deg); }
+  42%       { transform: translate(-40%, -62%) rotate(-4deg); }
+  52%       { transform: translate(-30%, -55%) rotate(6deg); }
+  62%       { transform: translate(-45%, -66%) rotate(-2deg); }
+  76%, 100% { transform: translate(-60%, 10%) rotate(-16deg); }
+}
+.hero { --peek: 1; }
+@media (prefers-reduced-motion: reduce) { .hero__bg-layer img, .hero__front img { animation: none; } }
+@media (max-width: 860px) { .hero__front { width: 220px; left: 70%; } }
 
 /* Greifer nach Prozess */
 .procs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
@@ -585,3 +602,4 @@ button.kfg__card { font: inherit; text-align: left; cursor: pointer; width: 100%
 .hero__visual::before { content: ""; position: absolute; inset: -6% -10%; background: radial-gradient(closest-side, rgba(244,246,248,.9) 45%, rgba(244,246,248,0)); pointer-events: none; }
 .hero3d, .hero3d__note { position: relative; }
 .hero3d__note { width: fit-content; margin-inline: auto; padding: 2px 8px; border-radius: 4px; background: rgba(244,246,248,.85); }
+.hero h1, .hero .lead, .hero__meta, .hero .eyebrow { text-shadow: 0 0 14px rgba(244,246,248,.95), 0 0 4px rgba(244,246,248,.9); }
