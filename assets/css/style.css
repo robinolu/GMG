@@ -319,8 +319,10 @@ button.kfg__card { font: inherit; text-align: left; cursor: pointer; width: 100%
 .kfg__status.is-bad { background: #fbe4e2; color: #9b2a21; }
 .kfg__stage { display: grid; gap: 18px; }
 .kfg__test { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 24px; align-items: end; padding: 20px; border: 1px solid var(--line); border-radius: var(--radius); background: #fff; }
-.kfg__test .kfg__step, .kfg__test .kfg__status, .kfg__test .kfg__simnote, .kfg__test #kfg-anfrage { grid-column: 1 / -1; }
-.kfg__simnote { margin: -4px 0 0; }
+.kfg__test .kfg__step, .kfg__test .kfg__status, .kfg__test .kfg__gp, .kfg__test #kfg-anfrage { grid-column: 1 / -1; }
+.kfg__gp { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; padding: 12px 14px; border: 1px dashed #9dbbd8; border-radius: 10px; background: var(--blue-soft); }
+.kfg__gp p { margin: 0; flex: 1 1 260px; color: var(--text); }
+.kfg__gp.is-set { border-style: solid; border-color: #2e9d5b; background: #e9f6ee; }
 .kfg__test .kfg__step { margin-top: 0; }
 .kfg__test #kfg-anfrage { justify-self: start; }
 .kfg__center { justify-self: stretch; padding: 12px; }

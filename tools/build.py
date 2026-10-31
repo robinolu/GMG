@@ -577,7 +577,10 @@ def configurator_block(r):
       </div>
       <button type="button" class="btn btn--ghost btn--xs kfg__center" id="kfg-zentrieren">⌖ Greifer über dem Teil zentrieren</button>
       <p id="kfg-status" class="kfg__status is-info" role="status">Teil wird geladen …</p>
-      <p class="kfg__small muted kfg__simnote">Diese Greifposition (innen oder außen, Höhe und Lage) übernimmt der <a href="#simulator">Simulator</a> weiter unten.</p>
+      <div class="kfg__gp" id="greifpunkt">
+        <button type="button" class="btn btn--primary" id="kfg-greifpunkt">⊕ Greifpunkt festlegen</button>
+        <p id="kfg-gp-info" class="kfg__small">Greifer mit den Reglern am Teil positionieren und zugreifen lassen, dann festlegen. Der <a href="#simulator">Simulator</a> greift Ihr Teil danach genau an dieser Stelle.</p>
+      </div>
       <a id="kfg-anfrage" class="btn btn--primary" href="mailto:{MAIL}">Anfrage mit diesem Teil {icon('arrow')}</a>
       </div>
     </div>

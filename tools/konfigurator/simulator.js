@@ -256,7 +256,7 @@ function buildArm(ped = 0) {
   const sh = new THREE.Vector3(), d2 = new THREE.Vector2();
   return {
     group: g, cfg: c,
-    tip: (v) => { flange.getWorldPosition(v); v.y -= 6; return v; },   // Unterseite des Flansches, wie gestellt
+    tip: (v) => flange.getWorldPosition(v),   // Flansch, wie die Gelenke tatsächlich stehen
     reach(F) {
       // Handgelenk senkrecht über dem Flansch; Ebene des Arms durch Fuß und Ziel
       const W = new THREE.Vector3(F.x, F.y + c.f, F.z);
@@ -682,7 +682,7 @@ export function initSimulator(K) {
     if (pose) {
       off0.set(pose.x, pose.y, pose.z).multiplyScalar(P.f);
       inside = pose.inside;
-      if (pose.state === 'gegriffen') tGrip = pose.t;
+      if (pose.state === 'gegriffen' && pose.gripper === g.id) tGrip = pose.t;
       else if (inside && r.innen) tGrip = clamp((r.innen[1] - P.griff) / Math.max(1, r.innen[1] - r.innen[0]), 0, 1);
     }
     const off = (yaw, v) => v.copy(off0).applyAxisAngle(UP, yaw);
@@ -810,7 +810,8 @@ export function initSimulator(K) {
     const card = (slot, num, title, val, info) => `<button type="button" class="sim__card${aktiv === slot ? ' is-active' : ''}${val ? '' : ' is-empty'}" data-slot="${slot}">
       <span class="sim__num">${num}</span><span><span class="sim__ct">${title}</span><strong>${val || 'Modul wählen'}</strong><small>${info || ''}</small></span></button>`;
     $('#sim-slots').innerHTML =
-      card('produkt', '◆', 'Produkt', P.name, `${fmt(P.size[0])} × ${fmt(P.size[1])} × ${fmt(P.size[2])} mm`) +
+      card('produkt', '◆', 'Produkt', P.name, `${fmt(P.size[0])} × ${fmt(P.size[1])} × ${fmt(P.size[2])} mm` +
+        (P.typ === 'eigen' ? (K.part() && K.part().pose ? ' · Greifpunkt aus dem Konfigurator' : ' · Greifpunkt: mittig von oben') : '')) +
       card('slot1', '1', 'Ankunft', S.s1 && QUELLEN[S.s1.modul].name, S.s1 && QUELLEN[S.s1.modul].info) +
       card('slot2', '2', 'Hebevorgang', S.s2 && GERAETE_UI[S.s2.modul].name, S.s2 && `${K.active().code} am ${GERAETE_UI[S.s2.modul].name}`) +
       card('slot3', '3', 'Weitertransport', S.s3 && ZIELE[S.s3.modul].name, S.s3 && ZIELE[S.s3.modul].info);
@@ -825,7 +826,8 @@ export function initSimulator(K) {
       box.innerHTML = `<h3>Produkt</h3>
         <div class="field"><label for="sim-p-typ">Produktart</label><select id="sim-p-typ">${Object.entries(PRODUKTE).map(([k, v]) => `<option value="${k}"${k === S.produkt.typ ? ' selected' : ''}>${v.name}${v.branche ? ' · ' + v.branche : ''}</option>`).join('')}</select></div>
         <div class="field"><label for="sim-p-gr">Größe <output>${S.produkt.groesse} %</output></label><input id="sim-p-gr" type="range" min="50" max="200" step="5" value="${S.produkt.groesse}"></div>
-        <p class="muted sim__small">${P.typ === 'eigen' ? 'Die Maße kommen aus dem Konfigurator oben.' : PRODUKTE[P.typ].info}</p>`;
+        <p class="muted sim__small">${P.typ === 'eigen' ? (K.part() && K.part().pose ? 'Maße und Greifpunkt kommen aus dem Konfigurator oben.'
+          : 'Die Maße kommen aus dem Konfigurator oben. Greifpunkt noch nicht festgelegt: der Greifer fasst mittig von oben. <a href="#greifpunkt">Greifpunkt festlegen</a>') : PRODUKTE[P.typ].info}</p>`;
       box.querySelector('#sim-p-typ').addEventListener('change', (e) => { S.produkt = { typ: e.target.value, groesse: 100 }; build(); renderPanels(); });
       const gr = box.querySelector('#sim-p-gr');
       gr.addEventListener('input', () => { gr.previousElementSibling.querySelector('output').textContent = gr.value + ' %'; });

@@ -19,7 +19,8 @@ const $ = (s) => root.querySelector(s);
 const MAX_BYTES = 100 * 1024 * 1024;   // darüber wird es im Browser zäh (Speicher, Rechenzeit)
 const SLOW_BYTES = 25 * 1024 * 1024;
 const partListeners = [];   // Simulator: wird benachrichtigt, wenn sich das Teil ändert
-let lastGrip = null;        // zuletzt eingestellte Greifposition (für den Simulator)
+let lastGrip = null;        // aktuelle Greifposition im Greiftest
+let savedGrip = null;       // festgelegter Greifpunkt, den der Simulator übernimmt
 const fmt = (v, d = 0) => v.toLocaleString('de-DE', { maximumFractionDigits: d, minimumFractionDigits: d });
 
 // ---------- Szene ----------
@@ -140,6 +141,7 @@ function unitFactor() {
 
 function placePart(autoOrient) {
   if (!baseGeo) return;
+  if (savedGrip) setGrip(null);   // neues oder gedrehtes Teil: festgelegter Greifpunkt passt nicht mehr
   const { f, auto, label } = unitFactor();
   $('#kfg-einheit-info').textContent = !auto ? '' : fileKind === 'step' || fileKind === 'muster' ? 'aus der STEP-Datei übernommen (mm)' : fileKind === 'form' ? 'Grundform in mm' : `erkannt: ${label}`;
   const geo = baseGeo.clone();
@@ -732,6 +734,29 @@ const drop = $('.kfg__drop');
 ['dragleave', 'drop'].forEach((t) => drop.addEventListener(t, (e) => { e.preventDefault(); drop.classList.remove('is-over'); }));
 drop.addEventListener('drop', (e) => e.dataTransfer.files[0] && loadFile(e.dataTransfer.files[0]));
 root.querySelectorAll('[data-src]').forEach((b) => b.addEventListener('click', () => chooseSource(b.dataset.src)));
+// ---------- Greifpunkt für den Simulator ----------
+// Markierung im 3D-Bild: Ring um die Fingerspitzen an der festgelegten Stelle
+const gpMarker = new THREE.Mesh(new THREE.TorusGeometry(1, 0.06, 10, 48), new THREE.MeshBasicMaterial({ color: 0x2e9d5b }));
+gpMarker.rotation.x = Math.PI / 2; gpMarker.visible = false; scene.add(gpMarker);
+function setGrip(g) {
+  savedGrip = g;
+  const box = $('#kfg-greifpunkt').parentElement, info = $('#kfg-gp-info');
+  box.classList.toggle('is-set', !!g);
+  gpMarker.visible = !!g;
+  if (g) {
+    const bb = new THREE.Vector3(); part.geometry.boundingBox.getSize(bb);
+    gpMarker.position.set(g.x, g.y, g.z); gpMarker.scale.setScalar(Math.max(12, A.reach * 0.22));
+    const where = `${g.inside ? 'innen' : 'außen'}, ${fmt(Math.max(0, bb.y - g.y))} mm unter der Oberkante` + (Math.abs(g.x) > 1 || Math.abs(g.z) > 1 ? `, ${fmt(g.x)} / ${fmt(g.z)} mm aus der Mitte` : ', mittig');
+    info.innerHTML = `<strong>Greifpunkt festgelegt</strong> (${A.code}, ${where}). Der <a href="#simulator">Simulator</a> greift Ihr Teil jetzt genau so.` +
+      (g.state !== 'gegriffen' ? ' Hinweis: In dieser Stellung berührt der Greifer das Teil nicht richtig.' : '');
+    $('#kfg-greifpunkt').textContent = '⊕ Greifpunkt neu festlegen';
+  } else {
+    info.innerHTML = 'Greifer mit den Reglern am Teil positionieren und zugreifen lassen, dann festlegen. Der <a href="#simulator">Simulator</a> greift Ihr Teil danach genau an dieser Stelle.';
+    $('#kfg-greifpunkt').textContent = '⊕ Greifpunkt festlegen';
+  }
+  partListeners.forEach((f) => f());
+}
+$('#kfg-greifpunkt').addEventListener('click', () => { if (lastGrip) setGrip({ ...lastGrip, gripper: A.id }); });
 $('#kfg-zentrieren').addEventListener('click', () => { $('#kfg-x').value = 0; $('#kfg-z').value = 0; update(); });
 $('#kfg-einheit').addEventListener('change', () => placePart(false));
 $('#kfg-material').addEventListener('change', () => { updateFacts(); suggest(); });
@@ -762,7 +787,7 @@ initSimulator({
   grippers: () => GRIPPERS,
   select: async (id) => { await selectGripper(id); suggest(); },
   restore: () => { A.set(0); if (part) update(); },
-  part: () => part && facts ? { geo: part.geometry, size: facts.s.clone(), mass: facts.mass, soft: facts.soft, label: partLabel, grip: facts.grip, inside: mode === 'innen', pose: lastGrip } : null,
+  part: () => part && facts ? { geo: part.geometry, size: facts.s.clone(), mass: facts.mass, soft: facts.soft, label: partLabel, grip: facts.grip, inside: mode === 'innen', pose: savedGrip } : null,
   onPart: (f) => partListeners.push(f),
 });
 window.__kfg = { sample, update, setMode, selectGripper, gripper: () => A.id, move: (x, z) => { $('#kfg-x').value = x; $('#kfg-z').value = z; update(); }, set: (h, z) => { $('#kfg-hoehe').value = h; $('#kfg-zu').value = z; update(); }, status: () => $('#kfg-status').textContent };

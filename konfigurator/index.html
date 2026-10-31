@@ -20,7 +20,7 @@
 <link rel="icon" href="../assets/logo/gmg-3d-dezent-bildmarke.svg" type="image/svg+xml">
 <link rel="alternate icon" href="../assets/img/gmg-bildmarke-3d.png" type="image/png">
 <link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
-<link rel="stylesheet" href="../assets/css/style.css?v=202610310906">
+<link rel="stylesheet" href="../assets/css/style.css?v=202610310945">
 </head>
 <body>
 <div class="draft">Entwurf / Testversion der neuen GMG-Webseite. Inhalte von gmg-system.com übernommen.</div>
@@ -119,7 +119,10 @@
       </div>
       <button type="button" class="btn btn--ghost btn--xs kfg__center" id="kfg-zentrieren">⌖ Greifer über dem Teil zentrieren</button>
       <p id="kfg-status" class="kfg__status is-info" role="status">Teil wird geladen …</p>
-      <p class="kfg__small muted kfg__simnote">Diese Greifposition (innen oder außen, Höhe und Lage) übernimmt der <a href="#simulator">Simulator</a> weiter unten.</p>
+      <div class="kfg__gp" id="greifpunkt">
+        <button type="button" class="btn btn--primary" id="kfg-greifpunkt">⊕ Greifpunkt festlegen</button>
+        <p id="kfg-gp-info" class="kfg__small">Greifer mit den Reglern am Teil positionieren und zugreifen lassen, dann festlegen. Der <a href="#simulator">Simulator</a> greift Ihr Teil danach genau an dieser Stelle.</p>
+      </div>
       <a id="kfg-anfrage" class="btn btn--primary" href="mailto:info@gmg-system.com">Anfrage mit diesem Teil <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
       </div>
     </div>
@@ -212,6 +215,6 @@
   <a class="btn btn--ghost" href="../konfigurator/index.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 16V8a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7l7 4a2 2 0 0 0 2 0l7-4a2 2 0 0 0 1-1.7z"/><path d="M3.3 7 12 12l8.7-5M12 22V12"/></svg>Konfigurator</a>
   <a class="btn btn--primary" href="../kontakt/index.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>Anfrage</a>
 </div>
-<script src="../assets/js/main.js?v=202610310906"></script><script src="../assets/js/konfigurator.js?v=202610310906" defer></script>
+<script src="../assets/js/main.js?v=202610310945"></script><script src="../assets/js/konfigurator.js?v=202610310945" defer></script>
 </body>
 </html>

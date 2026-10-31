@@ -341,8 +341,10 @@ button.kfg__card { font: inherit; text-align: left; cursor: pointer; width: 100%
 .kfg__status.is-bad { background: #fbe4e2; color: #9b2a21; }
 .kfg__stage { display: grid; gap: 18px; }
 .kfg__test { display: grid; grid-template-columns: 1fr 1fr; gap: 12px 24px; align-items: end; padding: 20px; border: 1px solid var(--line); border-radius: var(--radius); background: #fff; }
-.kfg__test .kfg__step, .kfg__test .kfg__status, .kfg__test .kfg__simnote, .kfg__test #kfg-anfrage { grid-column: 1 / -1; }
-.kfg__simnote { margin: -4px 0 0; }
+.kfg__test .kfg__step, .kfg__test .kfg__status, .kfg__test .kfg__gp, .kfg__test #kfg-anfrage { grid-column: 1 / -1; }
+.kfg__gp { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 16px; padding: 12px 14px; border: 1px dashed #9dbbd8; border-radius: 10px; background: var(--blue-soft); }
+.kfg__gp p { margin: 0; flex: 1 1 260px; color: var(--text); }
+.kfg__gp.is-set { border-style: solid; border-color: #2e9d5b; background: #e9f6ee; }
 .kfg__test .kfg__step { margin-top: 0; }
 .kfg__test #kfg-anfrage { justify-self: start; }
 .kfg__center { justify-self: stretch; padding: 12px; }
@@ -886,7 +888,10 @@ button.kfg__card { font: inherit; text-align: left; cursor: pointer; width: 100%
       </div>
       <button type="button" class="btn btn--ghost btn--xs kfg__center" id="kfg-zentrieren">⌖ Greifer über dem Teil zentrieren</button>
       <p id="kfg-status" class="kfg__status is-info" role="status">Teil wird geladen …</p>
-      <p class="kfg__small muted kfg__simnote">Diese Greifposition (innen oder außen, Höhe und Lage) übernimmt der <a href="#simulator">Simulator</a> weiter unten.</p>
+      <div class="kfg__gp" id="greifpunkt">
+        <button type="button" class="btn btn--primary" id="kfg-greifpunkt">⊕ Greifpunkt festlegen</button>
+        <p id="kfg-gp-info" class="kfg__small">Greifer mit den Reglern am Teil positionieren und zugreifen lassen, dann festlegen. Der <a href="#simulator">Simulator</a> greift Ihr Teil danach genau an dieser Stelle.</p>
+      </div>
       <a id="kfg-anfrage" class="btn btn--primary" href="mailto:info@gmg-system.com">Anfrage mit diesem Teil <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
       </div>
     </div>
