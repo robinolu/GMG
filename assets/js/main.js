@@ -74,6 +74,20 @@
     }
   }
 
+  // Kopfbereich: Greifer-Hintergrund mit Parallaxe beim Scrollen
+  var layers = document.querySelectorAll('.hero__bg-layer');
+  if (layers.length && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    var ticking = false;
+    var upd = function () {
+      ticking = false;
+      var y = window.scrollY;
+      if (y > window.innerHeight * 1.5) return;
+      layers.forEach(function (l) { l.style.setProperty('--py', (y * Number(l.dataset.depth)).toFixed(1) + 'px'); });
+    };
+    window.addEventListener('scroll', function () { if (!ticking) { ticking = true; requestAnimationFrame(upd); } }, { passive: true });
+    upd();
+  }
+
   window.gmgInit = init;
   init();
 })();

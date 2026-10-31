@@ -40,6 +40,11 @@ ICON = {
     "fingers": '<path d="M6 21V9M10 21V5M14 21V7M18 21V11"/>',
     "move": '<path d="M5 9l-3 3 3 3M9 5l3-3 3 3M15 19l-3 3-3-3M19 9l3 3-3 3M2 12h20M12 2v20"/>',
     "ruler": '<path d="M21.3 8.7 8.7 21.3a1 1 0 0 1-1.4 0l-4.6-4.6a1 1 0 0 1 0-1.4L15.3 2.7a1 1 0 0 1 1.4 0l4.6 4.6a1 1 0 0 1 0 1.4z"/><path d="m7.5 10.5 2 2M10.5 7.5l2 2M13.5 4.5l2 2M4.5 13.5l2 2"/>',
+    "food": '<path d="M3 11h18a9 9 0 0 1-18 0z"/><path d="M8 7c0-1.5 1-2 1-3.5M12 7c0-1.5 1-2 1-3.5M16 7c0-1.5 1-2 1-3.5"/>',
+    "car": '<path d="M5 17H3v-5l2-5h10l4 5h2v5h-2"/><circle cx="7.5" cy="17" r="2"/><circle cx="16.5" cy="17" r="2"/><path d="M9.5 17h5M5 12h14"/>',
+    "sack": '<path d="M8 3h8l-1.5 3.5C18 8 20 12 20 16a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5c0-4 2-8 5.5-9.5z"/><path d="M9.5 6.5h5"/>',
+    "box": '<path d="M3 7l9-4 9 4v10l-9 4-9-4z"/><path d="M3 7l9 4 9-4M12 11v10M7.5 5l9 4"/>',
+    "wrench": '<path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/>',
     "download": '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/>',
 }
 
@@ -269,18 +274,133 @@ def video_grid(videos, fallback):
             '<p class="video__hint">Die Videos werden erst nach Klick von YouTube geladen.</p>')
 
 
+# Greifer nach Prozess: Was soll der Greifer tun? (statt Produktnamen)
+PROZESSE = [
+    {"titel": "Drehteile, Wellen und Ringe greifen", "bild": "c10",
+     "text": "Runde und prismatische Teile zentrisch greifen, von innen oder außen, zum Beispiel beim Beladen von Dreh- und Fräsmaschinen.",
+     "fam": ["hexagonal", "rechteckig"]},
+    {"titel": "Schwere und große Teile heben", "bild": "s310",
+     "text": "Guss- und Schmiedeteile, große Bauteile, lange Finger: hohe Momente bis 850 Nm pro Achse und Finger, auf Wunsch mit Objektsicherung.",
+     "fam": ["schwerlast"]},
+    {"titel": "Reifen und Räder handhaben", "bild": "r_106",
+     "text": "Reifen und Räder sicher greifen und umsetzen, in Reifenlagern, in der Produktion und in der Automobilfertigung.",
+     "fam": ["reifengreifer"]},
+    {"titel": "Lebensmittel und weiche Teile greifen", "bild": "n206",
+     "text": "Teig, Fleisch und andere weiche oder unregelmäßige Teile mit gefederten Nadeln aufnehmen, abgedichtet und abwaschbar.",
+     "fam": ["nadelgreifer"]},
+    {"titel": "Kisten, Kartons und Verpackungen", "bild": "langarmgreifer",
+     "text": "Schlank in die Ecken von Kisten und Kartonagen greifen, Teile entnehmen oder Verpackungen umsetzen.",
+     "fam": ["langarmgreifer"]},
+    {"titel": "Schnell umsetzen, Finger aus dem Weg", "bild": "pw306",
+     "text": "Kurze Taktzeiten für Pick-and-place und Pressenverkettung: Die Finger schwenken bis 180° aus dem Arbeitsraum.",
+     "fam": ["winkelgreifer", "parallel-winkelgreifer"]},
+    {"titel": "Eigene Greifer und Spannvorrichtungen bauen", "bild": "e03",
+     "text": "Das Einzelfinger-Modul als Maschinenelement für Ihre eigenen Greifer, Spann- und Sondervorrichtungen.",
+     "fam": ["einzelfinger"]},
+]
+
+# Bereiche, in denen GMG heute schon stark ist
+BRANCHEN = [
+    {"icon": "food", "titel": "Lebensmittelindustrie",
+     "text": "Abgedichtete, abwaschbare Greifer aus Aluminium und nichtrostendem Stahl für Teig, Fleisch und Backwaren.",
+     "links": [("Nadelgreifer", "nadelgreifer"), ("Winkelgreifer", "winkelgreifer")]},
+    {"icon": "car", "titel": "Automotive",
+     "text": "Reifen, Räder und schwere Bauteile: robuste Greifer für Fertigung, Logistik und Reifenlager.",
+     "links": [("Reifengreifer", "reifengreifer"), ("Schwerlastgreifer", "schwerlast")]},
+    {"icon": "sack", "titel": "Sackgreifer",
+     "text": "Säcke sicher greifen, zum Beispiel Zementsäcke und andere Säcke mit Schüttgut, beim Palettieren und Depalettieren.",
+     "links": [("Sackgreifer anfragen", None)]},
+    {"icon": "box", "titel": "Verpackungsprozesse",
+     "text": "Kartons, Kisten und Gebinde handhaben: in Ecken greifen, schnell umsetzen, Verpackungen befüllen und entleeren.",
+     "links": [("Langarmgreifer", "langarmgreifer"), ("Parallel-Winkelgreifer", "parallel-winkelgreifer")]},
+]
+
+FAM_BY_SLUG = {f["slug"]: f for f in FAMILIES}
+
+
+def hero_bg(r):
+    """Viele Greifer hinter- und übereinander im Hintergrund des Kopfbereichs (3 Tiefenebenen)."""
+    import random
+    rnd = random.Random(7)
+    lagen = [
+        ("far", 0.12, 95, ["c16", "s610", "b10", "w10", "c06", "pw206", "sx10", "a06", "c03", "w03_03", "n206", "s410", "e03", "w03_04"]),
+        ("mid", 0.28, 135, ["s410", "c03", "w03_02", "n203", "b02", "pw106", "s310", "c10", "w06", "langarmgreifer"]),
+        ("near", 0.5, 175, ["s210", "c10", "w06", "r_106", "w105-a", "pw306", "b02"]),
+    ]
+    out = []
+    for lage, depth, size, bilder in lagen:
+        n = len(bilder)
+        items = []
+        for i, b in enumerate(bilder):
+            # gleichmäßig über die Breite verteilt, leicht zufällig versetzt; Höhe gestaffelt
+            x = (i + 0.5) / n * 112 - 6 + rnd.uniform(-5, 5)
+            y = rnd.uniform(-5, 85)
+            w = size * rnd.uniform(0.8, 1.2)
+            rot = rnd.uniform(-28, 28)
+            dur = rnd.uniform(14, 26)
+            items.append(f'<img src="{img(r, b)}" alt="" loading="lazy" decoding="async" '
+                         f'style="left:{x:.1f}%;top:{y:.1f}%;width:{w:.0f}px;--rot:{rot:.0f}deg;--dur:{dur:.1f}s;--del:-{rnd.uniform(0, dur):.1f}s">')
+        out.append(f'<div class="hero__bg-layer hero__bg-layer--{lage}" data-depth="{depth}">{"".join(items)}</div>')
+    return f'<div class="hero__bg" aria-hidden="true">{"".join(out)}</div>'
+
+
+def process_cards(r):
+    cards = []
+    for pz in PROZESSE:
+        chips = []
+        for slug in pz["fam"]:
+            fam = FAM_BY_SLUG[slug]
+            if "series" in fam:
+                for p in fam["series"]:
+                    if p["slug"].startswith("cp"):
+                        continue
+                    chips.append(f'<a href="{r}produkte/{slug}/{p["slug"]}/index.html">{e(p["code"])}</a>')
+            else:
+                chips.append(f'<a href="{r}produkte/{slug}/index.html">{e(fam["product"]["code"])}</a>')
+        first = pz["fam"][0]
+        cards.append(f"""<article class="proc">
+  <a class="proc__img" href="{r}produkte/{first}/index.html"><img src="{img(r, pz['bild'])}" alt="" loading="lazy"></a>
+  <div class="proc__body"><h3><a href="{r}produkte/{first}/index.html">{e(pz['titel'])}</a></h3><p>{e(pz['text'])}</p>
+  <div class="proc__chips"><span>Passende Greifer:</span>{''.join(chips)}</div></div>
+</article>""")
+    cards.append(f"""<article class="proc proc--special">
+  <div class="proc__body"><div class="tile__icon">{icon('wrench')}</div><h3>Ihr Prozess ist nicht dabei?</h3>
+  <p>Sonderanfertigungen sind möglich. Schicken Sie uns Ihr Teil, eine Zeichnung oder ein Video Ihrer Anlage. Wir entwickeln den passenden Greifer.</p>
+  <a class="btn btn--primary" href="{r}kontakt/index.html?produkt=Sonderanfertigung">Jetzt anfragen {icon('arrow')}</a></div>
+</article>""")
+    return f'<div class="procs">{"".join(cards)}</div>'
+
+
+def branchen_block(r):
+    tiles = []
+    for b in BRANCHEN:
+        links = "".join(
+            f'<a href="{r}produkte/{slug}/index.html">{e(label)} {icon("arrow")}</a>' if slug else
+            f'<a href="{r}kontakt/index.html?produkt={e(label.split()[0])}">{e(label)} {icon("arrow")}</a>'
+            for label, slug in b["links"])
+        tiles.append(f"""<div class="branche"><div class="branche__icon">{icon(b['icon'])}</div>
+  <h3>{e(b['titel'])}</h3><p>{e(b['text'])}</p><div class="branche__links">{links}</div></div>""")
+    return f'<div class="branchen">{"".join(tiles)}</div>'
+
+
+def kunden_block():
+    logos = "".join('<div class="kunde">Logo folgt</div>' for _ in range(8))
+    return f"""<div class="kunden">{logos}</div>
+<p class="kunden__note">Hier stehen bald die Logos der Unternehmen, die wir beliefern.</p>"""
+
+
 def build_home():
     r = ""
-    fams = "".join(family_card(r, f) for f in FAMILIES)
     home_videos = [{"id": "FLs6g3Z5qdc", "label": "Schwerlastgreifer S310 im Einsatz"},
                    {"id": "dITKkOq6PW4", "label": "Langarmgreifer I105"}]
     body = f"""
 <section class="hero">
+  {hero_bg(r)}
   <div class="hero__inner wrap">
     <div>
-      <span class="eyebrow">Seit 1992 · Made in Soest</span>
-      <h1>Modulare Greifersysteme <span>direkt vom Erfinder.</span></h1>
-      <p class="lead">GMG entwickelt, fertigt und vertreibt ausschließlich Greifer: technische Hände für Roboter, Maschinen und Anlagen. Form, Fingeranzahl, Bewegung und Fingerlänge wählen Sie frei.</p>
+      <span class="eyebrow">Über 25 Jahre Erfahrung · Made in Soest</span>
+      <h1>GMG entwickelt die Greifer <span>für die nächste Roboter-Generation.</span></h1>
+      <p class="lead">Wir entwickeln, fertigen und vertreiben ausschließlich Greifer: technische Hände für Roboter, Maschinen und Anlagen. Modular aufgebaut, und wo nichts von der Stange passt, als Sonderanfertigung.</p>
       <div class="btn-row">
         <a class="btn btn--primary" href="kontakt/index.html">Greiferlösung anfragen {icon('arrow')}</a>
         <a class="btn btn--ghost" href="konfigurator/index.html">{icon('cube')}Greifer im Konfigurator testen</a>
@@ -288,7 +408,7 @@ def build_home():
       <div class="hero__meta">
         <span>{icon('check')}International patentiert</span>
         <span>{icon('check')}Wartungs- &amp; schmierungsfrei</span>
-        <span>{icon('check')}Kundenspezifische Lösungen</span>
+        <span>{icon('check')}Sonderanfertigungen möglich</span>
       </div>
     </div>
     <div class="hero__visual">
@@ -303,12 +423,62 @@ def build_home():
 
 <section class="facts">
   <div class="wrap facts__grid">
-    <div class="fact"><div class="fact__value">1992</div><div class="fact__label">gegründet in Soest, international patentiert</div></div>
+    <div class="fact"><div class="fact__value"><small>über</small> 25 Jahre</div><div class="fact__label">Erfahrung, gegründet 1992 in Soest, international patentiert</div></div>
     <div class="fact"><div class="fact__value">9 / 20+</div><div class="fact__label">Produktfamilien / Baureihen</div></div>
     <div class="fact"><div class="fact__value"><small>bis</small> 44 kN</div><div class="fact__label">Greifkraft (Hohlgreifer C16, 6 bar)</div></div>
     <div class="fact"><div class="fact__value"><small>bis</small> 850 Nm</div><div class="fact__label">pro Achse und Finger (Schwerlastgreifer)</div></div>
     <div class="fact"><div class="fact__value"><small>bis</small> 10 Mio.</div><div class="fact__label">Hübe wartungsfrei</div></div>
     <div class="fact fact--badge"><img src="assets/img/made-in-germany.svg" alt="Made in Germany" width="176" height="51"><div class="fact__label">entwickelt und gefertigt in Soest</div></div>
+  </div>
+</section>
+
+<section class="section" id="produkte">
+  <div class="wrap">
+    <div class="section__head">
+      <span class="eyebrow">Greifer nach Prozess</span>
+      <h2>Was soll Ihr Greifer tun?</h2>
+      <p class="lead">Wählen Sie nach Ihrer Aufgabe, nicht nach Typenbezeichnung. Zu jedem Prozess zeigen wir die passenden Baureihen.</p>
+    </div>
+    {process_cards(r)}
+    <p class="procs__all"><a href="produkte/index.html">Alle Produktfamilien und Baureihen {icon('arrow')}</a></p>
+  </div>
+</section>
+
+<section class="section section--alt">
+  <div class="wrap">
+    <div class="section__head">
+      <span class="eyebrow">Kunden</span>
+      <h2>Diese Unternehmen setzen auf GMG</h2>
+      <p class="lead">Von Maschinenbauern und Integratoren bis zu Herstellern aus der Lebensmittel-, Automobil- und Baustoffindustrie.</p>
+    </div>
+    {kunden_block()}
+  </div>
+</section>
+
+<section class="section section--dark">
+  <div class="wrap">
+    <div class="section__head">
+      <span class="eyebrow">Hier sind wir stark</span>
+      <h2>Branchen und Prozesse, in denen sich GMG-Greifer bewährt haben</h2>
+    </div>
+    {branchen_block(r)}
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap split">
+    <div>
+      <span class="eyebrow">Sonderanfertigungen</span>
+      <h2>Kein passender Greifer dabei? Dann bauen wir ihn.</h2>
+      <p class="lead">Über 25 Jahre Erfahrung im Greiferbau stecken in jeder Sonderanfertigung. Aus unserem modularen Baukasten entsteht der Greifer für Ihre Aufgabe, entwickelt und gefertigt in Soest.</p>
+      <ul class="checklist">
+        <li>{icon('check')}<span><strong>Ihre Aufgabe:</strong> Teil, Zeichnung, STEP-Datei oder ein Video Ihrer Anlage.</span></li>
+        <li>{icon('check')}<span><strong>Unser Konzept:</strong> Greifprinzip, Finger und Backen passend zu Teil und Prozess.</span></li>
+        <li>{icon('check')}<span><strong>Ihr Greifer:</strong> gefertigt in Soest, auf Wunsch mit Signalgebern und Objektsicherung.</span></li>
+      </ul>
+      <div class="btn-row"><a class="btn btn--primary" href="kontakt/index.html?produkt=Sonderanfertigung">Sonderanfertigung anfragen {icon('arrow')}</a></div>
+    </div>
+    <div class="special__img"><img src="{img(r, 'home-02')}" alt="Kundenspezifischer GMG-Greifer" loading="lazy"></div>
   </div>
 </section>
 
@@ -335,17 +505,6 @@ def build_home():
           <span class="card__more">Simulator ansehen {icon('arrow')}</span></div></div>
       </a>
     </div>
-  </div>
-</section>
-
-<section class="section" id="produkte">
-  <div class="wrap">
-    <div class="section__head">
-      <span class="eyebrow">Produkte</span>
-      <h2>Der passende Greifer für Ihre Aufgabe</h2>
-      <p class="lead">Neun Produktfamilien, vom kompakten Winkelgreifer bis zum Schwerlastgreifer mit bis zu 850 Nm pro Achse und Finger.</p>
-    </div>
-    <div class="grid grid--3">{fams}</div>
   </div>
 </section>
 
@@ -402,8 +561,15 @@ def build_overview():
   <h1>Produkte</h1>
   <p class="lead">Neun Produktfamilien mit über 20 Baureihen: Greifer für Roboter, Maschinen und Handhabungsgeräte, modular aufgebaut und auf Wunsch kundenspezifisch.</p>
 </div></section>
-<section class="section"><div class="wrap"><div class="grid grid--3">{fams}</div></div></section>
+<section class="section"><div class="wrap">
+  <div class="section__head"><span class="eyebrow">Nach Prozess</span><h2>Was soll Ihr Greifer tun?</h2></div>
+  {process_cards(r)}
+</div></section>
 <section class="section section--alt"><div class="wrap">
+  <div class="section__head"><span class="eyebrow">Nach Produktfamilie</span><h2>Alle Produktfamilien</h2></div>
+  <div class="grid grid--3">{fams}</div>
+</div></section>
+<section class="section"><div class="wrap">
   <div class="section__head"><span class="eyebrow">Übersicht</span><h2>Alle Baureihen auf einen Blick</h2></div>
   <div class="table-wrap"><table><thead><tr><th>Baureihe</th><th>Beschreibung</th><th>Familie</th></tr></thead><tbody>{''.join(rows)}</tbody></table></div>
 </div></section>
