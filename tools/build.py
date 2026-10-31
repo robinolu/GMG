@@ -288,8 +288,8 @@ PROZESSE = [
     {"titel": "Lebensmittel und weiche Teile greifen", "bild": "n206",
      "text": "Teig, Fleisch und andere weiche oder unregelmäßige Teile mit gefederten Nadeln aufnehmen, abgedichtet und abwaschbar.",
      "fam": ["nadelgreifer"]},
-    {"titel": "Kisten, Kartons und Verpackungen", "bild": "langarmgreifer",
-     "text": "Schlank in die Ecken von Kisten und Kartonagen greifen, Teile entnehmen oder Verpackungen umsetzen.",
+    {"titel": "Kugellager und Ringe von innen greifen", "bild": "langarmgreifer",
+     "text": "Runde Teile mit Bohrung wie Kugellager, Ringe und Buchsen von innen greifen, mit langen, schlanken Fingern auch tief aus Kisten und Kartons.",
      "fam": ["langarmgreifer"]},
     {"titel": "Schnell umsetzen, Finger aus dem Weg", "bild": "pw306",
      "text": "Kurze Taktzeiten für Pick-and-place und Pressenverkettung: Die Finger schwenken bis 180° aus dem Arbeitsraum.",
@@ -311,7 +311,7 @@ BRANCHEN = [
      "text": "Säcke sicher greifen, zum Beispiel Zementsäcke und andere Säcke mit Schüttgut, beim Palettieren und Depalettieren.",
      "links": [("Sackgreifer anfragen", None)]},
     {"icon": "box", "titel": "Verpackungsprozesse",
-     "text": "Kartons, Kisten und Gebinde handhaben: in Ecken greifen, schnell umsetzen, Verpackungen befüllen und entleeren.",
+     "text": "Teile in Verpackungen einsetzen und aus Kisten und Kartons entnehmen, schnell umsetzen, Verpackungsanlagen beschicken.",
      "links": [("Langarmgreifer", "langarmgreifer"), ("Parallel-Winkelgreifer", "parallel-winkelgreifer")]},
 ]
 
@@ -843,7 +843,7 @@ def build_about():
     <div class="tile"><div class="tile__num">1992</div><h3>Gründung</h3><p>Gründung der GMG Gesellschaft für modulare Greifersysteme mbH in Soest.</p></div>
     <div class="tile"><div class="tile__num">Erfindung</div><h3>Modulare Greifersysteme</h3><p>Freie Wahl von Form, Fingeranzahl, Bewegungsform und Fingerlänge.</p></div>
     <div class="tile"><div class="tile__num">Erfindung</div><h3>Parallel-Winkelgreifer &amp; Schwerlastgreifer</h3><p>In den Industrienationen patentiert und richtungweisend.</p></div>
-    <div class="tile"><div class="tile__num">Neu</div><h3>Langarmgreifer I105</h3><p>Schlanker 3-Finger-Greifer für den Griff in die Ecken von Kisten. Patent angemeldet.</p></div>
+    <div class="tile"><div class="tile__num">Neu</div><h3>Langarmgreifer I105</h3><p>Schlanker 3-Finger-Greifer, der Kugellager und Ringe von innen greift, auch tief aus Kisten. Patent angemeldet.</p></div>
   </div>
 </div></section>
 <section class="section"><div class="wrap">

@@ -134,7 +134,7 @@ p { margin: 0 0 1em; }
 }
 .hero::after {
   content: ""; position: absolute; inset: 0;
-  background: linear-gradient(90deg, var(--bg-alt) 30%, rgba(244,246,248,.55) 65%, rgba(244,246,248,0));
+  background: linear-gradient(90deg, rgba(244,246,248,.72) 30%, rgba(244,246,248,.35) 52%, rgba(244,246,248,0) 72%);
   pointer-events: none;
 }
 .hero__inner { position: relative; z-index: 1; display: grid; grid-template-columns: 1.05fr 1fr; gap: 48px; align-items: center; padding: 88px 24px 96px; }
@@ -535,6 +535,96 @@ button.kfg__card { font: inherit; text-align: left; cursor: pointer; width: 100%
 .promo3d__body p { margin: 0 0 12px; }
 .promo3d__step { flex: none; width: 36px; height: 36px; border-radius: 50%; background: var(--blue); color: #fff; display: grid; place-items: center; font-weight: 750; }
 @media (max-width: 860px) { .promo3d__grid { grid-template-columns: 1fr; } }
+
+/* Kopfbereich: viele Greifer im Hintergrund, hinter- und übereinander */
+.hero__bg { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.hero__bg-layer { position: absolute; inset: -10% 0; transform: translate3d(0, var(--py, 0px), 0); will-change: transform; }
+.hero__bg-layer img { position: absolute; height: auto; transform: translate(-50%, 0) rotate(var(--rot)); animation: heroFloat var(--dur) ease-in-out var(--del) infinite alternate; }
+.hero__bg-layer--far img { opacity: .3; filter: grayscale(.8) blur(1.5px); }
+.hero__bg-layer--mid img { opacity: .5; filter: grayscale(.4) blur(.4px); }
+.hero__bg-layer--near img { opacity: .75; filter: drop-shadow(0 18px 24px rgba(16,24,40,.22)); }
+@keyframes heroFloat {
+  0%   { transform: translate(-50%, 0) rotate(var(--rot)); }
+  25%  { transform: translate(calc(-50% + var(--ax)), calc(var(--ay) * -.6)) rotate(calc(var(--rot) + var(--ar))); }
+  50%  { transform: translate(calc(-50% + var(--ax) * .4), calc(var(--ay) * -1)) rotate(calc(var(--rot) - var(--ar) * .5)); }
+  75%  { transform: translate(calc(-50% - var(--ax) * .5), calc(var(--ay) * -.3)) rotate(calc(var(--rot) + var(--ar) * .7)); }
+  100% { transform: translate(-50%, 0) rotate(var(--rot)); }
+}
+.hero__bg-layer img { animation-direction: normal; animation-timing-function: ease-in-out; }
+/* Vordergrund-Greifer: taucht unten auf, ragt ins Bild, überdeckt kurz andere Elemente und sinkt wieder ab */
+.hero__front { position: absolute; left: 50%; bottom: 0; width: 360px; height: 0; z-index: 2; pointer-events: none; }
+.hero__front img { position: absolute; left: 0; top: 0; width: 100%; height: auto; transform: translate(-50%, 10%) rotate(-12deg);
+  filter: drop-shadow(0 30px 40px rgba(16,24,40,.35)); animation: heroPeek 26s ease-in-out 4s infinite; }
+@keyframes heroPeek {
+  0%, 30%   { transform: translate(-50%, 10%) rotate(-12deg); }
+  42%       { transform: translate(-40%, -62%) rotate(-4deg); }
+  52%       { transform: translate(-30%, -55%) rotate(6deg); }
+  62%       { transform: translate(-45%, -66%) rotate(-2deg); }
+  76%, 100% { transform: translate(-60%, 10%) rotate(-16deg); }
+}
+.hero { --peek: 1; }
+@media (prefers-reduced-motion: reduce) { .hero__bg-layer img, .hero__front img { animation: none; } }
+@media (max-width: 860px) { .hero__front { width: 220px; left: 70%; } }
+
+/* Greifer nach Prozess */
+.procs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+.proc { display: flex; flex-direction: column; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; transition: border-color .15s, box-shadow .15s, transform .15s; }
+.proc:hover { border-color: var(--blue); box-shadow: var(--shadow); transform: translateY(-2px); }
+.proc__img { height: 180px; background: var(--bg-alt); display: flex; align-items: center; justify-content: center; padding: 18px; }
+.proc__img img { max-height: 100%; max-width: 100%; width: auto; height: auto; object-fit: contain; }
+.proc__body { padding: 18px 20px 20px; display: flex; flex-direction: column; gap: 8px; flex: 1; }
+.proc__body h3 { margin: 0; font-size: 1.08rem; }
+.proc__body h3 a { color: var(--ink); }
+.proc__body p { margin: 0; font-size: .93rem; color: var(--muted); }
+.proc__chips { margin-top: auto; padding-top: 10px; display: flex; flex-wrap: wrap; gap: 6px; align-items: center; }
+.proc__chips span { font-size: .78rem; color: var(--muted); width: 100%; }
+.proc__chips a { font-size: .8rem; font-weight: 650; color: var(--blue); background: var(--blue-soft); padding: 3px 8px; border-radius: 4px; }
+.proc__chips a:hover { background: var(--blue); color: #fff; text-decoration: none; }
+.proc--special { background: var(--ink); border-color: var(--ink); justify-content: center; }
+.proc--special h3, .proc--special p { color: #fff; }
+.proc--special p { color: #cfd6de; }
+.proc--special .btn { margin-top: 12px; align-self: flex-start; }
+.procs__all { margin: 24px 0 0; text-align: center; font-weight: 650; }
+.procs__all a { display: inline-flex; align-items: center; gap: 6px; }
+.procs__all svg { width: 16px; height: 16px; }
+
+/* Kunden */
+.kunden { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+.kunde { height: 96px; display: grid; place-items: center; background: #fff; border: 1px dashed var(--line); border-radius: var(--radius); color: var(--muted); font-size: .85rem; }
+.kunden__note { margin: 16px 0 0; text-align: center; color: var(--muted); font-size: .88rem; }
+
+/* Branchen, in denen GMG stark ist */
+.section--dark { background: var(--ink); }
+.section--dark h2, .section--dark h3 { color: #fff; }
+.section--dark .eyebrow { color: #7fb6e6; }
+.branchen { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+.branche { padding: 28px 24px; border: 1px solid rgba(255,255,255,.12); border-radius: var(--radius); background: rgba(255,255,255,.04); display: flex; flex-direction: column; gap: 10px; }
+.branche__icon { width: 52px; height: 52px; border-radius: 10px; background: var(--blue); color: #fff; display: grid; place-items: center; }
+.branche__icon svg { width: 28px; height: 28px; }
+.branche h3 { margin: 6px 0 0; font-size: 1.2rem; }
+.branche p { margin: 0; color: #b8c2cd; font-size: .95rem; }
+.branche__links { margin-top: auto; padding-top: 8px; display: flex; flex-direction: column; gap: 6px; }
+.branche__links a { color: #7fb6e6; font-weight: 650; font-size: .93rem; display: inline-flex; align-items: center; gap: 6px; }
+.branche__links svg { width: 15px; height: 15px; }
+.special__img { background: var(--bg-alt); border-radius: var(--radius); padding: 32px; display: flex; justify-content: center; }
+.special__img img { max-height: 420px; width: auto; }
+
+@media (max-width: 1080px) {
+  .procs, .branchen { grid-template-columns: repeat(2, 1fr); }
+}
+@media (max-width: 860px) {
+  .kunden { grid-template-columns: repeat(2, 1fr); }
+  .hero__bg-layer--near img { opacity: .45; }
+}
+@media (max-width: 520px) {
+  .procs, .branchen { grid-template-columns: 1fr; }
+}
+/* heller Schein hinter dem Roboter, damit er sich vom Greifer-Hintergrund abhebt */
+.hero__visual { position: relative; }
+.hero__visual::before { content: ""; position: absolute; inset: -6% -10%; background: radial-gradient(closest-side, rgba(244,246,248,.9) 45%, rgba(244,246,248,0)); pointer-events: none; }
+.hero3d, .hero3d__note { position: relative; }
+.hero3d__note { width: fit-content; margin-inline: auto; padding: 2px 8px; border-radius: 4px; background: rgba(244,246,248,.85); }
+.hero h1, .hero .lead, .hero__meta, .hero .eyebrow { text-shadow: 0 0 14px rgba(244,246,248,.95), 0 0 4px rgba(244,246,248,.9); }
 </style>
 </head>
 <body>
@@ -652,11 +742,12 @@ button.kfg__card { font: inherit; text-align: left; cursor: pointer; width: 100%
 <template id="p:">
 
 <section class="hero">
+  <div class="hero__bg" aria-hidden="true"><div class="hero__bg-layer hero__bg-layer--far" data-depth="0.12"><img data-img="c16" alt="" loading="lazy" decoding="async" style="left:1.6%;top:8.6%;width:148px;--rot:-24deg;--ax:-29px;--ay:-33px;--ar:4deg;--dur:39.6s;--del:-16.6s"><img data-img="s610" alt="" loading="lazy" decoding="async" style="left:19.4%;top:44.6%;width:115px;--rot:4deg;--ax:-36px;--ay:27px;--ar:-4deg;--dur:47.1s;--del:-2.2s"><img data-img="w10" alt="" loading="lazy" decoding="async" style="left:44.3%;top:21.1%;width:120px;--rot:-21deg;--ax:-40px;--ay:-17px;--ar:-6deg;--dur:35.6s;--del:-20.1s"><img data-img="pw206" alt="" loading="lazy" decoding="async" style="left:60.5%;top:39.7%;width:142px;--rot:16deg;--ax:43px;--ay:-21px;--ar:-7deg;--dur:38.4s;--del:-3.1s"><img data-img="sx10" alt="" loading="lazy" decoding="async" style="left:76.0%;top:39.6%;width:131px;--rot:-3deg;--ax:22px;--ay:18px;--ar:5deg;--dur:41.0s;--del:-17.3s"><img data-img="a06" alt="" loading="lazy" decoding="async" style="left:101.3%;top:2.0%;width:143px;--rot:16deg;--ax:29px;--ay:27px;--ar:-4deg;--dur:44.7s;--del:-42.3s"></div><div class="hero__bg-layer hero__bg-layer--mid" data-depth="0.28"><img data-img="s410" alt="" loading="lazy" decoding="async" style="left:4.9%;top:54.8%;width:165px;--rot:11deg;--ax:45px;--ay:21px;--ar:8deg;--dur:41.6s;--del:-0.9s"><img data-img="w03_02" alt="" loading="lazy" decoding="async" style="left:27.2%;top:10.1%;width:169px;--rot:-25deg;--ax:-23px;--ay:23px;--ar:4deg;--dur:43.8s;--del:-17.6s"><img data-img="n203" alt="" loading="lazy" decoding="async" style="left:47.8%;top:7.3%;width:194px;--rot:3deg;--ax:45px;--ay:-34px;--ar:-4deg;--dur:42.7s;--del:-9.9s"><img data-img="b02" alt="" loading="lazy" decoding="async" style="left:69.7%;top:38.6%;width:207px;--rot:-13deg;--ax:30px;--ay:27px;--ar:-9deg;--dur:30.1s;--del:-13.7s"><img data-img="c10" alt="" loading="lazy" decoding="async" style="left:98.5%;top:80.7%;width:214px;--rot:3deg;--ax:30px;--ay:-28px;--ar:-5deg;--dur:37.2s;--del:-16.4s"></div><div class="hero__bg-layer hero__bg-layer--near" data-depth="0.5"><img data-img="s210" alt="" loading="lazy" decoding="async" style="left:4.1%;top:49.1%;width:219px;--rot:4deg;--ax:-44px;--ay:-16px;--ar:-7deg;--dur:39.7s;--del:-25.2s"><img data-img="w06" alt="" loading="lazy" decoding="async" style="left:40.6%;top:49.2%;width:257px;--rot:-22deg;--ax:44px;--ay:-25px;--ar:5deg;--dur:38.8s;--del:-28.7s"><img data-img="r_106" alt="" loading="lazy" decoding="async" style="left:63.8%;top:57.3%;width:262px;--rot:-17deg;--ax:-29px;--ay:30px;--ar:-9deg;--dur:47.1s;--del:-32.8s"><img data-img="pw306" alt="" loading="lazy" decoding="async" style="left:89.6%;top:28.0%;width:225px;--rot:15deg;--ax:39px;--ay:-28px;--ar:8deg;--dur:39.6s;--del:-29.3s"></div></div><div class="hero__front" aria-hidden="true"><img data-img="s310" alt="" loading="lazy" decoding="async"></div>
   <div class="hero__inner wrap">
     <div>
-      <span class="eyebrow">Seit 1992 · Made in Soest</span>
-      <h1>Modulare Greifersysteme <span>direkt vom Erfinder.</span></h1>
-      <p class="lead">GMG entwickelt, fertigt und vertreibt ausschließlich Greifer: technische Hände für Roboter, Maschinen und Anlagen. Form, Fingeranzahl, Bewegung und Fingerlänge wählen Sie frei.</p>
+      <span class="eyebrow">Über 25 Jahre Erfahrung · Made in Soest</span>
+      <h1>GMG entwickelt die Greifer <span>für die nächste Roboter-Generation.</span></h1>
+      <p class="lead">Wir entwickeln, fertigen und vertreiben ausschließlich Greifer: technische Hände für Roboter, Maschinen und Anlagen. Modular aufgebaut, und wo nichts von der Stange passt, als Sonderanfertigung.</p>
       <div class="btn-row">
         <a class="btn btn--primary" href="#/kontakt">Greiferlösung anfragen <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
         <a class="btn btn--ghost" href="#/konfigurator"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 16V8a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7l7 4a2 2 0 0 0 2 0l7-4a2 2 0 0 0 1-1.7z"/><path d="M3.3 7 12 12l8.7-5M12 22V12"/></svg>Greifer im Konfigurator testen</a>
@@ -664,7 +755,7 @@ button.kfg__card { font: inherit; text-align: left; cursor: pointer; width: 100%
       <div class="hero__meta">
         <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m8 12 3 3 5-6"/></svg>International patentiert</span>
         <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m8 12 3 3 5-6"/></svg>Wartungs- &amp; schmierungsfrei</span>
-        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m8 12 3 3 5-6"/></svg>Kundenspezifische Lösungen</span>
+        <span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m8 12 3 3 5-6"/></svg>Sonderanfertigungen möglich</span>
       </div>
     </div>
     <div class="hero__visual">
@@ -672,19 +763,105 @@ button.kfg__card { font: inherit; text-align: left; cursor: pointer; width: 100%
         <img class="hero3d__fallback" data-img="b02" alt="GMG-Greifer B02">
         <canvas aria-label="3D-Szene: Roboter mit Greifer setzt beim Scrollen ein Kugellager von einem Tisch auf den anderen"></canvas>
       </div>
-      <p class="hero3d__note">3D-Testszene mit Testgreifer Tentra T3 – wird durch einen GMG-Greifer ersetzt</p>
     </div>
   </div>
 </section>
 
 <section class="facts">
   <div class="wrap facts__grid">
-    <div class="fact"><div class="fact__value">1992</div><div class="fact__label">gegründet in Soest, international patentiert</div></div>
+    <div class="fact"><div class="fact__value"><small>über</small> 25 Jahre</div><div class="fact__label">Erfahrung, gegründet 1992 in Soest, international patentiert</div></div>
     <div class="fact"><div class="fact__value">9 / 20+</div><div class="fact__label">Produktfamilien / Baureihen</div></div>
     <div class="fact"><div class="fact__value"><small>bis</small> 44 kN</div><div class="fact__label">Greifkraft (Hohlgreifer C16, 6 bar)</div></div>
     <div class="fact"><div class="fact__value"><small>bis</small> 850 Nm</div><div class="fact__label">pro Achse und Finger (Schwerlastgreifer)</div></div>
     <div class="fact"><div class="fact__value"><small>bis</small> 10 Mio.</div><div class="fact__label">Hübe wartungsfrei</div></div>
     <div class="fact fact--badge"><img data-img="made-in-germany" alt="Made in Germany" width="176" height="51"><div class="fact__label">entwickelt und gefertigt in Soest</div></div>
+  </div>
+</section>
+
+<section class="section" id="produkte">
+  <div class="wrap">
+    <div class="section__head">
+      <span class="eyebrow">Greifer nach Prozess</span>
+      <h2>Was soll Ihr Greifer tun?</h2>
+      <p class="lead">Wählen Sie nach Ihrer Aufgabe, nicht nach Typenbezeichnung. Zu jedem Prozess zeigen wir die passenden Baureihen.</p>
+    </div>
+    <div class="procs"><article class="proc">
+  <a class="proc__img" href="#/produkte/hexagonal"><img data-img="c10" alt="" loading="lazy"></a>
+  <div class="proc__body"><h3><a href="#/produkte/hexagonal">Drehteile, Wellen und Ringe greifen</a></h3><p>Runde und prismatische Teile zentrisch greifen, von innen oder außen, zum Beispiel beim Beladen von Dreh- und Fräsmaschinen.</p>
+  <div class="proc__chips"><span>Passende Greifer:</span><a href="#/produkte/hexagonal/c03">C03</a><a href="#/produkte/hexagonal/c06">C06</a><a href="#/produkte/hexagonal/c10">C10</a><a href="#/produkte/hexagonal/c16">C16</a><a href="#/produkte/rechteckig/b02">B02</a><a href="#/produkte/rechteckig/a06">A06</a><a href="#/produkte/rechteckig/b10">B10</a></div></div>
+</article><article class="proc">
+  <a class="proc__img" href="#/produkte/schwerlast"><img data-img="s310" alt="" loading="lazy"></a>
+  <div class="proc__body"><h3><a href="#/produkte/schwerlast">Schwere und große Teile heben</a></h3><p>Guss- und Schmiedeteile, große Bauteile, lange Finger: hohe Momente bis 850 Nm pro Achse und Finger, auf Wunsch mit Objektsicherung.</p>
+  <div class="proc__chips"><span>Passende Greifer:</span><a href="#/produkte/schwerlast/sx10">SX10</a><a href="#/produkte/schwerlast/s210">S210</a><a href="#/produkte/schwerlast/s310">S310</a><a href="#/produkte/schwerlast/s410">S410</a><a href="#/produkte/schwerlast/s610">S610</a></div></div>
+</article><article class="proc">
+  <a class="proc__img" href="#/produkte/reifengreifer"><img data-img="r_106" alt="" loading="lazy"></a>
+  <div class="proc__body"><h3><a href="#/produkte/reifengreifer">Reifen und Räder handhaben</a></h3><p>Reifen und Räder sicher greifen und umsetzen, in Reifenlagern, in der Produktion und in der Automobilfertigung.</p>
+  <div class="proc__chips"><span>Passende Greifer:</span><a href="#/produkte/reifengreifer">R106</a></div></div>
+</article><article class="proc">
+  <a class="proc__img" href="#/produkte/nadelgreifer"><img data-img="n206" alt="" loading="lazy"></a>
+  <div class="proc__body"><h3><a href="#/produkte/nadelgreifer">Lebensmittel und weiche Teile greifen</a></h3><p>Teig, Fleisch und andere weiche oder unregelmäßige Teile mit gefederten Nadeln aufnehmen, abgedichtet und abwaschbar.</p>
+  <div class="proc__chips"><span>Passende Greifer:</span><a href="#/produkte/nadelgreifer/n203">N203</a><a href="#/produkte/nadelgreifer/n206">N206</a></div></div>
+</article><article class="proc">
+  <a class="proc__img" href="#/produkte/langarmgreifer"><img data-img="langarmgreifer" alt="" loading="lazy"></a>
+  <div class="proc__body"><h3><a href="#/produkte/langarmgreifer">Kugellager und Ringe von innen greifen</a></h3><p>Runde Teile mit Bohrung wie Kugellager, Ringe und Buchsen von innen greifen, mit langen, schlanken Fingern auch tief aus Kisten und Kartons.</p>
+  <div class="proc__chips"><span>Passende Greifer:</span><a href="#/produkte/langarmgreifer">I105</a></div></div>
+</article><article class="proc">
+  <a class="proc__img" href="#/produkte/winkelgreifer"><img data-img="pw306" alt="" loading="lazy"></a>
+  <div class="proc__body"><h3><a href="#/produkte/winkelgreifer">Schnell umsetzen, Finger aus dem Weg</a></h3><p>Kurze Taktzeiten für Pick-and-place und Pressenverkettung: Die Finger schwenken bis 180° aus dem Arbeitsraum.</p>
+  <div class="proc__chips"><span>Passende Greifer:</span><a href="#/produkte/winkelgreifer/w03-winkelgreifer">W03</a><a href="#/produkte/winkelgreifer/w05-winkelgreifer">W05</a><a href="#/produkte/winkelgreifer/w06-winkelgreifer">W06</a><a href="#/produkte/winkelgreifer/w10-winkelgreifer">W10</a><a href="#/produkte/parallel-winkelgreifer/pw106">PW106</a><a href="#/produkte/parallel-winkelgreifer/pw206">PW206</a><a href="#/produkte/parallel-winkelgreifer/pw306">PW306</a></div></div>
+</article><article class="proc">
+  <a class="proc__img" href="#/produkte/einzelfinger"><img data-img="e03" alt="" loading="lazy"></a>
+  <div class="proc__body"><h3><a href="#/produkte/einzelfinger">Eigene Greifer und Spannvorrichtungen bauen</a></h3><p>Das Einzelfinger-Modul als Maschinenelement für Ihre eigenen Greifer, Spann- und Sondervorrichtungen.</p>
+  <div class="proc__chips"><span>Passende Greifer:</span><a href="#/produkte/einzelfinger">E03</a></div></div>
+</article><article class="proc proc--special">
+  <div class="proc__body"><div class="tile__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></div><h3>Ihr Prozess ist nicht dabei?</h3>
+  <p>Sonderanfertigungen sind möglich. Schicken Sie uns Ihr Teil, eine Zeichnung oder ein Video Ihrer Anlage. Wir entwickeln den passenden Greifer.</p>
+  <a class="btn btn--primary" href="#/kontakt?produkt=Sonderanfertigung">Jetzt anfragen <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+</article></div>
+    <p class="procs__all"><a href="#/produkte">Alle Produktfamilien und Baureihen <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></p>
+  </div>
+</section>
+
+<section class="section section--alt">
+  <div class="wrap">
+    <div class="section__head">
+      <span class="eyebrow">Kunden</span>
+      <h2>Diese Unternehmen setzen auf GMG</h2>
+      <p class="lead">Von Maschinenbauern und Integratoren bis zu Herstellern aus der Lebensmittel-, Automobil- und Baustoffindustrie.</p>
+    </div>
+    <div class="kunden"><div class="kunde">Logo folgt</div><div class="kunde">Logo folgt</div><div class="kunde">Logo folgt</div><div class="kunde">Logo folgt</div><div class="kunde">Logo folgt</div><div class="kunde">Logo folgt</div><div class="kunde">Logo folgt</div><div class="kunde">Logo folgt</div></div>
+<p class="kunden__note">Hier stehen bald die Logos der Unternehmen, die wir beliefern.</p>
+  </div>
+</section>
+
+<section class="section section--dark">
+  <div class="wrap">
+    <div class="section__head">
+      <span class="eyebrow">Hier sind wir stark</span>
+      <h2>Branchen und Prozesse, in denen sich GMG-Greifer bewährt haben</h2>
+    </div>
+    <div class="branchen"><div class="branche"><div class="branche__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 11h18a9 9 0 0 1-18 0z"/><path d="M8 7c0-1.5 1-2 1-3.5M12 7c0-1.5 1-2 1-3.5M16 7c0-1.5 1-2 1-3.5"/></svg></div>
+  <h3>Lebensmittelindustrie</h3><p>Abgedichtete, abwaschbare Greifer aus Aluminium und nichtrostendem Stahl für Teig, Fleisch und Backwaren.</p><div class="branche__links"><a href="#/produkte/nadelgreifer">Nadelgreifer <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a><a href="#/produkte/winkelgreifer">Winkelgreifer <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div></div><div class="branche"><div class="branche__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 17H3v-5l2-5h10l4 5h2v5h-2"/><circle cx="7.5" cy="17" r="2"/><circle cx="16.5" cy="17" r="2"/><path d="M9.5 17h5M5 12h14"/></svg></div>
+  <h3>Automotive</h3><p>Reifen, Räder und schwere Bauteile: robuste Greifer für Fertigung, Logistik und Reifenlager.</p><div class="branche__links"><a href="#/produkte/reifengreifer">Reifengreifer <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a><a href="#/produkte/schwerlast">Schwerlastgreifer <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div></div><div class="branche"><div class="branche__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3h8l-1.5 3.5C18 8 20 12 20 16a5 5 0 0 1-5 5H9a5 5 0 0 1-5-5c0-4 2-8 5.5-9.5z"/><path d="M9.5 6.5h5"/></svg></div>
+  <h3>Sackgreifer</h3><p>Säcke sicher greifen, zum Beispiel Zementsäcke und andere Säcke mit Schüttgut, beim Palettieren und Depalettieren.</p><div class="branche__links"><a href="#/kontakt?produkt=Sackgreifer">Sackgreifer anfragen <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div></div><div class="branche"><div class="branche__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7l9-4 9 4v10l-9 4-9-4z"/><path d="M3 7l9 4 9-4M12 11v10M7.5 5l9 4"/></svg></div>
+  <h3>Verpackungsprozesse</h3><p>Teile in Verpackungen einsetzen und aus Kisten und Kartons entnehmen, schnell umsetzen, Verpackungsanlagen beschicken.</p><div class="branche__links"><a href="#/produkte/langarmgreifer">Langarmgreifer <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a><a href="#/produkte/parallel-winkelgreifer">Parallel-Winkelgreifer <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div></div></div>
+  </div>
+</section>
+
+<section class="section">
+  <div class="wrap split">
+    <div>
+      <span class="eyebrow">Sonderanfertigungen</span>
+      <h2>Kein passender Greifer dabei? Dann bauen wir ihn.</h2>
+      <p class="lead">Über 25 Jahre Erfahrung im Greiferbau stecken in jeder Sonderanfertigung. Aus unserem modularen Baukasten entsteht der Greifer für Ihre Aufgabe, entwickelt und gefertigt in Soest.</p>
+      <ul class="checklist">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m8 12 3 3 5-6"/></svg><span><strong>Ihre Aufgabe:</strong> Teil, Zeichnung, STEP-Datei oder ein Video Ihrer Anlage.</span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m8 12 3 3 5-6"/></svg><span><strong>Unser Konzept:</strong> Greifprinzip, Finger und Backen passend zu Teil und Prozess.</span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="m8 12 3 3 5-6"/></svg><span><strong>Ihr Greifer:</strong> gefertigt in Soest, auf Wunsch mit Signalgebern und Objektsicherung.</span></li>
+      </ul>
+      <div class="btn-row"><a class="btn btn--primary" href="#/kontakt?produkt=Sonderanfertigung">Sonderanfertigung anfragen <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+    </div>
+    <div class="special__img"><img data-img="home-02" alt="Kundenspezifischer GMG-Greifer" loading="lazy"></div>
   </div>
 </section>
 
@@ -711,53 +888,6 @@ button.kfg__card { font: inherit; text-align: left; cursor: pointer; width: 100%
           <span class="card__more">Simulator ansehen <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div></div>
       </a>
     </div>
-  </div>
-</section>
-
-<section class="section" id="produkte">
-  <div class="wrap">
-    <div class="section__head">
-      <span class="eyebrow">Produkte</span>
-      <h2>Der passende Greifer für Ihre Aufgabe</h2>
-      <p class="lead">Neun Produktfamilien, vom kompakten Winkelgreifer bis zum Schwerlastgreifer mit bis zu 850 Nm pro Achse und Finger.</p>
-    </div>
-    <div class="grid grid--3"><a class="card" href="#/produkte/hexagonal">
-  <div class="card__img"><img data-img="c03" alt="Hexagonale Bauform" loading="lazy"></div>
-  <div class="card__body"><span class="badge">5 Baureihen</span><h3>Hexagonale Bauform</h3><p>2- bis 6-Finger-Greifer mit kreisförmiger Anordnung der Greiferfinger.</p>
-  <span class="card__more">Ansehen <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
-</a><a class="card" href="#/produkte/rechteckig">
-  <div class="card__img"><img data-img="b02" alt="Rechteckige Bauform" loading="lazy"></div>
-  <div class="card__body"><span class="badge">4 Baureihen</span><h3>Rechteckige Bauform</h3><p>2- bis 6-Finger-Greifer mit rechtwinkliger Anordnung der Greiferfinger.</p>
-  <span class="card__more">Ansehen <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
-</a><a class="card" href="#/produkte/einzelfinger">
-  <div class="card__img"><img data-img="e03" alt="Einzelfinger" loading="lazy"></div>
-  <div class="card__body"><span class="badge">1 Baureihe</span><h3>Einzelfinger</h3><p>Greifer- und Spannmodul E03 – Maschinenelement für Eigenkonstruktionen.</p>
-  <span class="card__more">Ansehen <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
-</a><a class="card" href="#/produkte/winkelgreifer">
-  <div class="card__img"><img data-img="w06" alt="Winkelgreifer" loading="lazy"></div>
-  <div class="card__body"><span class="badge">4 Baureihen</span><h3>Winkelgreifer</h3><p>Abgedichtete 180°-Winkelgreifer in extrem robuster Ausführung.</p>
-  <span class="card__more">Ansehen <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
-</a><a class="card" href="#/produkte/parallel-winkelgreifer">
-  <div class="card__img"><img data-img="pw206" alt="Parallel-Winkelgreifer" loading="lazy"></div>
-  <div class="card__body"><span class="badge">3 Baureihen</span><h3>Parallel-Winkelgreifer</h3><p>2- oder 3-Finger-Greifer mit maximaler Fingeröffnung und vier angetriebenen Armen pro Backe. Eine GMG-Erfindung.</p>
-  <span class="card__more">Ansehen <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
-</a><a class="card" href="#/produkte/schwerlast">
-  <div class="card__img"><img data-img="s310" alt="Schwerlastgreifer" loading="lazy"></div>
-  <div class="card__body"><span class="badge">5 Baureihen</span><h3>Schwerlastgreifer</h3><p>Modularer Greifertyp mit bis zu 850 Nm Belastbarkeit pro Achse und Finger.</p>
-  <span class="card__more">Ansehen <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
-</a><a class="card" href="#/produkte/reifengreifer">
-  <div class="card__img"><img data-img="r_106" alt="Reifengreifer" loading="lazy"></div>
-  <div class="card__body"><span class="badge">1 Baureihe</span><h3>Reifengreifer</h3><p>Der meistnachgebaute Greifer. Direkt vom Erfinder.</p>
-  <span class="card__more">Ansehen <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
-</a><a class="card" href="#/produkte/nadelgreifer">
-  <div class="card__img"><img data-img="n203" alt="Nadelgreifer" loading="lazy"></div>
-  <div class="card__body"><span class="badge">2 Baureihen</span><h3>Nadelgreifer</h3><p>Abgedichtete Nadelgreifer für weiche oder unregelmäßige Teile.</p>
-  <span class="card__more">Ansehen <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
-</a><a class="card" href="#/produkte/langarmgreifer">
-  <div class="card__img"><img data-img="langarmgreifer" alt="Langarmgreifer" loading="lazy"></div>
-  <div class="card__body"><span class="badge">1 Baureihe</span><h3>Langarmgreifer</h3><p>Schlanker 3-Finger-Greifer für den Griff in die Ecken von Kisten und Kartonagen.</p>
-  <span class="card__more">Ansehen <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
-</a></div>
   </div>
 </section>
 
@@ -1487,7 +1617,45 @@ button.kfg__card { font: inherit; text-align: left; cursor: pointer; width: 100%
   <h1>Produkte</h1>
   <p class="lead">Neun Produktfamilien mit über 20 Baureihen: Greifer für Roboter, Maschinen und Handhabungsgeräte, modular aufgebaut und auf Wunsch kundenspezifisch.</p>
 </div></section>
-<section class="section"><div class="wrap"><div class="grid grid--3"><a class="card" href="#/produkte/hexagonal">
+<section class="section"><div class="wrap">
+  <div class="section__head"><span class="eyebrow">Nach Prozess</span><h2>Was soll Ihr Greifer tun?</h2></div>
+  <div class="procs"><article class="proc">
+  <a class="proc__img" href="#/produkte/hexagonal"><img data-img="c10" alt="" loading="lazy"></a>
+  <div class="proc__body"><h3><a href="#/produkte/hexagonal">Drehteile, Wellen und Ringe greifen</a></h3><p>Runde und prismatische Teile zentrisch greifen, von innen oder außen, zum Beispiel beim Beladen von Dreh- und Fräsmaschinen.</p>
+  <div class="proc__chips"><span>Passende Greifer:</span><a href="#/produkte/hexagonal/c03">C03</a><a href="#/produkte/hexagonal/c06">C06</a><a href="#/produkte/hexagonal/c10">C10</a><a href="#/produkte/hexagonal/c16">C16</a><a href="#/produkte/rechteckig/b02">B02</a><a href="#/produkte/rechteckig/a06">A06</a><a href="#/produkte/rechteckig/b10">B10</a></div></div>
+</article><article class="proc">
+  <a class="proc__img" href="#/produkte/schwerlast"><img data-img="s310" alt="" loading="lazy"></a>
+  <div class="proc__body"><h3><a href="#/produkte/schwerlast">Schwere und große Teile heben</a></h3><p>Guss- und Schmiedeteile, große Bauteile, lange Finger: hohe Momente bis 850 Nm pro Achse und Finger, auf Wunsch mit Objektsicherung.</p>
+  <div class="proc__chips"><span>Passende Greifer:</span><a href="#/produkte/schwerlast/sx10">SX10</a><a href="#/produkte/schwerlast/s210">S210</a><a href="#/produkte/schwerlast/s310">S310</a><a href="#/produkte/schwerlast/s410">S410</a><a href="#/produkte/schwerlast/s610">S610</a></div></div>
+</article><article class="proc">
+  <a class="proc__img" href="#/produkte/reifengreifer"><img data-img="r_106" alt="" loading="lazy"></a>
+  <div class="proc__body"><h3><a href="#/produkte/reifengreifer">Reifen und Räder handhaben</a></h3><p>Reifen und Räder sicher greifen und umsetzen, in Reifenlagern, in der Produktion und in der Automobilfertigung.</p>
+  <div class="proc__chips"><span>Passende Greifer:</span><a href="#/produkte/reifengreifer">R106</a></div></div>
+</article><article class="proc">
+  <a class="proc__img" href="#/produkte/nadelgreifer"><img data-img="n206" alt="" loading="lazy"></a>
+  <div class="proc__body"><h3><a href="#/produkte/nadelgreifer">Lebensmittel und weiche Teile greifen</a></h3><p>Teig, Fleisch und andere weiche oder unregelmäßige Teile mit gefederten Nadeln aufnehmen, abgedichtet und abwaschbar.</p>
+  <div class="proc__chips"><span>Passende Greifer:</span><a href="#/produkte/nadelgreifer/n203">N203</a><a href="#/produkte/nadelgreifer/n206">N206</a></div></div>
+</article><article class="proc">
+  <a class="proc__img" href="#/produkte/langarmgreifer"><img data-img="langarmgreifer" alt="" loading="lazy"></a>
+  <div class="proc__body"><h3><a href="#/produkte/langarmgreifer">Kugellager und Ringe von innen greifen</a></h3><p>Runde Teile mit Bohrung wie Kugellager, Ringe und Buchsen von innen greifen, mit langen, schlanken Fingern auch tief aus Kisten und Kartons.</p>
+  <div class="proc__chips"><span>Passende Greifer:</span><a href="#/produkte/langarmgreifer">I105</a></div></div>
+</article><article class="proc">
+  <a class="proc__img" href="#/produkte/winkelgreifer"><img data-img="pw306" alt="" loading="lazy"></a>
+  <div class="proc__body"><h3><a href="#/produkte/winkelgreifer">Schnell umsetzen, Finger aus dem Weg</a></h3><p>Kurze Taktzeiten für Pick-and-place und Pressenverkettung: Die Finger schwenken bis 180° aus dem Arbeitsraum.</p>
+  <div class="proc__chips"><span>Passende Greifer:</span><a href="#/produkte/winkelgreifer/w03-winkelgreifer">W03</a><a href="#/produkte/winkelgreifer/w05-winkelgreifer">W05</a><a href="#/produkte/winkelgreifer/w06-winkelgreifer">W06</a><a href="#/produkte/winkelgreifer/w10-winkelgreifer">W10</a><a href="#/produkte/parallel-winkelgreifer/pw106">PW106</a><a href="#/produkte/parallel-winkelgreifer/pw206">PW206</a><a href="#/produkte/parallel-winkelgreifer/pw306">PW306</a></div></div>
+</article><article class="proc">
+  <a class="proc__img" href="#/produkte/einzelfinger"><img data-img="e03" alt="" loading="lazy"></a>
+  <div class="proc__body"><h3><a href="#/produkte/einzelfinger">Eigene Greifer und Spannvorrichtungen bauen</a></h3><p>Das Einzelfinger-Modul als Maschinenelement für Ihre eigenen Greifer, Spann- und Sondervorrichtungen.</p>
+  <div class="proc__chips"><span>Passende Greifer:</span><a href="#/produkte/einzelfinger">E03</a></div></div>
+</article><article class="proc proc--special">
+  <div class="proc__body"><div class="tile__icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 20h9M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></div><h3>Ihr Prozess ist nicht dabei?</h3>
+  <p>Sonderanfertigungen sind möglich. Schicken Sie uns Ihr Teil, eine Zeichnung oder ein Video Ihrer Anlage. Wir entwickeln den passenden Greifer.</p>
+  <a class="btn btn--primary" href="#/kontakt?produkt=Sonderanfertigung">Jetzt anfragen <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a></div>
+</article></div>
+</div></section>
+<section class="section section--alt"><div class="wrap">
+  <div class="section__head"><span class="eyebrow">Nach Produktfamilie</span><h2>Alle Produktfamilien</h2></div>
+  <div class="grid grid--3"><a class="card" href="#/produkte/hexagonal">
   <div class="card__img"><img data-img="c03" alt="Hexagonale Bauform" loading="lazy"></div>
   <div class="card__body"><span class="badge">5 Baureihen</span><h3>Hexagonale Bauform</h3><p>2- bis 6-Finger-Greifer mit kreisförmiger Anordnung der Greiferfinger.</p>
   <span class="card__more">Ansehen <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
@@ -1521,10 +1689,11 @@ button.kfg__card { font: inherit; text-align: left; cursor: pointer; width: 100%
   <span class="card__more">Ansehen <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
 </a><a class="card" href="#/produkte/langarmgreifer">
   <div class="card__img"><img data-img="langarmgreifer" alt="Langarmgreifer" loading="lazy"></div>
-  <div class="card__body"><span class="badge">1 Baureihe</span><h3>Langarmgreifer</h3><p>Schlanker 3-Finger-Greifer für den Griff in die Ecken von Kisten und Kartonagen.</p>
+  <div class="card__body"><span class="badge">1 Baureihe</span><h3>Langarmgreifer</h3><p>Schlanker 3-Finger-Greifer, der runde Teile mit Bohrung wie Kugellager und Ringe von innen greift, auch tief aus Kisten und Kartons.</p>
   <span class="card__more">Ansehen <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div>
-</a></div></div></section>
-<section class="section section--alt"><div class="wrap">
+</a></div>
+</div></section>
+<section class="section"><div class="wrap">
   <div class="section__head"><span class="eyebrow">Übersicht</span><h2>Alle Baureihen auf einen Blick</h2></div>
   <div class="table-wrap"><table><thead><tr><th>Baureihe</th><th>Beschreibung</th><th>Familie</th></tr></thead><tbody><tr><td><a href="#/produkte/hexagonal/c03">C03</a></td><td>Zwei- bis Sechsfinger Greifer</td><td>Hexagonale Bauform</td></tr><tr><td><a href="#/produkte/hexagonal/c06">C06</a></td><td>Zwei- bis Sechsfinger Hohlgreifer</td><td>Hexagonale Bauform</td></tr><tr><td><a href="#/produkte/hexagonal/c10">C10</a></td><td>Zwei- bis Sechsfinger Hohlgreifer</td><td>Hexagonale Bauform</td></tr><tr><td><a href="#/produkte/hexagonal/c16">C16</a></td><td>Zwei- bis Sechsfinger Hohlgreifer</td><td>Hexagonale Bauform</td></tr><tr><td><a href="#/produkte/hexagonal/cp">CP</a></td><td>Schwenkende Bewegungsform mit parallelgeführten Backen</td><td>Hexagonale Bauform</td></tr><tr><td><a href="#/produkte/rechteckig/b02">B02</a></td><td>Zwei- bis Sechsfinger Greifer</td><td>Rechteckige Bauform</td></tr><tr><td><a href="#/produkte/rechteckig/a06">A06</a></td><td>Zwei- bis Vierfinger Hohlgreifer</td><td>Rechteckige Bauform</td></tr><tr><td><a href="#/produkte/rechteckig/b10">B10</a></td><td>Zwei- bis Sechsfinger Hohlgreifer</td><td>Rechteckige Bauform</td></tr><tr><td><a href="#/produkte/rechteckig/cp-r">CP</a></td><td>Schwenkende Bewegungsform mit parallelgeführten Backen</td><td>Rechteckige Bauform</td></tr><tr><td><a href="#/produkte/einzelfinger">E03</a></td><td>Einzelfinger-Greifer- und Spannmodul</td><td>Einzelfinger</td></tr><tr><td><a href="#/produkte/winkelgreifer/w03-winkelgreifer">W03</a></td><td>Abgedichteter 180° Winkelgreifer</td><td>Winkelgreifer</td></tr><tr><td><a href="#/produkte/winkelgreifer/w05-winkelgreifer">W05</a></td><td>Abgedichteter 180° Winkelgreifer</td><td>Winkelgreifer</td></tr><tr><td><a href="#/produkte/winkelgreifer/w06-winkelgreifer">W06</a></td><td>Abgedichteter 180° Winkelgreifer</td><td>Winkelgreifer</td></tr><tr><td><a href="#/produkte/winkelgreifer/w10-winkelgreifer">W10</a></td><td>Abgedichteter 180° Winkelgreifer</td><td>Winkelgreifer</td></tr><tr><td><a href="#/produkte/parallel-winkelgreifer/pw106">PW106</a></td><td>Abgedichteter 2-Finger-Parallel-Winkel-Greifer</td><td>Parallel-Winkelgreifer</td></tr><tr><td><a href="#/produkte/parallel-winkelgreifer/pw206">PW206</a></td><td>Abgedichteter 2-Finger-Parallel-Winkel-Greifer</td><td>Parallel-Winkelgreifer</td></tr><tr><td><a href="#/produkte/parallel-winkelgreifer/pw306">PW306</a></td><td>Abgedichteter 3-Finger-Parallel-Winkel-Greifer</td><td>Parallel-Winkelgreifer</td></tr><tr><td><a href="#/produkte/schwerlast/sx10">Sx10</a></td><td>Einzelmodul Schwerlastgreifer</td><td>Schwerlastgreifer</td></tr><tr><td><a href="#/produkte/schwerlast/s210">S210</a></td><td>Zweifinger Schwerlast-Parallelgreifer</td><td>Schwerlastgreifer</td></tr><tr><td><a href="#/produkte/schwerlast/s310">S310</a></td><td>Dreifinger Schwerlast-Zentrischgreifer</td><td>Schwerlastgreifer</td></tr><tr><td><a href="#/produkte/schwerlast/s410">S410</a></td><td>Vierfinger Schwerlast-Zentrischgreifer</td><td>Schwerlastgreifer</td></tr><tr><td><a href="#/produkte/schwerlast/s610">S610</a></td><td>Sechsfinger Schwerlast-Zentrischgreifer</td><td>Schwerlastgreifer</td></tr><tr><td><a href="#/produkte/reifengreifer">R106</a></td><td>Reifengreifer</td><td>Reifengreifer</td></tr><tr><td><a href="#/produkte/nadelgreifer/n203">N203</a></td><td>Abgedichteter Nadelgreifer</td><td>Nadelgreifer</td></tr><tr><td><a href="#/produkte/nadelgreifer/n206">N206</a></td><td>Abgedichteter Nadelgreifer</td><td>Nadelgreifer</td></tr><tr><td><a href="#/produkte/langarmgreifer">I105</a></td><td>Langarmgreifer</td><td>Langarmgreifer</td></tr></tbody></table></div>
 </div></section>
@@ -1571,7 +1740,7 @@ button.kfg__card { font: inherit; text-align: left; cursor: pointer; width: 100%
   <div>
     <p class="lead">Langarmgreifer</p>
     <div class="chips"><span class="chip">Patent angemeldet</span></div>
-    <p>Schlanker 3-Finger-Greifer für den Griff in die Ecken von Kisten und Kartonagen</p>
+    <p>Schlanker 3-Finger-Greifer zum Innengreifen: greift runde Teile mit Bohrung, zum Beispiel Kugellager, Ringe oder Buchsen, von innen</p><p>Lange, schlanke Finger reichen tief in Kisten, Kartons und Behälter und entnehmen die Teile, die darin liegen</p>
     
     <div class="btn-row" style="margin-top:28px">
       <a class="btn btn--primary" href="#/kontakt?produkt=I105">Anfrage zum I105 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
@@ -3050,7 +3219,7 @@ button.kfg__card { font: inherit; text-align: left; cursor: pointer; width: 100%
     <div class="tile"><div class="tile__num">1992</div><h3>Gründung</h3><p>Gründung der GMG Gesellschaft für modulare Greifersysteme mbH in Soest.</p></div>
     <div class="tile"><div class="tile__num">Erfindung</div><h3>Modulare Greifersysteme</h3><p>Freie Wahl von Form, Fingeranzahl, Bewegungsform und Fingerlänge.</p></div>
     <div class="tile"><div class="tile__num">Erfindung</div><h3>Parallel-Winkelgreifer &amp; Schwerlastgreifer</h3><p>In den Industrienationen patentiert und richtungweisend.</p></div>
-    <div class="tile"><div class="tile__num">Neu</div><h3>Langarmgreifer I105</h3><p>Schlanker 3-Finger-Greifer für den Griff in die Ecken von Kisten. Patent angemeldet.</p></div>
+    <div class="tile"><div class="tile__num">Neu</div><h3>Langarmgreifer I105</h3><p>Schlanker 3-Finger-Greifer, der Kugellager und Ringe von innen greift, auch tief aus Kisten. Patent angemeldet.</p></div>
   </div>
 </div></section>
 <section class="section"><div class="wrap">
@@ -3186,6 +3355,20 @@ window.addEventListener('hashchange', gmgRoute);
         });
       });
     }
+  }
+
+  // Kopfbereich: Greifer-Hintergrund mit Parallaxe beim Scrollen
+  var layers = document.querySelectorAll('.hero__bg-layer');
+  if (layers.length && !matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    var ticking = false;
+    var upd = function () {
+      ticking = false;
+      var y = window.scrollY;
+      if (y > window.innerHeight * 1.5) return;
+      layers.forEach(function (l) { l.style.setProperty('--py', (y * Number(l.dataset.depth)).toFixed(1) + 'px'); });
+    };
+    window.addEventListener('scroll', function () { if (!ticking) { ticking = true; requestAnimationFrame(upd); } }, { passive: true });
+    upd();
   }
 
   window.gmgInit = init;
