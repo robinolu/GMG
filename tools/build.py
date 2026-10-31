@@ -323,9 +323,9 @@ def hero_bg(r):
     import random
     rnd = random.Random(7)
     lagen = [
-        ("far", 0.12, 95, ["c16", "s610", "b10", "w10", "c06", "pw206", "sx10", "a06", "c03", "w03_03", "n206", "s410", "e03", "w03_04"]),
-        ("mid", 0.28, 135, ["s410", "c03", "w03_02", "n203", "b02", "pw106", "s310", "c10", "w06", "langarmgreifer"]),
-        ("near", 0.5, 175, ["s210", "c10", "w06", "r_106", "w105-a", "pw306", "b02"]),
+        ("far", 0.12, 140, ["c16", "s610", "w10", "pw206", "sx10", "a06"]),
+        ("mid", 0.28, 200, ["s410", "w03_02", "n203", "b02", "c10"]),
+        ("near", 0.5, 260, ["s210", "w06", "r_106", "pw306"]),
     ]
     out = []
     for lage, depth, size, bilder in lagen:
@@ -337,11 +337,11 @@ def hero_bg(r):
             y = rnd.uniform(-5, 85)
             w = size * rnd.uniform(0.8, 1.2)
             rot = rnd.uniform(-28, 28)
-            dur = rnd.uniform(16, 30)
-            ax, ay = rnd.uniform(30, 70) * rnd.choice((-1, 1)), rnd.uniform(25, 55) * rnd.choice((-1, 1))
+            dur = rnd.uniform(30, 48)
+            ax, ay = rnd.uniform(20, 45) * rnd.choice((-1, 1)), rnd.uniform(15, 35) * rnd.choice((-1, 1))
             items.append(f'<img src="{img(r, b)}" alt="" loading="lazy" decoding="async" '
                          f'style="left:{x:.1f}%;top:{y:.1f}%;width:{w:.0f}px;--rot:{rot:.0f}deg;--ax:{ax:.0f}px;--ay:{ay:.0f}px;'
-                         f'--ar:{rnd.uniform(6, 14) * rnd.choice((-1, 1)):.0f}deg;--dur:{dur:.1f}s;--del:-{rnd.uniform(0, dur):.1f}s">')
+                         f'--ar:{rnd.uniform(4, 9) * rnd.choice((-1, 1)):.0f}deg;--dur:{dur:.1f}s;--del:-{rnd.uniform(0, dur):.1f}s">')
         out.append(f'<div class="hero__bg-layer hero__bg-layer--{lage}" data-depth="{depth}">{"".join(items)}</div>')
     # ein großer Greifer im Vordergrund, der immer wieder unten aus dem Bild ragt und anderes überdeckt
     vorn = f'<div class="hero__front" aria-hidden="true"><img src="{img(r, "s310")}" alt="" loading="lazy" decoding="async"></div>'
