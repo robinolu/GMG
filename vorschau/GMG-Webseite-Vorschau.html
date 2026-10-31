@@ -626,6 +626,39 @@ button.kfg__card { font: inherit; text-align: left; cursor: pointer; width: 100%
 .hero3d__note { width: fit-content; margin-inline: auto; padding: 2px 8px; border-radius: 4px; background: rgba(244,246,248,.85); }
 .hero h1, .hero .lead, .hero__meta, .hero .eyebrow { text-shadow: 0 0 14px rgba(244,246,248,.95), 0 0 4px rgba(244,246,248,.9); }
 
+
+/* Konfigurator: Profi-Modus (Greifberechnung) */
+.kfg__modus { margin-bottom: 4px; }
+.kfg__seg--3 { grid-template-columns: repeat(3, 1fr); }
+.kfg.is-profi .kfg__test .kfg__step, .kfg.is-profi .kfg__test .field, .kfg.is-profi .kfg__test .kfg__seg--2, .kfg.is-profi .kfg__center, .kfg.is-profi .kfg__gp, .kfg.is-profi #kfg-status { display: none; }
+.kfg__pro { grid-column: 1 / -1; display: grid; gap: 16px; padding: 22px; border: 1px solid #b9d0e8; border-radius: var(--radius); background: linear-gradient(180deg, var(--blue-soft), #fff 140px); }
+.kfg__pro[hidden] { display: none; }
+.pro__intro { margin: -6px 0 0; max-width: 900px; }
+.pro__grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 16px; }
+.pro__set .kfg__seg button { font-size: .88rem; padding: 8px 4px; }
+.pro__set { margin: 0; padding: 14px; border: 1px solid var(--line); border-radius: 8px; background: #fff; display: grid; gap: 10px; align-content: start; min-width: 0; }
+.pro__set legend { font-weight: 700; color: var(--ink); padding: 0 6px; }
+.pro__row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.pro__set .field label { font-size: .82rem; }
+.pro__set input, .pro__set select { width: 100%; }
+.pro__sperr { display: flex; gap: 8px; align-items: end; flex-wrap: wrap; }
+.pro__mini { width: 90px; }
+.pro__sperr [aria-pressed="true"] { background: #fbe4e2; border-color: #c8372d; color: #9b2a21; }
+.pro__go { justify-self: start; }
+.pro__ergebnis { display: grid; gap: 12px; }
+.pro__ergebnis:empty { display: none; }
+.pro__facts { grid-template-columns: max-content 1fr; }
+.pro__tab { width: 100%; border-collapse: collapse; font-size: .92rem; background: #fff; }
+.pro__tab th, .pro__tab td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--line); }
+.pro__tab td:last-child, .pro__tab th:last-child { text-align: right; white-space: nowrap; }
+.pro__tab tr.is-mass td { font-weight: 700; background: #fdf2dc; }
+.pro__alt { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.pro__hinweise { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
+.pro__hinweise li { padding: 8px 12px; border-radius: 6px; font-size: .9rem; }
+.pro__hinweise .is-rot { background: #fbe4e2; color: #9b2a21; }
+.pro__hinweise .is-gelb { background: #fdf2dc; color: #855a06; }
+.pro__hinweise .is-info { background: var(--bg-alt); color: var(--text); }
+@media (max-width: 640px) { .pro__grid, .pro__row { grid-template-columns: 1fr; } }
 </style>
 </head>
 <body>
@@ -973,6 +1006,10 @@ button.kfg__card { font: inherit; text-align: left; cursor: pointer; width: 100%
 <section class="section kfg-section"><div class="wrap">
   <div class="kfg" data-konfigurator data-base="../">
     <div class="kfg__panel">
+      <div class="kfg__seg kfg__seg--2 kfg__modus" role="group" aria-label="Modus des Konfigurators">
+        <button type="button" data-modus="einfach" aria-pressed="true">Einfach</button>
+        <button type="button" data-modus="profi" aria-pressed="false">Profi: Greifberechnung</button>
+      </div>
       <div class="kfg__step"><span class="kfg__num">1</span><h3>Teil laden</h3></div>
       <div class="kfg__source" role="group" aria-label="Teil auswählen">
         <button type="button" class="kfg__src-file" data-src="datei"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg><span><strong>STEP-/STL-Datei</strong><small>eigenes Teil laden</small></span></button>
@@ -1003,9 +1040,10 @@ button.kfg__card { font: inherit; text-align: left; cursor: pointer; width: 100%
       </div>
       <div class="field"><label for="kfg-material">Werkstoff</label>
         <select id="kfg-material">
-          <option value="7850">Stahl</option><option value="2700">Aluminium</option><option value="1200">Kunststoff</option>
-          <option value="600">Holz</option><option value="150">Karton / leichte Verpackung</option>
-          <option value="1050" data-weich="1">Weich: Teig, Fleisch, Lebensmittel</option>
+          <option value="7850" data-key="stahl">Stahl</option><option value="2700" data-key="alu">Aluminium</option><option value="1200" data-key="kunststoff">Kunststoff</option>
+          <option value="600" data-key="holz">Holz</option><option value="2500" data-key="glas">Glas</option><option value="1300" data-key="gummi">Gummi</option>
+          <option value="150" data-key="karton">Karton / leichte Verpackung</option><option value="800" data-key="papier">Papier</option>
+          <option value="1050" data-key="lebensmittel" data-weich="1">Weich: Teig, Fleisch, Lebensmittel</option>
         </select></div>
       <dl class="kfg__facts"><dt>Abmessungen</dt><dd id="kfg-masse">–</dd><dt>Gewicht</dt><dd id="kfg-gewicht">–</dd></dl>
       <div class="kfg__turn"><span class="muted">Teil um 90° drehen:</span>
@@ -1048,6 +1086,78 @@ button.kfg__card { font: inherit; text-align: left; cursor: pointer; width: 100%
       </div>
       <a id="kfg-anfrage" class="btn btn--primary" href="mailto:info@gmg-system.com">Anfrage mit diesem Teil <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
       </div>
+    </div>
+    <div class="kfg__pro" id="kfg-pro" hidden>
+      <div class="kfg__step"><span class="kfg__num">4</span><h3>Greifberechnung</h3></div>
+      <p class="kfg__small muted pro__intro">Greifzone und Sperrzonen festlegen, Bewegung und Umgebung angeben, dann berechnen. Das Programm tastet die Zone ab, sucht gegenüberliegende Kontaktflächen außerhalb der Sperrzonen, rechnet alle Lastfälle und wählt die Position mit der größten Reserve. Die Berechnung ist greiferunabhängig.</p>
+      <div class="pro__grid">
+        <fieldset class="pro__set"><legend>Greifzone</legend>
+          <div class="kfg__seg kfg__seg--3" role="group" aria-label="Greifzone">
+            <button type="button" data-zone="auto" aria-pressed="true">Automatisch</button>
+            <button type="button" data-zone="waagerecht" aria-pressed="false">Waagerecht</button>
+            <button type="button" data-zone="senkrecht" aria-pressed="false">Senkrecht</button>
+          </div>
+          <p class="kfg__small muted" id="pro-zone-text"></p>
+          <div id="pro-zone-felder" hidden>
+            <div class="field"><label for="pro-lage">Lage <output id="pro-lage-out"></output></label><input id="pro-lage" type="range" step="1"></div>
+            <div class="pro__row">
+              <div class="field"><label for="pro-dicke">Dicke (mm)</label><input id="pro-dicke" type="number" min="1" step="1"></div>
+              <div class="field" id="pro-winkel-feld"><label for="pro-winkel">Drehung um die Hochachse (°)</label><input id="pro-winkel" type="number" min="0" max="179" step="5" value="0"></div>
+            </div>
+          </div>
+          <div class="pro__sperr">
+            <button type="button" class="btn btn--ghost btn--xs" id="pro-sperr" aria-pressed="false">⊘ Sperrzonen anklicken</button>
+            <div class="field pro__mini"><label for="pro-sperr-r">Radius (mm)</label><input id="pro-sperr-r" type="number" min="2" step="1" value="15"></div>
+            <button type="button" class="btn btn--ghost btn--xs" id="pro-sperr-weg">Löschen</button>
+          </div>
+          <p class="kfg__small muted" id="pro-sperr-info"></p>
+        </fieldset>
+        <fieldset class="pro__set"><legend>Produkt</legend>
+          <div class="field"><label for="pro-masse">Masse direkt eingeben (kg)</label><input id="pro-masse" type="number" min="0" step="0.001"><small class="muted" id="pro-masse-auto"></small><small class="muted">Pflicht bei Hohlkörpern und Füllgut</small></div>
+          <div class="field"><label for="pro-produkt">Oberfläche des Produkts</label><select id="pro-produkt"><option value="stahl">Stahl</option><option value="alu">Aluminium</option><option value="kunststoff">Kunststoff</option><option value="holz">Holz</option><option value="glas">Glas</option><option value="karton">Karton</option><option value="papier">Papier</option><option value="gummi">Gummi</option><option value="lebensmittel">Lebensmittel</option></select></div>
+          <div class="field"><label for="pro-zustand">Zustand der Oberfläche</label><select id="pro-zustand"><option value="trocken">trocken, sauber</option><option value="nass">nass, Kondenswasser (× 0,4)</option><option value="oelig">ölig, gefettet (× 0,2)</option><option value="staubig">staubig, mehlig (× 0,5, Annahme)</option></select></div>
+          <div class="pro__row">
+            <div class="field"><label for="pro-pzul">Zul. Flächenpressung (N/mm²)</label><input id="pro-pzul" type="text" inputmode="decimal" placeholder="optional"></div>
+            <div class="field"><label for="pro-fmax">Höchstens greifen mit (N)</label><input id="pro-fmax" type="number" min="0" placeholder="optional"></div>
+          </div>
+        </fieldset>
+        <fieldset class="pro__set"><legend>Bewegung und Umgebung</legend>
+          <div class="pro__row">
+            <div class="field"><label for="pro-az">Beschl. Heben (m/s²)</label><input id="pro-az" type="number" min="0" step="0.5" value="5"></div>
+            <div class="field"><label for="pro-ax">Beschl. seitlich (m/s²)</label><input id="pro-ax" type="number" min="0" step="0.5" value="5"></div>
+          </div>
+          <div class="pro__row">
+            <div class="field"><label for="pro-an">Not-Halt-Verzögerung (m/s²)</label><input id="pro-an" type="number" min="0" step="0.5" value="10"></div>
+            <div class="field"><label for="pro-s">Sicherheitsfaktor S</label><input id="pro-s" type="text" inputmode="decimal" value="2"></div>
+          </div>
+          <label class="check"><input type="checkbox" id="pro-dreh" checked> <span>Drehbewegungen (S = 2, sonst 1,5)</span></label>
+          <div class="pro__row">
+            <div class="field"><label for="pro-temp">Temperatur (°C)</label><input id="pro-temp" type="number" step="1" value="20"></div>
+            <div class="field"><label for="pro-feuchte">Luftfeuchte (%)</label><input id="pro-feuchte" type="number" min="0" max="100" step="5" value="50"></div>
+          </div>
+        </fieldset>
+        <fieldset class="pro__set"><legend>Greifprinzip und Fingerbelag</legend>
+          <div class="pro__row">
+            <div class="field"><label for="pro-backen">Backen</label><select id="pro-backen"><option value="flach">Flachbacken (Klemmen)</option><option value="prisma">Prismenbacken (Formschluss)</option></select></div>
+            <div class="field" id="pro-prisma-feld" hidden><label for="pro-alpha">Öffnungswinkel α</label><select id="pro-alpha"><option value="90">90°</option><option value="120">120°</option><option value="60">60°</option></select></div>
+          </div>
+          <div class="field"><label for="pro-belag">Fingerbelag</label><select id="pro-belag"><option value="gummi">Gummi (NBR)</option><option value="pu">Polyurethan (Shore A 60)</option><option value="pa" selected>Polyamid (PA), harter Kunststoff</option><option value="pe">Polyethylen (PE)</option><option value="ptfe">PTFE (Teflon)</option><option value="stahl">Stahl, blank</option></select></div>
+          <div class="pro__row">
+            <div class="field"><label for="pro-bw">Belag Breite (mm)</label><input id="pro-bw" type="number" min="2" step="1" value="20"></div>
+            <div class="field"><label for="pro-bh">Belag Höhe (mm)</label><input id="pro-bh" type="number" min="2" step="1" value="25"></div>
+          </div>
+          <div class="pro__row">
+            <div class="field"><label for="pro-n">Reibflächen n</label><select id="pro-n"><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></div>
+            <div class="field"><label for="pro-mu">Eigener Reibwert μ</label><input id="pro-mu" type="text" inputmode="decimal" placeholder="aus Tabelle"></div>
+          </div>
+          <div class="pro__row">
+            <div class="field"><label for="pro-hub">Max. Greiferhub (mm)</label><input id="pro-hub" type="number" min="0" placeholder="optional"></div>
+            <div class="field"><label for="pro-schritt">Schrittweite (mm)</label><input id="pro-schritt" type="number" min="1" step="1" value="5"></div>
+          </div>
+        </fieldset>
+      </div>
+      <button type="button" class="btn btn--primary pro__go" id="pro-rechnen">Berechnen</button>
+      <div id="pro-ergebnis" class="pro__ergebnis" aria-live="polite"></div>
     </div>
   </div>
 </div></section>

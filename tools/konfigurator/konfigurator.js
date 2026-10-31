@@ -10,6 +10,7 @@ import { MeshBVH } from 'three-mesh-bvh';
 import GRIPPER from '../../data/3d/greifer-platzhalter.json';
 import { Quaternion as Q } from 'three';
 import { initSimulator } from './simulator.js';
+import { initPro, schwerpunkt } from './greifberechnung.js';
 // Greifer mit 3D-Modell. Weitere GMG-Greifer kommen hinzu, sobald ihre STEP-Dateien vorliegen
 // (Kennwerte aller Baureihen liegen schon in data/greifer-specs.json).
 
@@ -19,6 +20,7 @@ const $ = (s) => root.querySelector(s);
 const MAX_BYTES = 100 * 1024 * 1024;   // darüber wird es im Browser zäh (Speicher, Rechenzeit)
 const SLOW_BYTES = 25 * 1024 * 1024;
 const partListeners = [];   // Simulator: wird benachrichtigt, wenn sich das Teil ändert
+const placeListeners = [];  // Profi-Modus: neues oder gedrehtes Teil
 let lastGrip = null;        // aktuelle Greifposition im Greiftest
 let savedGrip = null;       // festgelegter Greifpunkt, den der Simulator übernimmt
 const fmt = (v, d = 0) => v.toLocaleString('de-DE', { maximumFractionDigits: d, minimumFractionDigits: d });
@@ -124,7 +126,7 @@ function pose(phi) {
 let baseGeo = null;          // Teil in Rohmaßen der Datei
 let fileKind = null;         // 'step' | 'stl' | 'muster'
 let turns = { x: 0, y: 0, z: 0 };  // Vierteldrehungen
-let part = null, partBVH = null, box = new THREE.Box3();
+let part = null, partBVH = null, box = new THREE.Box3(), partCog = new THREE.Vector3();
 const partMat = new THREE.MeshStandardMaterial({ color: 0xd9a441, metalness: 0.2, roughness: 0.55 });
 
 function unitFactor() {
@@ -170,10 +172,12 @@ function placePart(autoOrient) {
   innerWidth = measureInner();
   if (mode === 'innen' && !innerWidth) setMode('aussen');
   $('#kfg-griff-innen').disabled = !innerWidth || !A.range.innen;
+  partCog = schwerpunkt(geo);
   fitScene();
   updateFacts();
   suggest();
   update();
+  placeListeners.forEach((f) => f());
 }
 
 let mode = 'aussen';          // 'aussen' = Backen schließen um das Teil, 'innen' = Backen spreizen im Hohlraum
@@ -357,7 +361,7 @@ async function selectGripper(id) {
   if (A.root) scene.remove(A.root);
   A = g;
   scene.add(A.root);
-  A.root.visible = true;
+  A.root.visible = !root.classList.contains('is-profi');   // im Profi-Modus ohne Testgreifer
   $('#kfg-badge').textContent = `Greifer ${A.code} (Testmodell) in Originalgröße`;
   const innenOk = !!A.range.innen;
   if (!innenOk && mode === 'innen') { mode = 'aussen'; }
@@ -808,4 +812,11 @@ initSimulator({
   part: () => part && facts ? { geo: part.geometry, size: facts.s.clone(), mass: facts.mass, soft: facts.soft, label: partLabel, grip: facts.grip, inside: mode === 'innen', pose: savedGrip } : null,
   onPart: (f) => partListeners.push(f),
 });
-window.__kfg = { sample, update, setMode, selectGripper, gripper: () => A.id, move: (x, z) => { $('#kfg-x').value = x; $('#kfg-z').value = z; update(); }, set: (h, z) => { $('#kfg-hoehe').value = h; $('#kfg-zu').value = z; update(); }, status: () => $('#kfg-status').textContent };
+// Profi-Modus: Greifberechnung (Greifzone, Sperrzonen, Lastfälle)
+const pro = initPro({
+  $, root, scene, camera, controls, canvas,
+  part: () => part && facts ? { mesh: part, geo: part.geometry, bvh: partBVH, box, cog: partCog, mass: facts.mass } : null,
+  showGripper: (v) => { A.root.visible = v; },
+  onPlace: (f) => placeListeners.push(f),
+});
+window.__kfg = { pro,  sample, update, setMode, selectGripper, gripper: () => A.id, move: (x, z) => { $('#kfg-x').value = x; $('#kfg-z').value = z; update(); }, set: (h, z) => { $('#kfg-hoehe').value = h; $('#kfg-zu').value = z; update(); }, status: () => $('#kfg-status').textContent };
