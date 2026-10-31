@@ -2,7 +2,7 @@
 
 Je Seite ein Parallelogramm: innerer Hebel (SOLID) dreht um P_A, äußerer Hebel (finger1/finger2 +
 Schneckenrad) um P_B; das Fingerglied (finger4 + Fingerspitze) wird dabei parallel verschoben.
-Gelenkpunkte aus den Lagern im Modell (mm, Ebene X/Y, Drehachsen ∥ Z). Kugellager entfallen (verdeckt).
+Gelenkpunkte aus den Lagern im Modell (mm, Ebene X/Y, Drehachsen ∥ Z). Kugellager entfallen (verdeckt), ebenso die frei stehenden Schrauben der Fingerspitzen.
 Aufruf: python3 tools/pinza/export.py <pinza.json> data/3d/pinza-adattiva.json
 """
 import json, sys
@@ -24,6 +24,9 @@ for m in ms:
     p = np.array(m['p']).reshape(-1, 3)
     c = p.mean(0)
     side = 1 if c[0] > 0 else -1
+    # Schrauben M4×20 der Fingerspitzen samt Muttern: im vereinfachten Modell stehen sie frei vor den Fingern
+    if 'M4 x 20' in name or near(c, (39.5, 108.6), side, 4) and 'M4' in name:
+        continue
     sfx = '_r' if side > 0 else '_l'
     if name == 'SOLID':
         g = 'hebel_a' + sfx
