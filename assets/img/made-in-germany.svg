@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 220 64" role="img" aria-label="Made in Germany">
+  <rect x="1" y="1" width="218" height="62" rx="10" fill="#fff" stroke="#13171d" stroke-width="2"/>
+  <rect x="14" y="14" width="36" height="12" fill="#000"/>
+  <rect x="14" y="26" width="36" height="12" fill="#dd0000"/>
+  <rect x="14" y="38" width="36" height="12" fill="#ffce00"/>
+  <text x="62" y="29" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif" font-size="13" font-weight="600" letter-spacing="2.2" fill="#3a424d">MADE IN</text>
+  <text x="61" y="50" font-family="system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif" font-size="21" font-weight="800" letter-spacing="1.2" fill="#13171d">GERMANY</text>
+</svg>

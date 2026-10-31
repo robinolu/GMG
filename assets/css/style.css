@@ -131,10 +131,15 @@ p { margin: 0 0 1em; }
 
 /* Facts strip */
 .facts { border-bottom: 1px solid var(--line); background: #fff; }
-.facts__grid { display: grid; grid-template-columns: repeat(5, 1fr); }
+.facts__grid { display: grid; grid-template-columns: repeat(6, 1fr); }
+.fact--badge { display: flex; flex-direction: column; justify-content: center; }
+.fact--badge img { width: 150px; height: auto; }
+.footer__made { display: flex; align-items: center; gap: 14px; padding: 18px 0; border-top: 1px solid rgba(255,255,255,.12); font-size: .9rem; }
+.footer__made img { width: 130px; height: auto; flex: none; }
 .fact { padding: 28px 20px; border-left: 1px solid var(--line); }
 .fact:first-child { border-left: 0; }
-.fact__value { font-size: 1.6rem; font-weight: 750; color: var(--ink); line-height: 1.1; }
+.fact__value { font-size: 1.5rem; font-weight: 750; color: var(--ink); line-height: 1.1; white-space: nowrap; }
+.fact__value small { font-size: .62em; font-weight: 600; color: var(--muted); }
 .fact__label { font-size: .88rem; color: var(--muted); margin-top: 6px; }
 
 /* Cards */

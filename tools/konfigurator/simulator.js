@@ -136,8 +136,9 @@ function conveyor(kind, len, width, dir, opts = {}) {
   const x0 = dir < 0 ? -len + 150 : -150, x1 = dir < 0 ? 150 : len - 150, L = x1 - x0, cx = (x0 + x1) / 2;
   const w = width;
   let tex = null;
+  const rollers = [];
   if (kind === 'rollenbahn') {
-    for (let x = x0 + 40; x < x1; x += 90) { const r = cyl(28, w, M.rolle, 16); r.rotation.x = Math.PI / 2; r.position.set(x, top - 28, 0); g.add(r); }
+    for (let x = x0 + 40; x < x1; x += 90) { const r = cyl(28, w, M.rolle, 16); r.rotation.x = Math.PI / 2; r.position.set(x, top - 28, 0); g.add(r); rollers.push(r); }
   } else {
     tex = kind === 'modulband' ? stripes('#f4f6f8', '#d9dee3', 6) : stripes('#3a4047', '#2c3137', 3);
     tex.repeat.set(L / 300, 1);
@@ -148,7 +149,7 @@ function conveyor(kind, len, width, dir, opts = {}) {
   for (const s of [-1, 1]) g.add(box(L, 70, 30, M.alu, cx, top - 25, s * (w / 2 + 15)));
   for (let x = x0 + 100; x < x1; x += Math.max(600, L / 3)) for (const s of [-1, 1]) g.add(box(40, top - 60, 40, M.alu, x, (top - 60) / 2, s * (w / 2 + 10)));
   g.add(box(40, top - 60, 40, M.alu, x1 - 60, (top - 60) / 2, w / 2 + 10), box(40, top - 60, 40, M.alu, x1 - 60, (top - 60) / 2, -w / 2 - 10));
-  return { group: g, top, tex, half: 150, flow: true, len: L, dir, x0, x1 };
+  return { group: g, top, tex, rollers, half: 150, flow: true, len: L, dir, x0, x1 };
 }
 
 function pallet() {
@@ -376,7 +377,6 @@ function fence(group, w, d, cx, cz) {
 const BAND = { k: 'band', label: 'Bandgeschwindigkeit', opts: [['langsam', 'langsam'], ['mittel', 'mittel'], ['schnell', 'schnell']], def: 'mittel' };
 const P1 = [
   { k: 'lage', label: 'Lage des Produkts', opts: [['ausgerichtet', 'ausgerichtet'], ['chaotisch', 'chaotisch (mit Kamera)']], def: 'ausgerichtet' },
-  { ...BAND, when: (m) => FLOW.includes(m) },
 ];
 const P2 = [
   { k: 'speed', label: 'Geschwindigkeit', range: [10, 100, 5], unit: '%', def: 70 },
@@ -656,6 +656,11 @@ export function initSimulator(K) {
     }
     return { p: new THREE.Vector3(placeX, tgt.top, zLine), i: 0, total: 1 };
   }
+  // Band um eine Strecke (mm) weiterbewegen: Gurt-Textur (eine Kachel = 300 mm) bzw. Rollen (r = 28 mm)
+  function beltMove(c, dist) {
+    if (c.tex) c.tex.offset.x = -(dist / 300) % 1;
+    if (c.rollers) for (const r of c.rollers) r.rotation.y = -dist / 28;
+  }
   const speedOf = (v) => ({ langsam: 0.6, mittel: 1, schnell: 1.6 }[v] || 1);
 
   function frameState(time) {
@@ -760,8 +765,12 @@ export function initSimulator(K) {
       A.sheets.forEach((m, l) => { m.visible = l + 1 <= layers; });
     }
     if (src.ram) src.ram.position.y = 1900 - seg(p, 0.45, 0.6) * (1900 - 960 - P.size[1] - 160) + seg(p, 0.62, 0.8) * (1900 - 960 - P.size[1] - 160);
-    if (src.tex) src.tex.offset.x = -(time * speedOf(S.s1.band) * 0.5) % 1;
-    if (tgt.tex) tgt.tex.offset.x = -(time * speedOf(S.s3.band) * 0.5) % 1;
+    // Bänder laufen genau so weit wie die Teile darauf – und stehen, wenn die Teile stehen
+    if (src.flow) beltMove(src, (n + arrive) * (Math.max(P.size[0], P.size[2]) + 200));
+    if (tgt.trays) {
+      const per = tgt.trays.pat.pts.length, done = Math.floor(n / per), step = 1.2 * T * vT, cur = targetPos(n);
+      beltMove(tgt, cur.i === 0 && n > 0 ? (done - 1) * step + (p + 0.2) * T * vT : done * step);
+    } else if (tgt.flow) beltMove(tgt, time * vT);
   }
   const trayGeo = new Map();
   function trayMesh(x, y, z, tr) {
@@ -945,5 +954,5 @@ export function initSimulator(K) {
     const io = new IntersectionObserver((e) => { if (e[0].isIntersecting) { io.disconnect(); open(); } }, { rootMargin: '600px 0px' });
     io.observe(sec);
   }
-  window.__sim = { open, S, frame: (t) => { simTime = t; running = false; }, eval: () => lastEval, A: () => A, gap: () => { const v = new THREE.Vector3(); A.device.tip(v); const bb = new THREE.Box3().setFromObject(A.g.holder); return { top: bb.max.y - v.y, dx: Math.hypot((bb.min.x + bb.max.x) / 2 - v.x, (bb.min.z + bb.max.z) / 2 - v.z), want: v.toArray().map(Math.round) }; }, build: () => { build(); renderPanels(); } };
+  window.__sim = { open, S, belts: () => ({ src: A.src.tex ? A.src.tex.offset.x : A.src.rollers && A.src.rollers[0] ? A.src.rollers[0].rotation.y : null, tgt: A.tgt.tex ? A.tgt.tex.offset.x : null }), frame: (t) => { simTime = t; running = false; }, eval: () => lastEval, A: () => A, gap: () => { const v = new THREE.Vector3(); A.device.tip(v); const bb = new THREE.Box3().setFromObject(A.g.holder); return { top: bb.max.y - v.y, dx: Math.hypot((bb.min.x + bb.max.x) / 2 - v.x, (bb.min.z + bb.max.z) / 2 - v.z), want: v.toArray().map(Math.round) }; }, build: () => { build(); renderPanels(); } };
 }

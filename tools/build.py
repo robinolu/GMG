@@ -172,6 +172,7 @@ def page(path, title, body, active="", description="", scripts=()):
         <a class="btn btn--primary btn--sm" href="{r}kontakt/index.html">Anfrage stellen</a>
       </div>
     </div>
+    <div class="footer__made"><img src="{r}assets/img/made-in-germany.svg" alt="Made in Germany" width="150" height="44" loading="lazy"><span>Alle GMG-Greifer werden in Soest entwickelt und gefertigt.</span></div>
     <div class="footer__bottom">
       <span>© GMG Gesellschaft für modulare Greifersysteme mbH</span>
       <span><a href="{r}impressum/index.html">Impressum</a> · <a href="{r}datenschutz/index.html">Datenschutz</a></span>
@@ -299,6 +300,17 @@ def build_home():
   </div>
 </section>
 
+<section class="facts">
+  <div class="wrap facts__grid">
+    <div class="fact"><div class="fact__value">1992</div><div class="fact__label">gegründet in Soest, international patentiert</div></div>
+    <div class="fact"><div class="fact__value">9 / 20+</div><div class="fact__label">Produktfamilien / Baureihen</div></div>
+    <div class="fact"><div class="fact__value"><small>bis</small> 44 kN</div><div class="fact__label">Greifkraft (Hohlgreifer C16, 6 bar)</div></div>
+    <div class="fact"><div class="fact__value"><small>bis</small> 850 Nm</div><div class="fact__label">pro Achse und Finger (Schwerlastgreifer)</div></div>
+    <div class="fact"><div class="fact__value"><small>bis</small> 10 Mio.</div><div class="fact__label">Hübe wartungsfrei</div></div>
+    <div class="fact fact--badge"><img src="assets/img/made-in-germany.svg" alt="Made in Germany" width="176" height="51"><div class="fact__label">entwickelt und gefertigt in Soest</div></div>
+  </div>
+</section>
+
 <section class="section promo3d">
   <div class="wrap">
     <div class="section__head">
@@ -322,16 +334,6 @@ def build_home():
           <span class="card__more">Simulator ansehen {icon('arrow')}</span></div></div>
       </a>
     </div>
-  </div>
-</section>
-
-<section class="facts">
-  <div class="wrap facts__grid">
-    <div class="fact"><div class="fact__value">1992</div><div class="fact__label">gegründet in Soest</div></div>
-    <div class="fact"><div class="fact__value">9</div><div class="fact__label">Produktfamilien</div></div>
-    <div class="fact"><div class="fact__value">20+</div><div class="fact__label">Baureihen</div></div>
-    <div class="fact"><div class="fact__value">10 Mio.</div><div class="fact__label">Hübe wartungsfrei</div></div>
-    <div class="fact"><div class="fact__value">850 Nm</div><div class="fact__label">Belastbarkeit pro Achse und Finger</div></div>
   </div>
 </section>
 

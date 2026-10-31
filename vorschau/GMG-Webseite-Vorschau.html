@@ -153,10 +153,15 @@ p { margin: 0 0 1em; }
 
 /* Facts strip */
 .facts { border-bottom: 1px solid var(--line); background: #fff; }
-.facts__grid { display: grid; grid-template-columns: repeat(5, 1fr); }
+.facts__grid { display: grid; grid-template-columns: repeat(6, 1fr); }
+.fact--badge { display: flex; flex-direction: column; justify-content: center; }
+.fact--badge img { width: 150px; height: auto; }
+.footer__made { display: flex; align-items: center; gap: 14px; padding: 18px 0; border-top: 1px solid rgba(255,255,255,.12); font-size: .9rem; }
+.footer__made img { width: 130px; height: auto; flex: none; }
 .fact { padding: 28px 20px; border-left: 1px solid var(--line); }
 .fact:first-child { border-left: 0; }
-.fact__value { font-size: 1.6rem; font-weight: 750; color: var(--ink); line-height: 1.1; }
+.fact__value { font-size: 1.5rem; font-weight: 750; color: var(--ink); line-height: 1.1; white-space: nowrap; }
+.fact__value small { font-size: .62em; font-weight: 600; color: var(--muted); }
 .fact__label { font-size: .88rem; color: var(--muted); margin-top: 6px; }
 
 /* Cards */
@@ -557,6 +562,7 @@ button.kfg__card { font: inherit; text-align: left; cursor: pointer; width: 100%
         <a class="btn btn--primary btn--sm" href="#/kontakt">Anfrage stellen</a>
       </div>
     </div>
+    <div class="footer__made"><img data-img="made-in-germany" alt="Made in Germany" width="150" height="44" loading="lazy"><span>Alle GMG-Greifer werden in Soest entwickelt und gefertigt.</span></div>
     <div class="footer__bottom">
       <span>© GMG Gesellschaft für modulare Greifersysteme mbH</span>
       <span><a href="#/impressum">Impressum</a> · <a href="#/datenschutz">Datenschutz</a></span>
@@ -658,6 +664,17 @@ button.kfg__card { font: inherit; text-align: left; cursor: pointer; width: 100%
   </div>
 </section>
 
+<section class="facts">
+  <div class="wrap facts__grid">
+    <div class="fact"><div class="fact__value">1992</div><div class="fact__label">gegründet in Soest, international patentiert</div></div>
+    <div class="fact"><div class="fact__value">9 / 20+</div><div class="fact__label">Produktfamilien / Baureihen</div></div>
+    <div class="fact"><div class="fact__value"><small>bis</small> 44 kN</div><div class="fact__label">Greifkraft (Hohlgreifer C16, 6 bar)</div></div>
+    <div class="fact"><div class="fact__value"><small>bis</small> 850 Nm</div><div class="fact__label">pro Achse und Finger (Schwerlastgreifer)</div></div>
+    <div class="fact"><div class="fact__value"><small>bis</small> 10 Mio.</div><div class="fact__label">Hübe wartungsfrei</div></div>
+    <div class="fact fact--badge"><img data-img="made-in-germany" alt="Made in Germany" width="176" height="51"><div class="fact__label">entwickelt und gefertigt in Soest</div></div>
+  </div>
+</section>
+
 <section class="section promo3d">
   <div class="wrap">
     <div class="section__head">
@@ -681,16 +698,6 @@ button.kfg__card { font: inherit; text-align: left; cursor: pointer; width: 100%
           <span class="card__more">Simulator ansehen <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></span></div></div>
       </a>
     </div>
-  </div>
-</section>
-
-<section class="facts">
-  <div class="wrap facts__grid">
-    <div class="fact"><div class="fact__value">1992</div><div class="fact__label">gegründet in Soest</div></div>
-    <div class="fact"><div class="fact__value">9</div><div class="fact__label">Produktfamilien</div></div>
-    <div class="fact"><div class="fact__value">20+</div><div class="fact__label">Baureihen</div></div>
-    <div class="fact"><div class="fact__value">10 Mio.</div><div class="fact__label">Hübe wartungsfrei</div></div>
-    <div class="fact"><div class="fact__value">850 Nm</div><div class="fact__label">Belastbarkeit pro Achse und Finger</div></div>
   </div>
 </section>
 
