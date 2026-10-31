@@ -297,6 +297,8 @@ td a { font-weight: 600; }
 .kfg__seg button[aria-pressed="true"] { background: var(--blue); color: #fff; }
 .kfg__seg button:disabled { color: #a8b1bb; cursor: not-allowed; }
 .kfg__seg--2 { grid-template-columns: 1fr 1fr; }
+.kfg__examples { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 10px; font-size: .9rem; }
+.kfg__examples button[aria-pressed="true"] { background: var(--blue); border-color: var(--blue); color: #fff; }
 .kfg__fields { grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)) !important; }
 .kfg__fields { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
 .kfg__fields .field input { padding: 9px 10px; }
@@ -576,6 +578,9 @@ button.kfg__card { font: inherit; text-align: left; cursor: pointer; width: 100%
           <button type="button" data-src="rohr">Rohr / Ring</button>
           <button type="button" data-src="kasten">Kasten offen</button>
         </div>
+        <div class="kfg__examples"><span class="muted">Beispielteil:</span>
+          <button type="button" class="btn btn--ghost btn--xs" data-src="felge">Felge Ø 400 mm</button>
+        </div>
       </div>
       <div id="kfg-quelle-datei" class="kfg__box" hidden>
         <label class="kfg__drop">
@@ -783,6 +788,9 @@ button.kfg__card { font: inherit; text-align: left; cursor: pointer; width: 100%
           <button type="button" data-src="quader">Quader</button>
           <button type="button" data-src="rohr">Rohr / Ring</button>
           <button type="button" data-src="kasten">Kasten offen</button>
+        </div>
+        <div class="kfg__examples"><span class="muted">Beispielteil:</span>
+          <button type="button" class="btn btn--ghost btn--xs" data-src="felge">Felge Ø 400 mm</button>
         </div>
       </div>
       <div id="kfg-quelle-datei" class="kfg__box" hidden>

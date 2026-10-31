@@ -138,7 +138,7 @@ function unitFactor() {
 function placePart(autoOrient) {
   if (!baseGeo) return;
   const { f, auto, label } = unitFactor();
-  $('#kfg-einheit-info').textContent = !auto ? '' : fileKind === 'step' ? 'aus der STEP-Datei übernommen (mm)' : fileKind === 'form' ? 'Grundform in mm' : `erkannt: ${label}`;
+  $('#kfg-einheit-info').textContent = !auto ? '' : fileKind === 'step' || fileKind === 'muster' ? 'aus der STEP-Datei übernommen (mm)' : fileKind === 'form' ? 'Grundform in mm' : `erkannt: ${label}`;
   const geo = baseGeo.clone();
   geo.scale(f, f, f);
   geo.computeBoundingBox();
@@ -153,7 +153,9 @@ function placePart(autoOrient) {
   const c = new THREE.Vector3(); geo.boundingBox.getCenter(c);
   geo.translate(-c.x, -geo.boundingBox.min.y, -c.z);
   geo.computeBoundingBox();
-  geo.computeVertexNormals();
+  // Runde Flächen glatt schattieren, Kanten über 30° bleiben scharf (bei sehr großen Dateien zu langsam)
+  if (geo.attributes.position.count < 1.2e6) toCreasedNormals(geo, Math.PI / 6);   // setzt die Normalen in geo
+  else geo.computeVertexNormals();
   if (part) { scene.remove(part); part.geometry.dispose(); }
   part = new THREE.Mesh(geo, partMat);
   part.castShadow = part.receiveShadow = true;
@@ -366,6 +368,7 @@ function fitScene() {
   grid.scale.setScalar(r * 4);
   sun.position.set(-r * 1.5, r * 3, r * 1.2);
   Object.assign(sun.shadow.camera, { left: -r * 2, right: r * 2, top: r * 2, bottom: -r * 2, near: r * 0.1, far: r * 10 });
+  sun.shadow.normalBias = r * 0.006;          // gegen Streifen/Flecken durch Eigenschatten auf gewölbten Flächen
   sun.shadow.camera.updateProjectionMatrix();
   controls.target.set(0, s.y * 0.5 + gLen * 0.3, 0);
   camera.position.set(r * 1.15, r * 0.8, r * 1.45);
@@ -670,9 +673,36 @@ let fileState = null, partLabel = '';
 function showSource(src) {
   root.querySelectorAll('[data-src]').forEach((b) => b.setAttribute('aria-pressed', b.dataset.src === src ? 'true' : 'false'));
   $('#kfg-quelle-datei').hidden = src !== 'datei';
-  $('#kfg-quelle-form').hidden = src === 'datei';
+  $('#kfg-quelle-form').hidden = !FORMS[src];
+}
+// Beispielteile aus echten STEP-Dateien, vorab zerlegt (tools/konfigurator/beispiel.py)
+const EXAMPLES = { felge: { file: 'felge.json', label: 'Beispielteil: Felge Ø 400 × 204 mm (STEP)', material: '2700' } };
+async function loadExample(key) {
+  const ex = EXAMPLES[key];
+  showSource(key);
+  root.classList.add('is-loading');
+  progress(10, 'Beispielteil wird geladen');
+  try {
+    if (!ex.geo) {
+      const d = await (await fetch(BASE + 'data/3d/beispiele/' + ex.file)).json();
+      const g = new THREE.BufferGeometry();
+      g.setAttribute('position', new THREE.Float32BufferAttribute(d.v, 3));
+      g.setIndex(d.i);
+      ex.geo = g.toNonIndexed();
+      ex.geo.computeBoundingBox();
+    }
+    baseGeo = ex.geo; fileKind = 'muster'; partLabel = ex.label;
+    $('#kfg-material').value = ex.material;
+    turns = { x: 0, y: 0, z: 0 };
+    placePart(false);
+    setMode(innerWidth && A.range.innen ? 'innen' : 'aussen');
+  } finally {
+    root.classList.remove('is-loading');
+    ring.hidden = true;
+  }
 }
 function chooseSource(src) {
+  if (EXAMPLES[src]) { loadExample(src); return; }
   if (src !== 'datei') { sample(src); return; }
   showSource('datei');
   if (fileState) {

@@ -486,6 +486,9 @@ def configurator_block(r):
           <button type="button" data-src="rohr">Rohr / Ring</button>
           <button type="button" data-src="kasten">Kasten offen</button>
         </div>
+        <div class="kfg__examples"><span class="muted">Beispielteil:</span>
+          <button type="button" class="btn btn--ghost btn--xs" data-src="felge">Felge Ø 400 mm</button>
+        </div>
       </div>
       <div id="kfg-quelle-datei" class="kfg__box" hidden>
         <label class="kfg__drop">
