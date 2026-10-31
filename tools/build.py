@@ -558,6 +558,48 @@ def configurator_block(r):
 </div></section>"""
 
 
+def simulator_block():
+    """Greifer-Simulator unter dem Konfigurator: Mini-Anlage aus drei Stationen, Logik in tools/konfigurator/simulator.js."""
+    return f"""<section class="section section--alt sim-section" id="simulator" data-simulator data-mail="{MAIL}"><div class="wrap">
+  <div class="section__head">
+    <span class="eyebrow">Greifer-Simulator</span>
+    <h2>Ihr Greifer in Ihrer Anlage</h2>
+    <p class="lead">Stellen Sie aus drei Stationen eine kleine Anlage zusammen: wie das Produkt ankommt, welches Gerät den Greifer führt und wohin das Produkt geht. Der Greifer aus dem Konfigurator wird übernommen.</p>
+  </div>
+  <div class="sim__intro">
+    <button type="button" class="btn btn--primary" id="sim-open">{icon('cube')}Anlage aufbauen</button>
+    <span class="muted">Am besten am Computer. Die Bewertung ist eine erste Einschätzung nach einfachen Regeln.</span>
+  </div>
+  <div class="sim" hidden>
+    <div class="sim__bar">
+      <div class="sim__gripper"><span class="muted">Greifer</span> <strong id="sim-greifer">–</strong></div>
+      <label class="sim__tpl"><span class="muted">Vorlage</span>
+        <select id="sim-vorlage"></select></label>
+      <ol class="sim__steps" id="sim-steps"><li>Vorlage</li><li>Produkt</li><li>Stationen</li><li>Simulation</li></ol>
+    </div>
+    <div class="sim__body">
+      <div class="sim__slots" id="sim-slots"></div>
+      <div class="sim__view"><canvas></canvas>
+        <div class="sim__hint">Ziehen zum Drehen · Scrollen zum Zoomen · Station anklicken zum Ändern</div>
+        <div class="sim__empty" id="sim-empty" hidden>Wählen Sie links für jede Station ein Modul.</div>
+      </div>
+      <div class="sim__params" id="sim-params"></div>
+    </div>
+    <div class="sim__result">
+      <button type="button" class="btn btn--primary" id="sim-run">Simulation starten</button>
+      <div class="sim__ampel" id="sim-ampel" aria-live="polite"><span></span><span></span><span></span></div>
+      <div class="sim__verdict"><strong id="sim-urteil">Noch nicht bewertet</strong><span id="sim-gruende" class="muted"></span></div>
+      <dl class="sim__kpi"><div><dt>Taktzeit</dt><dd id="sim-takt">–</dd></div><div><dt>Teile pro Stunde</dt><dd id="sim-stunde">–</dd></div></dl>
+      <p class="sim__tip" id="sim-tipp"></p>
+      <div class="sim__cta">
+        <a class="btn btn--primary" id="sim-anfrage" href="mailto:{MAIL}">Angebot für diese Anlage anfragen {icon('arrow')}</a>
+        <button type="button" class="btn btn--ghost" id="sim-teilen">Anlage teilen</button>
+      </div>
+    </div>
+  </div>
+</div></section>"""
+
+
 def build_configurator():
     path = "konfigurator"
     r = rel(path)
@@ -569,6 +611,7 @@ def build_configurator():
   <p class="lead">Laden Sie Ihr Teil als STEP- oder STL-Datei oder wählen Sie eine Grundform mit Ihren Maßen. Dann testen Sie direkt in 3D, wie der Greifer zufasst. Die Datei bleibt auf Ihrem Rechner und wird nicht hochgeladen.</p>
 </div></section>
 {configurator_block(r)}
+{simulator_block()}
 {cta_band(r)}"""
     page(path, "Greifer-Konfigurator", body, "konfigurator",
          "Teil als STEP-Datei laden, passenden GMG-Greifer finden und das Greifen direkt in 3D testen.",

@@ -20,7 +20,7 @@
 <link rel="icon" href="../assets/logo/gmg-3d-dezent-bildmarke.svg" type="image/svg+xml">
 <link rel="alternate icon" href="../assets/img/gmg-bildmarke-3d.png" type="image/png">
 <link rel="apple-touch-icon" href="../assets/img/apple-touch-icon.png">
-<link rel="stylesheet" href="../assets/css/style.css?v=202610310050">
+<link rel="stylesheet" href="../assets/css/style.css?v=202610310833">
 </head>
 <body>
 <div class="draft">Entwurf / Testversion der neuen GMG-Webseite. Inhalte von gmg-system.com übernommen.</div>
@@ -124,6 +124,44 @@
     </div>
   </div>
 </div></section>
+<section class="section section--alt sim-section" id="simulator" data-simulator data-mail="info@gmg-system.com"><div class="wrap">
+  <div class="section__head">
+    <span class="eyebrow">Greifer-Simulator</span>
+    <h2>Ihr Greifer in Ihrer Anlage</h2>
+    <p class="lead">Stellen Sie aus drei Stationen eine kleine Anlage zusammen: wie das Produkt ankommt, welches Gerät den Greifer führt und wohin das Produkt geht. Der Greifer aus dem Konfigurator wird übernommen.</p>
+  </div>
+  <div class="sim__intro">
+    <button type="button" class="btn btn--primary" id="sim-open"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 16V8a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7l7 4a2 2 0 0 0 2 0l7-4a2 2 0 0 0 1-1.7z"/><path d="M3.3 7 12 12l8.7-5M12 22V12"/></svg>Anlage aufbauen</button>
+    <span class="muted">Am besten am Computer. Die Bewertung ist eine erste Einschätzung nach einfachen Regeln.</span>
+  </div>
+  <div class="sim" hidden>
+    <div class="sim__bar">
+      <div class="sim__gripper"><span class="muted">Greifer</span> <strong id="sim-greifer">–</strong></div>
+      <label class="sim__tpl"><span class="muted">Vorlage</span>
+        <select id="sim-vorlage"></select></label>
+      <ol class="sim__steps" id="sim-steps"><li>Vorlage</li><li>Produkt</li><li>Stationen</li><li>Simulation</li></ol>
+    </div>
+    <div class="sim__body">
+      <div class="sim__slots" id="sim-slots"></div>
+      <div class="sim__view"><canvas></canvas>
+        <div class="sim__hint">Ziehen zum Drehen · Scrollen zum Zoomen · Station anklicken zum Ändern</div>
+        <div class="sim__empty" id="sim-empty" hidden>Wählen Sie links für jede Station ein Modul.</div>
+      </div>
+      <div class="sim__params" id="sim-params"></div>
+    </div>
+    <div class="sim__result">
+      <button type="button" class="btn btn--primary" id="sim-run">Simulation starten</button>
+      <div class="sim__ampel" id="sim-ampel" aria-live="polite"><span></span><span></span><span></span></div>
+      <div class="sim__verdict"><strong id="sim-urteil">Noch nicht bewertet</strong><span id="sim-gruende" class="muted"></span></div>
+      <dl class="sim__kpi"><div><dt>Taktzeit</dt><dd id="sim-takt">–</dd></div><div><dt>Teile pro Stunde</dt><dd id="sim-stunde">–</dd></div></dl>
+      <p class="sim__tip" id="sim-tipp"></p>
+      <div class="sim__cta">
+        <a class="btn btn--primary" id="sim-anfrage" href="mailto:info@gmg-system.com">Angebot für diese Anlage anfragen <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14M13 6l6 6-6 6"/></svg></a>
+        <button type="button" class="btn btn--ghost" id="sim-teilen">Anlage teilen</button>
+      </div>
+    </div>
+  </div>
+</div></section>
 <section class="cta-band">
   <div class="wrap cta-band__inner">
     <div>
@@ -179,6 +217,6 @@
   <a class="btn btn--ghost" href="../konfigurator/index.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M21 16V8a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7l7 4a2 2 0 0 0 2 0l7-4a2 2 0 0 0 1-1.7z"/><path d="M3.3 7 12 12l8.7-5M12 22V12"/></svg>Konfigurator</a>
   <a class="btn btn--primary" href="../kontakt/index.html"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-10 6L2 7"/></svg>Anfrage</a>
 </div>
-<script src="../assets/js/main.js?v=202610310050"></script><script src="../assets/js/konfigurator.js?v=202610310050" defer></script>
+<script src="../assets/js/main.js?v=202610310833"></script><script src="../assets/js/konfigurator.js?v=202610310833" defer></script>
 </body>
 </html>

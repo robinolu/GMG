@@ -9,6 +9,7 @@ import { mergeGeometries, toCreasedNormals } from 'three/examples/jsm/utils/Buff
 import { MeshBVH } from 'three-mesh-bvh';
 import GRIPPER from '../../data/3d/greifer-platzhalter.json';
 import { Quaternion as Q } from 'three';
+import { initSimulator } from './simulator.js';
 // Greifer mit 3D-Modell. Weitere GMG-Greifer kommen hinzu, sobald ihre STEP-Dateien vorliegen
 // (Kennwerte aller Baureihen liegen schon in data/greifer-specs.json).
 
@@ -17,6 +18,7 @@ const BASE = root.dataset.base || '';
 const $ = (s) => root.querySelector(s);
 const MAX_BYTES = 100 * 1024 * 1024;   // darüber wird es im Browser zäh (Speicher, Rechenzeit)
 const SLOW_BYTES = 25 * 1024 * 1024;
+const partListeners = [];   // Simulator: wird benachrichtigt, wenn sich das Teil ändert
 const fmt = (v, d = 0) => v.toLocaleString('de-DE', { maximumFractionDigits: d, minimumFractionDigits: d });
 
 // ---------- Szene ----------
@@ -400,6 +402,7 @@ function updateFacts() {
   facts = { s, vol, mass, grip: mode === 'innen' && innerWidth ? innerWidth : s.z, soft: $('#kfg-material').selectedOptions[0].dataset.weich === '1' };
   $('#kfg-masse').textContent = `${fmt(s.x)} × ${fmt(s.y)} × ${fmt(s.z)} mm (L × H × Greifbreite)` + (innerWidth ? ` · Innenmaß ${fmt(innerWidth)} mm` : '');
   $('#kfg-gewicht').textContent = mass < 1 ? `ca. ${fmt(mass * 1000)} g` : `ca. ${fmt(mass, 1)} kg`;
+  partListeners.forEach((f) => f());
 }
 
 // ---------- Vorschlag ----------
@@ -751,4 +754,13 @@ pose(0);
 sample('zylinder');
 root.classList.add('is-ready');
 (function loop() { requestAnimationFrame(loop); controls.update(); renderer.render(scene, camera); })();
+// Simulator unter dem Konfigurator: übernimmt Greifer und Teil
+initSimulator({
+  active: () => A,
+  grippers: () => GRIPPERS,
+  select: async (id) => { await selectGripper(id); suggest(); },
+  restore: () => { A.set(0); if (part) update(); },
+  part: () => part && facts ? { geo: part.geometry, size: facts.s.clone(), mass: facts.mass, soft: facts.soft, label: partLabel, grip: facts.grip, inside: mode === 'innen' } : null,
+  onPart: (f) => partListeners.push(f),
+});
 window.__kfg = { sample, update, setMode, selectGripper, gripper: () => A.id, move: (x, z) => { $('#kfg-x').value = x; $('#kfg-z').value = z; update(); }, set: (h, z) => { $('#kfg-hoehe').value = h; $('#kfg-zu').value = z; update(); }, status: () => $('#kfg-status').textContent };
