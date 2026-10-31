@@ -236,7 +236,7 @@ function buildTarget(id, P, p3, dreh = 0) {
 // ---------------------------------------------------------------- Geräte
 // Jedes Gerät: group, reach(flange: Vector3) stellt die Gelenke so, dass der Flansch dort liegt (Werkzeug senkrecht nach unten)
 function buildArm(ped = 0) {
-  const c = { ped, base: 300, hs: 520, L2: 900, L3: 950, f: 180, r: 120, mat: M.roboter, joint: M.dunkel };
+  const c = { ped, base: 300, hs: 520, L2: 1000, L3: 1050, f: 180, r: 120, mat: M.roboter, joint: M.dunkel };
   const g = new THREE.Group();
   if (c.ped) g.add(box(420, c.ped, 420, M.alu, 0, c.ped / 2, 0));
   const y0 = c.ped;
@@ -256,6 +256,7 @@ function buildArm(ped = 0) {
   const sh = new THREE.Vector3(), d2 = new THREE.Vector2();
   return {
     group: g, cfg: c,
+    tip: (v) => { flange.getWorldPosition(v); v.y -= 6; return v; },   // Unterseite des Flansches, wie gestellt
     reach(F) {
       // Handgelenk senkrecht über dem Flansch; Ebene des Arms durch Fuß und Ziel
       const W = new THREE.Vector3(F.x, F.y + c.f, F.z);
@@ -294,6 +295,7 @@ function buildLinear(x0, x1) {
       arm.group.position.x = clamp(F.x, x0, x1);         // Schlitten fährt mit, der Arm greift nach vorn
       arm.reach(F);
     },
+    tip: arm.tip,
   };
 }
 
@@ -317,6 +319,7 @@ function buildDelta(cx, cz, pickX, placeX) {
   const E = new THREE.Vector3(), Pj = new THREE.Vector3(), D = new THREE.Vector3(), a = new THREE.Vector3(), b = new THREE.Vector3();
   return {
     group: g,
+    tip: (v) => v.set(platform.position.x, platform.position.y - 20, platform.position.z),
     reach(F) {
       platform.position.set(F.x, F.y + 20, F.z);
       for (const A of arms) {
@@ -347,6 +350,7 @@ function buildPortal(cx, cz, pickX, placeX, H) {
   const column = box(160, 2400, 160, M.stahl, 0, 0, 0); g.add(column);
   return {
     group: g,
+    tip: (v) => v.set(column.position.x, column.position.y - 1200, column.position.z),
     reach(F) {
       beam.position.x = F.x; carriage.position.set(F.x, H + 240, F.z);
       column.position.set(F.x, F.y + 1200, F.z);
@@ -688,11 +692,13 @@ export function initSimulator(K) {
       const yN = nx.p.y + P.size[1] - depth;
       y = THREE.MathUtils.lerp(yPlace + hub, yN + hub, back) + Math.sin(back * Math.PI) * 80; yaw = THREE.MathUtils.lerp(dreh, nx.yaw, back);
     }
-    tcp.set(x, y, z);
-    g.holder.position.copy(tcp); g.holder.rotation.y = yaw;
     g.set(inside ? 1 - (1 - tGrip) * close * (1 - open) : tGrip * close * (1 - open));
     flange.set(x, y + g.length, z);
     device.reach(flange);
+    // Greifer hängt fest am Flansch, so wie das Gerät tatsächlich steht (auch am Rand der Reichweite)
+    device.tip(tcp); tcp.y -= g.length;
+    x = tcp.x; y = tcp.y; z = tcp.z;
+    g.holder.position.copy(tcp); g.holder.rotation.y = yaw;
     // Teile an der Quelle
     let used = 0;
     const held = p >= 0.24 && p < 0.8;
@@ -924,5 +930,5 @@ export function initSimulator(K) {
       open(st).then(() => sec.scrollIntoView());
     } catch (e) { /* ungültiger Link: normal starten */ }
   }
-  window.__sim = { open, S, frame: (t) => { simTime = t; running = false; }, eval: () => lastEval, A: () => A, build: () => { build(); renderPanels(); } };
+  window.__sim = { open, S, frame: (t) => { simTime = t; running = false; }, eval: () => lastEval, A: () => A, gap: () => { const v = new THREE.Vector3(); A.device.tip(v); const bb = new THREE.Box3().setFromObject(A.g.holder); return { top: bb.max.y - v.y, dx: Math.hypot((bb.min.x + bb.max.x) / 2 - v.x, (bb.min.z + bb.max.z) / 2 - v.z), want: v.toArray().map(Math.round) }; }, build: () => { build(); renderPanels(); } };
 }
