@@ -1,6 +1,7 @@
 // Startseite: Roboter (ABB IRB 120) mit Testgreifer Tentra T3 setzt ein Kugellager (Kurvenrolle) von einem
 // Tisch auf den anderen. Der Ablauf folgt dem Scrollen: runter = greifen, heben, umsetzen, loslassen;
-// hoch = alles rückwärts. Tische und Roboter in Weiß/Grau vor dem Seitenhintergrund, damit der Blick auf Greifer und Teil fällt.
+// hoch = alles rückwärts. Fährt die Maus über die Szene, weicht der Roboter dem Zeiger aus.
+// Tische und Roboter in Weiß/Grau vor dem Seitenhintergrund, damit der Blick auf Greifer und Teil fällt.
 // Roboter-Koordinaten wie im STEP (mm, Y oben, Arm zeigt in −X), siehe tools/roboter/export.py.
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/examples/jsm/environments/RoomEnvironment.js';
@@ -277,9 +278,37 @@ const fromScroll = () => {
   const still = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
   let visible = true;
   new IntersectionObserver((e) => { visible = e[0].isIntersecting; }).observe(box);
+  // Ausweichen vor dem Mauszeiger: liegt der Zeiger (auf dem Bildschirm) nah an Greifer, Handgelenk
+  // oder Ellbogen, schiebt der Roboter den Greifpunkt vom Zeiger weg (rechts = +Z, oben = +Y).
+  const pointer = { x: 0, y: 0, on: false };
+  const dodge = new THREE.Vector2(), dodgeGoal = new THREE.Vector2(), sp = new THREE.Vector3();
+  box.addEventListener('pointermove', (e) => {
+    if (e.pointerType === 'touch') return;
+    const r = box.getBoundingClientRect();
+    pointer.x = e.clientX - r.left; pointer.y = e.clientY - r.top; pointer.on = true; dirty = true;
+  });
+  box.addEventListener('pointerleave', () => { pointer.on = false; dirty = true; });
+  const keypoints = () => [G.root, links.glied5, links.glied3].map((o) => o.getWorldPosition(new THREE.Vector3()));
+  function aim() {
+    dodgeGoal.set(0, 0);
+    if (!pointer.on || still) return;
+    const w = box.clientWidth, h = box.clientHeight, R = h * 0.26;
+    for (const k of keypoints()) {
+      sp.copy(k).project(camera);
+      const dx = (sp.x + 1) / 2 * w - pointer.x, dy = pointer.y - (1 - sp.y) / 2 * h;   // vom Zeiger weg, y nach oben
+      const dist = Math.hypot(dx, dy);
+      if (dist < R) dodgeGoal.add(new THREE.Vector2(dx, dy).divideScalar(Math.max(dist, 1)).multiplyScalar((R - dist) / R));
+    }
+    if (dodgeGoal.length() > 1) dodgeGoal.normalize();
+    dodgeGoal.multiplyScalar(300);                                  // höchstens 30 cm ausweichen
+  }
+  const aimed = new THREE.Vector3();
   const update = (s) => {
     const st = timeline(s, G);
-    pose(ik(st.p));
+    // beim Greifen und Ablegen auf dem Tisch nur wenig ausweichen, sonst bliebe das Teil liegen
+    const k = st.held !== 1 && st.t > 0.02 ? 0.2 : 1;
+    aimed.set(st.p.x, Math.max(TABLE_H + 7, st.p.y + dodge.y * k), st.p.z + dodge.x * k);
+    pose(ik(aimed));
     G.set(st.t);
     if (st.held === 1) {
       robot.updateMatrixWorld(true);
@@ -291,7 +320,10 @@ const fromScroll = () => {
   function frame() {
     requestAnimationFrame(frame);
     if (!visible) return;
-    if (Math.abs(progress - current) < 1e-4 && !dirty) return;
+    aim();
+    const dodging = dodge.distanceTo(dodgeGoal) > 0.5;
+    if (Math.abs(progress - current) < 1e-4 && !dirty && !dodging) return;
+    dodge.lerp(dodgeGoal, 0.1);
     current += (progress - current) * (still ? 1 : 0.12);
     update(current);
     renderer.render(scene, camera);
@@ -301,5 +333,5 @@ const fromScroll = () => {
   box.classList.remove('is-loading');
   box.classList.add('is-3d');
   frame();
-  window.__robo = { set: (s) => { progress = current = s; update(s); renderer.render(scene, camera); }, G, ik, links, camera, render: () => renderer.render(scene, camera) };
+  window.__robo = { set: (s) => { progress = current = s; update(s); renderer.render(scene, camera); }, G, ik, links, camera, dodge, render: () => renderer.render(scene, camera) };
 })().catch((e) => { box.classList.remove('is-loading'); console.error(e); });
