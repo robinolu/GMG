@@ -277,25 +277,28 @@ def video_grid(videos, fallback):
 # Greifer nach Prozess: Was soll der Greifer tun? (statt Produktnamen)
 PROZESSE = [
     {"titel": "Drehteile, Wellen und Ringe greifen", "bild": "c10",
-     "text": "Runde und prismatische Teile zentrisch greifen, von innen oder außen, zum Beispiel beim Beladen von Dreh- und Fräsmaschinen.",
+     "text": "Runde und prismatische Teile zentrisch greifen, von innen oder außen, zum Beispiel beim Beladen von Dreh- und Fräsmaschinen. Durch die hohle Mitte passen auch lange Wellen und Rohre.",
      "fam": ["hexagonal", "rechteckig"]},
-    {"titel": "Schwere und große Teile heben", "bild": "s310",
-     "text": "Guss- und Schmiedeteile, große Bauteile, lange Finger: hohe Momente bis 850 Nm pro Achse und Finger, auf Wunsch mit Objektsicherung.",
+    {"titel": "Schwere Guss- und Schmiedeteile heben", "bild": "s310",
+     "text": "Große und schwere Bauteile mit langen Fingern sicher halten: bis 850 Nm pro Achse und Finger, auf Wunsch mit Objektsicherung bei Energieausfall.",
      "fam": ["schwerlast"]},
-    {"titel": "Reifen und Räder handhaben", "bild": "r_106",
-     "text": "Reifen und Räder sicher greifen und umsetzen, in Reifenlagern, in der Produktion und in der Automobilfertigung.",
+    {"titel": "Reifen und Räder greifen", "bild": "r_106",
+     "text": "Reifen und Räder sicher aufnehmen und umsetzen, in der Reifenproduktion, im Reifenlager und in der Automobilfertigung.",
      "fam": ["reifengreifer"]},
-    {"titel": "Lebensmittel und weiche Teile greifen", "bild": "n206",
-     "text": "Teig, Fleisch und andere weiche oder unregelmäßige Teile mit gefederten Nadeln aufnehmen, abgedichtet und abwaschbar.",
+    {"titel": "Teig, Fleisch und Backwaren greifen", "bild": "n206",
+     "text": "Weiche und unregelmäßige Lebensmittel mit gefederten Nadeln aufnehmen, die ins Produkt einstechen. Abgedichtet und abwaschbar, mit Abstreifblech für Backwaren.",
      "fam": ["nadelgreifer"]},
     {"titel": "Kugellager und Ringe von innen greifen", "bild": "langarmgreifer",
      "text": "Runde Teile mit Bohrung wie Kugellager, Ringe und Buchsen von innen greifen, mit langen, schlanken Fingern auch tief aus Kisten und Kartons. Ein Vakuumsauger legt dabei gleich die Zwischenlagen zwischen die Schichten.",
      "fam": ["langarmgreifer"]},
-    {"titel": "Schnell umsetzen, Finger aus dem Weg", "bild": "pw306",
-     "text": "Kurze Taktzeiten für Pick-and-place und Pressenverkettung: Die Finger schwenken bis 180° aus dem Arbeitsraum.",
-     "fam": ["winkelgreifer", "parallel-winkelgreifer"]},
-    {"titel": "Eigene Greifer und Spannvorrichtungen bauen", "bild": "e03",
-     "text": "Das Einzelfinger-Modul als Maschinenelement für Ihre eigenen Greifer, Spann- und Sondervorrichtungen.",
+    {"titel": "Teile in Staub und Schmutz greifen", "bild": "w06",
+     "text": "Komplett abgedichtete Winkelgreifer für raue Umgebungen. Die Finger öffnen um 180° und geben den Platz über dem Teil ganz frei, so fährt der Greifer direkt an das Teil heran.",
+     "fam": ["winkelgreifer"]},
+    {"titel": "Kleine und große Teile mit einem Greifer", "bild": "pw306",
+     "text": "Riesiger Hub: Die Finger fahren parallel zu und schwenken beim Öffnen über 100° zur Seite. Ein Greifer fasst so sehr unterschiedlich große Teile, ohne Umrüsten.",
+     "fam": ["parallel-winkelgreifer"]},
+    {"titel": "Werkstücke spannen, eigene Greifer bauen", "bild": "e03",
+     "text": "Das Einzelfinger-Modul als Maschinenelement: Werkstücke in Vorrichtungen spannen oder eigene Greifer mit beliebiger Greifform aufbauen.",
      "fam": ["einzelfinger"]},
 ]
 
@@ -316,6 +319,8 @@ BRANCHEN = [
 ]
 
 FAM_BY_SLUG = {f["slug"]: f for f in FAMILIES}
+_zugeordnet = [f for pz in PROZESSE for f in pz["fam"]]
+assert sorted(_zugeordnet) == sorted(FAM_BY_SLUG), "Jede Produktfamilie muss genau einem Prozess zugeordnet sein"
 
 
 def hero_bg(r):
@@ -356,9 +361,10 @@ def process_cards(r):
             fam = FAM_BY_SLUG[slug]
             if "series" in fam:
                 for p in fam["series"]:
+                    code = p["code"]
                     if p["slug"].startswith("cp"):
-                        continue
-                    chips.append(f'<a href="{r}produkte/{slug}/{p["slug"]}/index.html">{e(p["code"])}</a>')
+                        code = "CP rund" if slug == "hexagonal" else "CP eckig"
+                    chips.append(f'<a href="{r}produkte/{slug}/{p["slug"]}/index.html">{e(code)}</a>')
             else:
                 chips.append(f'<a href="{r}produkte/{slug}/index.html">{e(fam["product"]["code"])}</a>')
         first = pz["fam"][0]

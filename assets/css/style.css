@@ -545,7 +545,7 @@ button.kfg__card { font: inherit; text-align: left; cursor: pointer; width: 100%
 @media (max-width: 860px) { .hero__front { width: 220px; left: 70%; } }
 
 /* Greifer nach Prozess */
-.procs { display: grid; grid-template-columns: repeat(4, 1fr); gap: 20px; }
+.procs { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; }
 .proc { display: flex; flex-direction: column; background: #fff; border: 1px solid var(--line); border-radius: var(--radius); overflow: hidden; transition: border-color .15s, box-shadow .15s, transform .15s; }
 .proc:hover { border-color: var(--blue); box-shadow: var(--shadow); transform: translateY(-2px); }
 .proc__img { height: 180px; background: var(--bg-alt); display: flex; align-items: center; justify-content: center; padding: 18px; }
