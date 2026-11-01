@@ -1,0 +1,414 @@
+[
+  {
+    "id": "greifzone_waagerecht",
+    "gruppe": "Greifzone",
+    "titel": "Greifzone waagerecht",
+    "kurz": "Ein waagerechter Bereich am Teil, in dem der Greifer zufassen darf.",
+    "bild_links": "svg/greifzone_waagerecht_1.png",
+    "bild_rechts": "svg/greifzone_waagerecht_2.png",
+    "text": "Du legst die Zone als Scheibe um das Teil. Der Greifer fasst von der Seite zu, seine Backen liegen immer innerhalb dieser Scheibe. Wo genau, sucht das Programm selbst. Eine Zone nah am Schwerpunkt ist meist besser, weil das Teil beim Bewegen weniger kippt.",
+    "legende": [
+      "Greifzone",
+      "Greifer mit Backen",
+      "Schwerpunkt des Teils"
+    ],
+    "hinweis": "Für Kartons, Dosen und Flaschen, die von der Seite gegriffen werden."
+  },
+  {
+    "id": "greifzone_senkrecht",
+    "gruppe": "Greifzone",
+    "titel": "Greifzone senkrecht",
+    "kurz": "Ein senkrechter Bereich, z. B. für liegende runde Teile. Er lässt sich um die Hochachse drehen.",
+    "bild_links": "svg/greifzone_senkrecht_1.png",
+    "bild_rechts": "svg/greifzone_senkrecht_2.png",
+    "text": "Die senkrechte Zone ist eine stehende Scheibe. Der Greifer kommt von oben und fasst innerhalb dieser Scheibe zu. Mit der Maus drehst du die Scheibe um die Hochachse. Damit legst du fest, aus welcher Richtung der Greifer das Teil packt.",
+    "legende": [
+      "Greifzone (stehende Scheibe)",
+      "Greifer mit Backen",
+      "Drehung um die Hochachse (senkrechte Linie)"
+    ],
+    "hinweis": "Für Wellen, Rohre und liegende Zylinder."
+  },
+  {
+    "id": "zonendicke",
+    "gruppe": "Greifzone",
+    "titel": "Zonendicke",
+    "kurz": "Wie dick die Greifzone ist, also wie viel Spielraum das Programm bei der Suche hat.",
+    "bild_links": "svg/zonendicke_1.svg",
+    "bild_rechts": "svg/zonendicke_2.svg",
+    "text": "In einer dünnen Zone gibt es kaum Auswahl, der Greifer muss genau dort greifen. In einer dicken Zone prüft das Programm viele Höhen und nimmt die sicherste. Wähle die Zone so dick, wie das Teil es erlaubt.",
+    "legende": [
+      "Dicke der Zone",
+      "Geprüfte Höhen",
+      "Gewählte Greifstelle"
+    ],
+    "hinweis": "Typisch 20 bis 60 mm."
+  },
+  {
+    "id": "sperrzone",
+    "gruppe": "Greifzone",
+    "titel": "Sperrzone",
+    "kurz": "Ein Bereich, den der Greifer nicht berühren darf.",
+    "bild_links": "svg/sperrzone_1.svg",
+    "bild_rechts": "svg/sperrzone_2.svg",
+    "text": "Sperrzonen markierst du auf dem Teil, z. B. Etiketten, Dichtflächen, Sensoren oder Ausgießer. Das Programm sucht dann nur Greifstellen außerhalb davon. Liegt die ganze Greifzone in einer Sperrzone, kommt eine Meldung.",
+    "legende": [
+      "Sperrzone (rot schraffiert)",
+      "Neue Greifstelle außerhalb"
+    ],
+    "hinweis": "Lieber eine Sperrzone zu viel als zu wenig."
+  },
+  {
+    "id": "produktmaterial",
+    "gruppe": "Teil",
+    "titel": "Produktmaterial",
+    "kurz": "Woraus die Oberfläche des Teils besteht.",
+    "bild_links": "svg/produktmaterial_1.svg",
+    "bild_rechts": "svg/produktmaterial_2.svg",
+    "text": "Wie gut Belag und Teil aneinander haften, hängt davon ab, welche Werkstoffe sich berühren. Das Programm liest den Reibwert aus seiner Tabelle. Manche Kombinationen sind gesperrt, z. B. Stahl auf Glas, weil das Teil Schaden nehmen kann.",
+    "legende": [
+      "Berührfläche zwischen Belag und Teil"
+    ],
+    "hinweis": "Bei beschichteten Teilen die Beschichtung wählen."
+  },
+  {
+    "id": "masse",
+    "gruppe": "Teil",
+    "titel": "Masse",
+    "kurz": "Das Gewicht des Teils in Kilogramm.",
+    "bild_links": "svg/masse_1.svg",
+    "bild_rechts": "svg/masse_2.svg",
+    "text": "Je schwerer das Teil, desto stärker zieht es nach unten und desto mehr Greifkraft ist nötig. Bei Behältern mit Inhalt gibst du das volle Gewicht an.",
+    "legende": [
+      "Gewichtskraft",
+      "Nötige Greifkraft"
+    ],
+    "hinweis": "Am besten wiegen, nicht schätzen."
+  },
+  {
+    "id": "belastbarkeit",
+    "gruppe": "Teil",
+    "titel": "Belastbarkeit (Stufe)",
+    "kurz": "Wie fest eine Stelle am Teil gedrückt werden darf.",
+    "bild_links": "svg/belastbarkeit_1.svg",
+    "bild_rechts": "svg/belastbarkeit_2.svg",
+    "text": "Empfindliche Teile geben unter der Backe nach oder gehen kaputt. Das Programm begrenzt dann den Druck auf die Fläche. Es nimmt eine größere Backe, einen weicheren Belag oder meldet, dass es so nicht geht. Die Stufen reichen von sehr empfindlich über empfindlich, normal und fest bis unbegrenzt.",
+    "legende": [
+      "Backe",
+      "Eindruck im Teil"
+    ],
+    "hinweis": "Unsicher? Lieber eine Stufe empfindlicher wählen.",
+    "stufen": [
+      {
+        "stufe": "Sehr empfindlich",
+        "kPa": 25,
+        "N_cm2": 2.5,
+        "etwa": "1 kg auf 2 x 2 cm",
+        "vergleich": "Erdbeeren, Himbeeren, reife Tomaten, Pfirsiche"
+      },
+      {
+        "stufe": "Empfindlich",
+        "kPa": 100,
+        "N_cm2": 10,
+        "etwa": "4 kg auf 2 x 2 cm",
+        "vergleich": "Äpfel, Birnen, Kiwis, Gurken, Paprika"
+      },
+      {
+        "stufe": "Normal",
+        "kPa": 300,
+        "N_cm2": 30,
+        "etwa": "12 kg auf 2 x 2 cm",
+        "vergleich": "Milchkartons, Kartons, leere Kunststoffflaschen, Weichholz"
+      },
+      {
+        "stufe": "Fest",
+        "kPa": 2000,
+        "N_cm2": 200,
+        "etwa": "80 kg auf 2 x 2 cm",
+        "vergleich": "massive Kunststoffteile, Gehäuse, Hartholz"
+      },
+      {
+        "stufe": "Unbegrenzt",
+        "kPa": null,
+        "N_cm2": null,
+        "etwa": "",
+        "vergleich": "Stahl, Aluminium, Guss, Glas mit Belag"
+      }
+    ],
+    "pro_eigener_wert": "Eingabe in kPa oder als höchste Greifkraft je Backe in N"
+  },
+  {
+    "id": "wandstaerke",
+    "gruppe": "Teil",
+    "titel": "Hohlkörper und Wandstärke",
+    "kurz": "Ob das Teil innen hohl ist und wie dick seine Wand ist.",
+    "bild_links": "svg/wandstaerke_1.svg",
+    "bild_rechts": "svg/wandstaerke_2.svg",
+    "text": "Volle Teile oder dicke Wände halten die Greifkraft gut aus. Dünne Wände biegen sich nach innen. Das Programm rechnet aus der Wandstärke und dem Material, wie weit, und begrenzt die Kraft.",
+    "legende": [
+      "Wandstärke",
+      "Wand gibt nach"
+    ],
+    "hinweis": "Bei Kunststoffflaschen und Dosen unbedingt angeben."
+  },
+  {
+    "id": "fuellstand",
+    "gruppe": "Teil",
+    "titel": "Füllstand",
+    "kurz": "Wie voll der Behälter ist.",
+    "bild_links": "svg/fuellstand_1.svg",
+    "bild_rechts": "svg/fuellstand_2.svg",
+    "text": "Ein voller Behälter ist schwerer und braucht mehr Kraft. Dafür stützt der Inhalt die Wand, bei verschlossenen Behältern auch die eingeschlossene Luft. Ein leerer Behälter ist leicht, aber die Wand knickt schnell ein. Der Schwerpunkt wandert mit dem Füllstand.",
+    "legende": [
+      "Füllhöhe",
+      "Schwerpunkt"
+    ],
+    "hinweis": "Wenn es beides gibt (leer und voll), beide Fälle rechnen lassen."
+  },
+  {
+    "id": "kopfraum",
+    "gruppe": "Teil",
+    "titel": "Kopfraum",
+    "kurz": "Die Luft über dem Inhalt in einem verschlossenen Behälter.",
+    "bild_links": "svg/kopfraum_1.svg",
+    "bild_rechts": "svg/kopfraum_2.svg",
+    "text": "Drückt der Greifer die Wand ein, wird die eingeschlossene Luft zusammengepresst und drückt dagegen. Bei wenig Luft steigt der Druck schnell und die Wand bleibt stabil. Bei viel Luft gibt sie leichter nach.",
+    "legende": [
+      "Kopfraum (Luft)",
+      "Inhalt"
+    ],
+    "hinweis": "Nur wichtig, wenn der Behälter dicht verschlossen ist."
+  },
+  {
+    "id": "verschlossen",
+    "gruppe": "Teil",
+    "titel": "Verschlossen",
+    "kurz": "Ob der Behälter dicht verschlossen ist.",
+    "bild_links": "svg/verschlossen_1.svg",
+    "bild_rechts": "svg/verschlossen_2.svg",
+    "text": "Nur wenn der Behälter dicht ist, bleibt die Luft drin und stützt die Wand. Bei offenen Behältern entweicht die Luft und die Wand gibt nach.",
+    "legende": [
+      "Luft entweicht",
+      "Deckel dicht",
+      "Gegendruck der Luft"
+    ],
+    "hinweis": "Im Zweifel \"offen\" wählen, das ist die sichere Seite."
+  },
+  {
+    "id": "eindrueckung",
+    "gruppe": "Teil",
+    "titel": "Zulässige Eindrückung",
+    "kurz": "Wie viele Millimeter die Wand höchstens nachgeben darf.",
+    "bild_links": "svg/eindrueckung_1.svg",
+    "bild_rechts": "svg/eindrueckung_2.svg",
+    "text": "Manche Teile dürfen etwas nachgeben, z. B. Kunststoffflaschen oder Beutel. Das Programm hält die Eindrückung unter diesem Wert. 0 mm heißt: Die Form darf sich nicht sichtbar ändern.",
+    "legende": [
+      "Erlaubte Eindrückung"
+    ],
+    "hinweis": "Typisch 0 bis 3 mm."
+  },
+  {
+    "id": "beschleunigung",
+    "gruppe": "Bewegung",
+    "titel": "Beschleunigung",
+    "kurz": "Wie schnell der Greifer beim Anheben auf Tempo kommt.",
+    "bild_links": "svg/beschleunigung_1.svg",
+    "bild_rechts": "svg/beschleunigung_2.svg",
+    "text": "Beim schnellen Anfahren drückt das Teil zusätzlich nach unten, als wäre es schwerer. Je höher die Beschleunigung, desto mehr Greifkraft ist nötig. Die Geschwindigkeit selbst spielt dabei keine Rolle, nur wie schnell sie sich ändert.",
+    "legende": [
+      "Anheben",
+      "Zusätzliche Kraft durch Beschleunigung"
+    ],
+    "hinweis": "Typisch 2 bis 10 m/s²."
+  },
+  {
+    "id": "nothalt",
+    "gruppe": "Bewegung",
+    "titel": "Not-Halt-Verzögerung",
+    "kurz": "Wie stark der Greifer bei einem Not-Halt abbremst.",
+    "bild_links": "svg/nothalt_1.svg",
+    "bild_rechts": "svg/nothalt_2.svg",
+    "text": "Beim Not-Halt bremst die Anlage sehr hart. Das Teil will weiterfliegen und darf dabei nicht aus den Backen rutschen. Diesen Wert findest du in den Daten des Roboters oder der Achse.",
+    "legende": [
+      "Fahrtrichtung, dann Bremsen",
+      "Teil will weiter"
+    ],
+    "hinweis": "Unbekannt? Lieber hoch ansetzen, z. B. 15 m/s²."
+  },
+  {
+    "id": "oberflaeche",
+    "gruppe": "Umgebung",
+    "titel": "Oberflächenzustand",
+    "kurz": "Ob die Oberfläche trocken, nass, ölig oder staubig ist.",
+    "bild_links": "svg/oberflaeche_1.svg",
+    "bild_rechts": "svg/oberflaeche_2.svg",
+    "text": "Wasser, Öl oder Staub bilden eine Schicht zwischen Backe und Teil. Dadurch sinkt die Haftung, teils auf ein Viertel. Das Programm rechnet je nach Material mit einem eigenen Abschlag und schlägt einen passenden Belag vor.",
+    "legende": [
+      "Ölfilm zwischen Backe und Teil"
+    ],
+    "hinweis": "Wenn es mal so und mal so ist, den ungünstigsten Fall wählen."
+  },
+  {
+    "id": "umgebungstemperatur",
+    "gruppe": "Umgebung",
+    "titel": "Umgebungstemperatur",
+    "kurz": "Die Temperatur in der Halle oder an der Anlage.",
+    "bild_links": "svg/umgebungstemperatur_1.svg",
+    "bild_rechts": "svg/umgebungstemperatur_2.svg",
+    "text": "Belag und Backen aus Kunststoff werden bei Wärme weich und verlieren Kraft. Das Programm schlägt nur Werkstoffe vor, die die Temperatur aushalten.",
+    "legende": [
+      "Temperatur in der Halle",
+      "Belag und Backen"
+    ],
+    "hinweis": "Den höchsten Wert im Jahr angeben, z. B. im Sommer."
+  },
+  {
+    "id": "produkttemperatur",
+    "gruppe": "Umgebung",
+    "titel": "Produkttemperatur",
+    "kurz": "Die Temperatur des Teils, wenn es gegriffen wird.",
+    "bild_links": "svg/produkttemperatur_1.svg",
+    "bild_rechts": "svg/produkttemperatur_2.svg",
+    "text": "Heiße Teile erwärmen den Belag an der Kontaktstelle. Unter Druck wird Kunststoff schon unterhalb seiner normalen Grenztemperatur weich. Das Programm prüft das und schlägt z. B. Silikon oder Metall statt ABS vor.",
+    "legende": [
+      "Heißes Teil",
+      "Belag an der Kontaktstelle"
+    ],
+    "hinweis": "Temperatur direkt beim Greifen angeben, nicht beim Herstellen."
+  },
+  {
+    "id": "luftfeuchte",
+    "gruppe": "Umgebung",
+    "titel": "Luftfeuchte",
+    "kurz": "Wie feucht die Luft ist, in Prozent.",
+    "bild_links": "svg/luftfeuchte_1.svg",
+    "bild_rechts": "svg/luftfeuchte_2.svg",
+    "text": "Karton und Papier nehmen Feuchtigkeit auf und werden weich. Ab etwa 50 % rechnet das Programm mit weniger Belastbarkeit, über 85 % mit der Hälfte. Bei Metall und Kunststoff spielt die Luftfeuchte kaum eine Rolle.",
+    "legende": [
+      "Feuchter Karton gibt nach"
+    ],
+    "hinweis": "Kühlhäuser und Waschbereiche sind oft sehr feucht."
+  },
+  {
+    "id": "backenform",
+    "gruppe": "Backe",
+    "titel": "Backenform",
+    "kurz": "Die Form der Backe: flach, Prisma, Kontur oder Kegel.",
+    "bild_links": "svg/backenform_1.svg",
+    "bild_rechts": "svg/backenform_2.svg",
+    "text": "Flache Backen sind einfach, halten runde Teile aber nur an zwei Punkten. Prismenbacken zentrieren runde Teile und halten an vier Linien. Konturbacken sind der Form des Teils nachgebildet und kommen aus dem 3D-Drucker. Kegelige Backen tragen das Teil zusätzlich über eine Schräge.",
+    "legende": [
+      "Kontaktstellen"
+    ],
+    "hinweis": "Für runde Teile fast immer Prisma oder Kontur."
+  },
+  {
+    "id": "oeffnungswinkel",
+    "gruppe": "Backe",
+    "titel": "Öffnungswinkel α",
+    "kurz": "Der Winkel zwischen den beiden schrägen Flächen einer Prismenbacke.",
+    "bild_links": "svg/oeffnungswinkel_1.svg",
+    "bild_rechts": "svg/oeffnungswinkel_2.svg",
+    "text": "Je kleiner α, desto tiefer sitzt das runde Teil in der Backe und desto weniger Greifkraft ist nötig. Ein großer Winkel passt dafür zu mehr verschiedenen Durchmessern.",
+    "legende": [
+      "Öffnungswinkel α",
+      "Kontaktlinie am Teil"
+    ],
+    "hinweis": "Üblich sind 90° oder 120°."
+  },
+  {
+    "id": "umschliessung",
+    "gruppe": "Backe",
+    "titel": "Umschließung",
+    "kurz": "Wie viel vom Umfang des Teils die Backen umfassen, in Prozent.",
+    "bild_links": "svg/umschliessung_1.svg",
+    "bild_rechts": "svg/umschliessung_2.svg",
+    "text": "Konturbacken legen sich um das Teil. Je mehr sie umschließen, desto sicherer hält es, auch bei schnellen Bewegungen. Mehr als 85 % geht nicht, sonst kommt das Teil beim Öffnen nicht mehr frei.",
+    "legende": [
+      "Umschlossener Anteil",
+      "Spalt zum Öffnen"
+    ],
+    "hinweis": "Das Programm schlägt den Wert passend zur Beschleunigung vor."
+  },
+  {
+    "id": "kegelwinkel",
+    "gruppe": "Backe",
+    "titel": "Kegelwinkel γ",
+    "kurz": "Die Neigung der Fläche bei einer kegeligen Backe.",
+    "bild_links": "svg/kegelwinkel_1.svg",
+    "bild_rechts": "svg/kegelwinkel_2.svg",
+    "text": "Bei einer kegeligen Backe sitzt das Teil auf einer Schräge und wird zusätzlich getragen. Ein kleiner Winkel hält fest, das Teil kann sich aber festklemmen und löst sich schlecht. Ein größerer Winkel trägt mehr über die Form und löst sauber.",
+    "legende": [
+      "Kegelwinkel γ",
+      "Backe mit Schräge"
+    ],
+    "hinweis": "Unter etwa 8° klemmt es leicht fest."
+  },
+  {
+    "id": "fingerbelag",
+    "gruppe": "Backe",
+    "titel": "Fingerbelag",
+    "kurz": "Das Material auf den Greiferfingern, das das Teil berührt.",
+    "bild_links": "svg/fingerbelag_1.svg",
+    "bild_rechts": "svg/fingerbelag_2.svg",
+    "text": "Der Belag entscheidet, wie gut der Finger hält. Weiche Beläge wie Gummi schmiegen sich an und haften stark, nutzen sich aber ab. Harte Beläge halten länger, haften aber weniger. Das Programm schlägt den passenden Belag automatisch vor.",
+    "legende": [
+      "Belag",
+      "Kontaktfläche"
+    ],
+    "hinweis": "Den Vorschlag übernehmen, wenn es keinen besonderen Grund gibt."
+  },
+  {
+    "id": "reibwert",
+    "gruppe": "Berechnung",
+    "titel": "Reibwert μ",
+    "kurz": "Eine Zahl dafür, wie gut Finger und Teil aneinander haften.",
+    "bild_links": "svg/reibwert_1.svg",
+    "bild_rechts": "svg/reibwert_2.svg",
+    "text": "Der Reibwert kommt aus der Tabelle und hängt von Belag und Teil ab. Bei gleichem Teil braucht ein hoher Reibwert viel weniger Greifkraft. Im Beispiel wiegt das Teil 2 kg und wird von zwei Backen gehalten.",
+    "legende": [
+      "Gleiches Teil, gleiches Gewicht",
+      "Nötige Greifkraft"
+    ],
+    "hinweis": "Selbst eintragen nur im Pro-Modus und nur mit Messwert."
+  },
+  {
+    "id": "greifkraft",
+    "gruppe": "Berechnung",
+    "titel": "Greifkraft",
+    "kurz": "Die Kraft, mit der der Greifer zudrücken muss.",
+    "bild_links": "svg/greifkraft_1.svg",
+    "bild_rechts": "svg/greifkraft_2.svg",
+    "text": "Das Programm berechnet die Kraft aus Gewicht, Beschleunigung, Reibwert und Sicherheitsfaktor. Ist sie zu klein, rutscht das Teil. Ist sie zu groß, kann das Teil Schaden nehmen. Darum prüft das Programm auch die Belastbarkeit.",
+    "legende": [
+      "Greifkraft",
+      "Gewicht"
+    ],
+    "hinweis": "Der Wert ist die Kraft je Backe."
+  },
+  {
+    "id": "sicherheitsfaktor",
+    "gruppe": "Berechnung",
+    "titel": "Sicherheitsfaktor (Pro)",
+    "kurz": "Reserve auf die berechnete Greifkraft.",
+    "bild_links": "svg/sicherheitsfaktor_1.svg",
+    "bild_rechts": "svg/sicherheitsfaktor_2.svg",
+    "text": "Das Programm rechnet die nötige Kraft aus und multipliziert sie mit dem Faktor. Die Reserve deckt Dinge ab, die man nicht genau kennt, z. B. Verschleiß des Belags oder leicht andere Teile. Im Normalmodus ist der Faktor fest 2. Im Pro-Modus kannst du 1,5 bis 2 wählen.",
+    "legende": [
+      "Berechnete Kraft",
+      "Reserve"
+    ],
+    "hinweis": "Nur verringern, wenn alle Werte gut bekannt sind."
+  },
+  {
+    "id": "ampel",
+    "gruppe": "Berechnung",
+    "titel": "Ampel",
+    "kurz": "Das Ergebnis auf einen Blick.",
+    "bild_links": "svg/ampel_1.svg",
+    "bild_rechts": "svg/ampel_2.svg",
+    "text": "Grün heißt: Alles passt mit Reserve. Gelb heißt: Es passt knapp oder ein Wert ist unsicher, z. B. ein Reibwert ohne Messung. Bitte prüfen oder testen. Rot heißt: So geht es nicht. Das Programm zeigt dann, was helfen würde.",
+    "legende": [],
+    "hinweis": "Bei Gelb ist ein kurzer Greiftest mit dem echten Teil sinnvoll."
+  }
+]

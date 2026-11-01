@@ -1,6 +1,6 @@
 // Profi-Modus des Konfigurators: Greifberechnung nach dem Konzept „Greifberechnung: Konzept für den Konfigurator“
 // (Stand 1. November 2026). Alle Werte und Regeln stehen in data/greifberechnung.json (erzeugt von
-// tools/greifberechnung/daten.py), nicht im Programmcode. Info-Texte: data/info_texte.json, Skizzen: assets/img/info/.
+// tools/greifberechnung/daten.py), nicht im Programmcode. Info-Texte: data/info_texte.json, Bilder: assets/img/info/ (aus tools/greifberechnung/quelle über info.py).
 // Einheiten: Längen in mm, Masse in kg, Kräfte in N, Druck in kPa.
 import * as THREE from 'three';
 import { STLExporter } from 'three/examples/jsm/exporters/STLExporter.js';
@@ -725,19 +725,30 @@ export function initPro(K) {
   // ---------- Info-Fenster: „!“ neben jedem Feld, Inhalte aus data/info_texte.json ----------
   let INFO = null, zuletzt = null;
   const modal = $('#info-modal');
+  const esc = (x) => String(x).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+  const zahl = (x) => String(x).replace('.', ',');
   async function infoOeffnen(key, btn) {
-    if (!INFO) { try { INFO = await (await fetch(K.base + 'data/info_texte.json')).json(); } catch (e) { INFO = {}; } }
+    if (!INFO) { try { INFO = Object.fromEntries((await (await fetch(K.base + 'data/info_texte.json')).json()).map((t) => [t.id, t])); } catch (e) { INFO = {}; } }
     const t = INFO[key]; if (!t) return;
     zuletzt = btn;
-    modal.querySelector('#info-titel').textContent = t.titel;
-    modal.querySelector('.info-modal__satz').textContent = t.satz;
-    modal.querySelector('.info-modal__bilder').innerHTML = t.bilder.map((b) => `<figure><img src="${K.base}${b.datei}" alt="${b.beschriftung}"><figcaption>${b.beschriftung}</figcaption></figure>`).join('');
-    modal.querySelector('.info-modal__text').textContent = t.text;
-    modal.querySelector('.info-modal__legende').innerHTML = t.legende.map((l) => `<li>${l}</li>`).join('');
-    modal.querySelector('.info-modal__tipp').textContent = t.tipp;
-    modal.querySelector('.info-modal__tipp').hidden = !t.tipp;
+    const q = (s) => modal.querySelector(s);
+    q('.info-modal__gruppe').textContent = t.gruppe || '';
+    q('#info-titel').textContent = t.titel;
+    q('.info-modal__satz').textContent = t.kurz;
+    q('.info-modal__bilder').innerHTML = [t.bild_links, t.bild_rechts].filter(Boolean).map((d) => `<img src="${K.base}${d}" alt="">`).join('');
+    q('.info-modal__text').textContent = t.text;
+    q('.info-modal__legende').innerHTML = (t.legende || []).map((l) => `<li>${esc(l)}</li>`).join('');
+    q('.info-modal__legende').hidden = !(t.legende || []).length;
+    let extra = '';
+    if (t.stufen) {
+      extra += '<table class="info-modal__stufen"><tr><th>Stufe</th><th>Höchstens</th><th>Etwa wie</th><th>Vergleichbar mit</th></tr>' + t.stufen.map((s) => `<tr><td><b>${esc(s.stufe)}</b></td><td>${s.kPa == null ? 'keine Grenze' : (s.kPa >= 1000 ? zahl(s.kPa / 1000) + ' MPa' : s.kPa + ' kPa') + `<br><small>${zahl(s.N_cm2)} N/cm²</small>`}</td><td>${esc(s.etwa).replace(/ /g, '&nbsp;')}</td><td>${esc(s.vergleich)}</td></tr>`).join('') + '</table>';
+    }
+    if (t.pro_eigener_wert) extra += `<p class="info-modal__pro"><b>Pro-Modus:</b> Statt einer Stufe kannst du einen eigenen Wert eingeben, ${esc(t.pro_eigener_wert.replace(/^Eingabe /, 'entweder '))}, z. B. aus einem eigenen Versuch.</p>`;
+    q('.info-modal__extra').innerHTML = extra;
+    q('.info-modal__tipp').textContent = t.hinweis || '';
+    q('.info-modal__tipp').hidden = !t.hinweis;
     modal.hidden = false;
-    modal.querySelector('.info-modal__x').focus();
+    q('.info-modal__x').focus();
   }
   function infoZu() { modal.hidden = true; if (zuletzt) zuletzt.focus(); }
   K.root.querySelectorAll('.info[data-info]').forEach((b) => b.addEventListener('click', (e) => { e.preventDefault(); e.stopPropagation(); infoOeffnen(b.dataset.info, b); }));

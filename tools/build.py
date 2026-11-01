@@ -771,7 +771,7 @@ def configurator_block(r):
       <p class="kfg__small muted pro__intro">Greifzone und Sperrzonen festlegen, Teil, Bewegung und Umgebung angeben, dann berechnen. Das Programm tastet die Zone ab, sucht gegenüberliegende Kontaktflächen außerhalb der Sperrzonen, rechnet alle Lastfälle und wählt die Stelle mit der größten Reserve. Ein Klick auf <span class="info info--demo">!</span> erklärt jedes Feld.</p>
       <div class="pro__grid">
         <fieldset class="pro__set"><legend>Greifzone</legend>
-          <div class="pro__lab">Art der Greifzone<button type="button" class="info" data-info="zone_waagerecht" aria-label="Erklärung">!</button><button type="button" class="info" data-info="zone_senkrecht" aria-label="Erklärung">!</button></div>
+          <div class="pro__lab">Art der Greifzone<button type="button" class="info" data-info="greifzone_waagerecht" aria-label="Erklärung">!</button><button type="button" class="info" data-info="greifzone_senkrecht" aria-label="Erklärung">!</button></div>
           <div class="kfg__seg kfg__seg--3" role="group" aria-label="Greifzone">
             <button type="button" data-zone="auto" aria-pressed="true">Automatisch</button>
             <button type="button" data-zone="waagerecht" aria-pressed="false">Waagerecht</button>
@@ -807,10 +807,10 @@ def configurator_block(r):
             <div class="field"><label for="pro-belast-einheit">Einheit</label><select id="pro-belast-einheit"><option value="kpa">kPa (Druck)</option><option value="n">N je Backe</option></select></div>
           </div>
           <small class="muted" id="pro-belast-info"></small>
-          <label class="check"><input type="checkbox" id="pro-hohl"> <span>Hohlkörper, Behälter<button type="button" class="info" data-info="hohl" aria-label="Erklärung">!</button></span></label>
+          <label class="check"><input type="checkbox" id="pro-hohl"> <span>Hohlkörper, Behälter<button type="button" class="info" data-info="wandstaerke" aria-label="Erklärung">!</button></span></label>
           <div id="pro-hohl-felder" class="pro__sub" hidden>
             <div class="pro__row">
-              <div class="field"><label for="pro-wand">Wandstärke (mm)<button type="button" class="info" data-info="hohl" aria-label="Erklärung">!</button></label><input id="pro-wand" type="text" inputmode="decimal" value="0,6"></div>
+              <div class="field"><label for="pro-wand">Wandstärke (mm)<button type="button" class="info" data-info="wandstaerke" aria-label="Erklärung">!</button></label><input id="pro-wand" type="text" inputmode="decimal" value="0,6"></div>
               <div class="field"><label for="pro-fuell">Füllstand (%)<button type="button" class="info" data-info="fuellstand" aria-label="Erklärung">!</button></label><input id="pro-fuell" type="text" inputmode="decimal" value="95"></div>
             </div>
             <div class="pro__row">
@@ -828,15 +828,15 @@ def configurator_block(r):
           </div>
           <div class="pro__row">
             <div class="field"><label for="pro-an">Not-Halt-Verzögerung (m/s²)<button type="button" class="info" data-info="nothalt" aria-label="Erklärung">!</button></label><input id="pro-an" type="text" inputmode="decimal" value="10"></div>
-            <div class="field"><label for="pro-s">Sicherheitsfaktor S (1,5 bis 2)<button type="button" class="info" data-info="sicherheit" aria-label="Erklärung">!</button></label><input id="pro-s" type="text" inputmode="decimal" value="2"></div>
+            <div class="field"><label for="pro-s">Sicherheitsfaktor S (1,5 bis 2)<button type="button" class="info" data-info="sicherheitsfaktor" aria-label="Erklärung">!</button></label><input id="pro-s" type="text" inputmode="decimal" value="2"></div>
           </div>
           <div class="pro__row">
             <div class="field"><label for="pro-zustand">Oberflächenzustand<button type="button" class="info" data-info="oberflaeche" aria-label="Erklärung">!</button></label><select id="pro-zustand"><option value="trocken">trocken, sauber</option><option value="nass">nass, Kondenswasser</option><option value="oelig">ölig, gefettet</option><option value="staubig">staubig, mehlig</option></select></div>
             <div class="field"><label for="pro-feuchte">Luftfeuchte (%)<button type="button" class="info" data-info="luftfeuchte" aria-label="Erklärung">!</button></label><input id="pro-feuchte" type="text" inputmode="decimal" value="50"></div>
           </div>
           <div class="pro__row">
-            <div class="field"><label for="pro-tumg">Umgebungstemperatur (°C)<button type="button" class="info" data-info="temp_umgebung" aria-label="Erklärung">!</button></label><input id="pro-tumg" type="text" inputmode="decimal" value="20"></div>
-            <div class="field"><label for="pro-tprod">Produkttemperatur (°C)<button type="button" class="info" data-info="temp_produkt" aria-label="Erklärung">!</button></label><input id="pro-tprod" type="text" inputmode="decimal" value="20"></div>
+            <div class="field"><label for="pro-tumg">Umgebungstemperatur (°C)<button type="button" class="info" data-info="umgebungstemperatur" aria-label="Erklärung">!</button></label><input id="pro-tumg" type="text" inputmode="decimal" value="20"></div>
+            <div class="field"><label for="pro-tprod">Produkttemperatur (°C)<button type="button" class="info" data-info="produkttemperatur" aria-label="Erklärung">!</button></label><input id="pro-tprod" type="text" inputmode="decimal" value="20"></div>
           </div>
           <label class="check"><input type="checkbox" id="pro-takt"> <span>Hohe Taktzahl: Backe heizt sich auf</span></label>
           <div class="field"><label for="pro-strecke">Fahrstrecke für die Geschwindigkeit (mm)</label><input id="pro-strecke" type="text" inputmode="decimal" value="1000"></div>
@@ -844,17 +844,17 @@ def configurator_block(r):
         <fieldset class="pro__set"><legend>Backe und Belag</legend>
           <div class="pro__row">
             <div class="field"><label for="pro-backen">Backenform<button type="button" class="info" data-info="backenform" aria-label="Erklärung">!</button></label><select id="pro-backen"><option value="flach">Flachbacke (Klemmen)</option><option value="prisma">Prismenbacke</option><option value="kontur">Konturbacke (3D-Druck)</option><option value="konus">Kegelbacke</option></select></div>
-            <div class="field" id="pro-alpha-feld" hidden><label for="pro-alpha">Öffnungswinkel α (°)<button type="button" class="info" data-info="alpha" aria-label="Erklärung">!</button></label><input id="pro-alpha" type="text" inputmode="decimal" value="90"></div>
+            <div class="field" id="pro-alpha-feld" hidden><label for="pro-alpha">Öffnungswinkel α (°)<button type="button" class="info" data-info="oeffnungswinkel" aria-label="Erklärung">!</button></label><input id="pro-alpha" type="text" inputmode="decimal" value="90"></div>
             <div class="field" id="pro-umschl-feld" hidden><label for="pro-umschl">Umschließung (%)<button type="button" class="info" data-info="umschliessung" aria-label="Erklärung">!</button></label><input id="pro-umschl" type="text" inputmode="decimal" value="70"></div>
-            <div class="field" id="pro-gamma-feld" hidden><label for="pro-gamma">Kegelwinkel γ (°)<button type="button" class="info" data-info="gamma" aria-label="Erklärung">!</button></label><input id="pro-gamma" type="text" inputmode="decimal" value="15"></div>
+            <div class="field" id="pro-gamma-feld" hidden><label for="pro-gamma">Kegelwinkel γ (°)<button type="button" class="info" data-info="kegelwinkel" aria-label="Erklärung">!</button></label><input id="pro-gamma" type="text" inputmode="decimal" value="15"></div>
           </div>
           <div class="pro__row">
             <div class="field"><label for="pro-belag">Fingerbelag<button type="button" class="info" data-info="fingerbelag" aria-label="Erklärung">!</button></label><select id="pro-belag"><option value="Naturgummi">Naturgummi</option><option value="Nitrilgummi" selected>Nitrilgummi</option><option value="Silikon">Silikon</option><option value="PU">PU</option><option value="TPU">TPU</option><option value="Leder">Leder</option><option value="Stahl">Stahl</option><option value="Polyamid">Polyamid</option><option value="POM">POM</option><option value="Polyethylen">Polyethylen</option><option value="PP">PP</option><option value="PTFE">PTFE</option></select></div>
             <div class="field"><label for="pro-backe">Backenkörper<button type="button" class="info" data-info="fingerbelag" aria-label="Erklärung">!</button></label><select id="pro-backe"><option value="TPU">TPU</option><option value="Stahl">Stahl</option><option value="Aluminium" selected>Aluminium</option><option value="Plexiglas">Plexiglas</option><option value="Polyamid">Polyamid</option><option value="POM">POM</option><option value="Polystyrol">Polystyrol</option><option value="Polyethylen">Polyethylen</option><option value="PP">PP</option><option value="PTFE">PTFE</option><option value="PLA">PLA (gedruckt)</option><option value="PETG">PETG (gedruckt)</option><option value="ABS">ABS (gedruckt)</option><option value="ASA">ASA (gedruckt)</option><option value="PC">PC (gedruckt)</option></select></div>
           </div>
           <div class="pro__row">
-            <div class="field"><label for="pro-bw">Belag Breite (mm)<button type="button" class="info" data-info="zonendicke" aria-label="Erklärung">!</button></label><input id="pro-bw" type="text" inputmode="decimal" value="20"></div>
-            <div class="field"><label for="pro-bh">Belag Höhe (mm)<button type="button" class="info" data-info="zonendicke" aria-label="Erklärung">!</button></label><input id="pro-bh" type="text" inputmode="decimal" value="25"></div>
+            <div class="field"><label for="pro-bw">Belag Breite (mm)<button type="button" class="info" data-info="fingerbelag" aria-label="Erklärung">!</button></label><input id="pro-bw" type="text" inputmode="decimal" value="20"></div>
+            <div class="field"><label for="pro-bh">Belag Höhe (mm)<button type="button" class="info" data-info="fingerbelag" aria-label="Erklärung">!</button></label><input id="pro-bh" type="text" inputmode="decimal" value="25"></div>
           </div>
           <div class="pro__row">
             <div class="field"><label for="pro-n">Reibflächen n<button type="button" class="info" data-info="greifkraft" aria-label="Erklärung">!</button></label><select id="pro-n"><option value="2">2</option><option value="3">3</option><option value="4">4</option></select></div>
@@ -877,10 +877,12 @@ def configurator_block(r):
     <div class="info-modal" id="info-modal" hidden>
       <div class="info-modal__box" role="dialog" aria-modal="true" aria-labelledby="info-titel">
         <button type="button" class="info-modal__x" aria-label="Schließen">✕</button>
+        <div class="info-modal__gruppe"></div>
         <h3 id="info-titel"></h3><p class="info-modal__satz"></p>
         <div class="info-modal__bilder"></div>
         <div class="info-modal__text"></div>
         <ol class="info-modal__legende"></ol>
+        <div class="info-modal__extra"></div>
         <p class="info-modal__tipp"></p>
       </div>
     </div>
