@@ -1,0 +1,940 @@
+{
+ "stand": "2026-11-01",
+ "festlegungen": {
+  "sicherheit_normal": 2,
+  "sicherheit_pro": [
+   1.5,
+   2
+  ],
+  "abschlag_mu": 0.7,
+  "umschliessung_max": 85,
+  "temperatur_gelb_abstand": 10,
+  "hdt_ohne_dauer_abzug": 20,
+  "hdt18_ersatz_abzug": 30,
+  "eindrueckung_vorschlag_mm": 2,
+  "luftdruck_kpa": 101
+ },
+ "werkstoffe": {
+  "Naturgummi": {
+   "gruppe": "gummi",
+   "glatt": true,
+   "dichte": 930,
+   "E": 2,
+   "rollen": [
+    "belag",
+    "produkt"
+   ],
+   "unten": -40,
+   "dauer": 70,
+   "kurz": null,
+   "hdt045": null,
+   "hdt18": null
+  },
+  "Nitrilgummi": {
+   "gruppe": "gummi",
+   "glatt": true,
+   "dichte": 1000,
+   "E": 4,
+   "rollen": [
+    "belag",
+    "produkt"
+   ],
+   "unten": -20,
+   "dauer": 110,
+   "kurz": null,
+   "hdt045": null,
+   "hdt18": null
+  },
+  "Silikon": {
+   "gruppe": "gummi",
+   "glatt": true,
+   "dichte": 1150,
+   "E": 2,
+   "rollen": [
+    "belag",
+    "produkt"
+   ],
+   "unten": -60,
+   "dauer": 220,
+   "kurz": null,
+   "hdt045": null,
+   "hdt18": null
+  },
+  "PU": {
+   "gruppe": "gummi",
+   "glatt": true,
+   "dichte": 1200,
+   "E": 25,
+   "rollen": [
+    "belag",
+    "produkt"
+   ],
+   "unten": -50,
+   "dauer": 80,
+   "kurz": 130,
+   "hdt045": null,
+   "hdt18": null
+  },
+  "TPU": {
+   "gruppe": "gummi",
+   "glatt": true,
+   "dichte": 1200,
+   "E": 30,
+   "rollen": [
+    "belag",
+    "backe",
+    "produkt"
+   ],
+   "unten": null,
+   "dauer": 60,
+   "kurz": null,
+   "hdt045": null,
+   "hdt18": null
+  },
+  "Leder": {
+   "gruppe": "leder",
+   "glatt": false,
+   "dichte": 860,
+   "E": 200,
+   "rollen": [
+    "belag",
+    "produkt"
+   ],
+   "unten": null,
+   "dauer": null,
+   "kurz": null,
+   "hdt045": null,
+   "hdt18": null
+  },
+  "Holz": {
+   "gruppe": "holz",
+   "glatt": false,
+   "dichte": 600,
+   "E": 10000,
+   "rollen": [
+    "produkt"
+   ],
+   "unten": null,
+   "dauer": null,
+   "kurz": null,
+   "hdt045": null,
+   "hdt18": null
+  },
+  "Karton": {
+   "gruppe": "karton",
+   "glatt": false,
+   "dichte": 150,
+   "E": 3000,
+   "rollen": [
+    "produkt"
+   ],
+   "unten": null,
+   "dauer": null,
+   "kurz": null,
+   "hdt045": null,
+   "hdt18": null
+  },
+  "Glas": {
+   "gruppe": "glas",
+   "glatt": true,
+   "dichte": 2500,
+   "E": 70000,
+   "rollen": [
+    "produkt"
+   ],
+   "unten": null,
+   "dauer": null,
+   "kurz": null,
+   "hdt045": null,
+   "hdt18": null
+  },
+  "Stahl": {
+   "gruppe": "metall",
+   "glatt": true,
+   "dichte": 7850,
+   "E": 210000,
+   "rollen": [
+    "belag",
+    "backe",
+    "produkt"
+   ],
+   "unten": null,
+   "dauer": null,
+   "kurz": null,
+   "hdt045": null,
+   "hdt18": null
+  },
+  "Aluminium": {
+   "gruppe": "metall",
+   "glatt": true,
+   "dichte": 2700,
+   "E": 70000,
+   "rollen": [
+    "backe",
+    "produkt"
+   ],
+   "unten": null,
+   "dauer": null,
+   "kurz": null,
+   "hdt045": null,
+   "hdt18": null
+  },
+  "Plexiglas": {
+   "gruppe": "hart",
+   "glatt": true,
+   "dichte": 1190,
+   "E": 3200,
+   "rollen": [
+    "backe",
+    "produkt"
+   ],
+   "unten": null,
+   "dauer": 65,
+   "kurz": null,
+   "hdt045": null,
+   "hdt18": null
+  },
+  "Polyamid": {
+   "gruppe": "hart",
+   "glatt": true,
+   "dichte": 1140,
+   "E": 3000,
+   "rollen": [
+    "belag",
+    "backe",
+    "produkt"
+   ],
+   "unten": null,
+   "dauer": 80,
+   "kurz": 120,
+   "hdt045": null,
+   "hdt18": null
+  },
+  "POM": {
+   "gruppe": "hart",
+   "glatt": true,
+   "dichte": 1410,
+   "E": 3000,
+   "rollen": [
+    "belag",
+    "backe",
+    "produkt"
+   ],
+   "unten": -50,
+   "dauer": 105,
+   "kurz": 130,
+   "hdt045": null,
+   "hdt18": null
+  },
+  "Polystyrol": {
+   "gruppe": "hart",
+   "glatt": true,
+   "dichte": 1050,
+   "E": 3200,
+   "rollen": [
+    "backe",
+    "produkt"
+   ],
+   "unten": null,
+   "dauer": 65,
+   "kurz": 80,
+   "hdt045": null,
+   "hdt18": null
+  },
+  "Polyethylen": {
+   "gruppe": "hart",
+   "glatt": true,
+   "dichte": 950,
+   "E": 1000,
+   "rollen": [
+    "belag",
+    "backe",
+    "produkt"
+   ],
+   "unten": -200,
+   "dauer": 90,
+   "kurz": null,
+   "hdt045": null,
+   "hdt18": null
+  },
+  "PP": {
+   "gruppe": "hart",
+   "glatt": true,
+   "dichte": 905,
+   "E": 1500,
+   "rollen": [
+    "belag",
+    "backe",
+    "produkt"
+   ],
+   "unten": -10,
+   "dauer": 100,
+   "kurz": 130,
+   "hdt045": null,
+   "hdt18": null
+  },
+  "PTFE": {
+   "gruppe": "hart",
+   "glatt": true,
+   "dichte": 2200,
+   "E": 500,
+   "rollen": [
+    "belag",
+    "backe",
+    "produkt"
+   ],
+   "unten": -200,
+   "dauer": 250,
+   "kurz": null,
+   "hdt045": null,
+   "hdt18": null
+  },
+  "PLA": {
+   "gruppe": "hart",
+   "glatt": true,
+   "dichte": 1240,
+   "E": 3500,
+   "rollen": [
+    "backe",
+    "produkt"
+   ],
+   "unten": null,
+   "dauer": null,
+   "kurz": null,
+   "hdt045": 55,
+   "hdt18": null,
+   "gedruckt": true
+  },
+  "PETG": {
+   "gruppe": "hart",
+   "glatt": true,
+   "dichte": 1270,
+   "E": 2000,
+   "rollen": [
+    "backe",
+    "produkt"
+   ],
+   "unten": null,
+   "dauer": null,
+   "kurz": null,
+   "hdt045": 70,
+   "hdt18": null,
+   "gedruckt": true
+  },
+  "ABS": {
+   "gruppe": "hart",
+   "glatt": true,
+   "dichte": 1040,
+   "E": 2200,
+   "rollen": [
+    "backe",
+    "produkt"
+   ],
+   "unten": null,
+   "dauer": null,
+   "kurz": null,
+   "hdt045": 85,
+   "hdt18": null,
+   "gedruckt": true
+  },
+  "ASA": {
+   "gruppe": "hart",
+   "glatt": true,
+   "dichte": 1070,
+   "E": 2000,
+   "rollen": [
+    "backe",
+    "produkt"
+   ],
+   "unten": null,
+   "dauer": null,
+   "kurz": null,
+   "hdt045": 95,
+   "hdt18": null,
+   "gedruckt": true
+  },
+  "PC": {
+   "gruppe": "hart",
+   "glatt": true,
+   "dichte": 1200,
+   "E": 2400,
+   "rollen": [
+    "backe",
+    "produkt"
+   ],
+   "unten": -80,
+   "dauer": 130,
+   "kurz": null,
+   "hdt045": 110,
+   "hdt18": null,
+   "gedruckt_hdt": true
+  },
+  "Backware": {
+   "gruppe": "backware",
+   "glatt": false,
+   "dichte": 300,
+   "E": 1,
+   "rollen": [
+    "produkt"
+   ],
+   "unten": null,
+   "dauer": null,
+   "kurz": null,
+   "hdt045": null,
+   "hdt18": null
+  }
+ },
+ "reibwerte": [
+  {
+   "a": "Naturgummi",
+   "b": "Glas",
+   "mu": 1.68,
+   "quelle": "Forbo DB 3, NR 40 Shore A"
+  },
+  {
+   "a": "Naturgummi",
+   "b": "Aluminium",
+   "mu": 1.52,
+   "quelle": "Forbo DB 3"
+  },
+  {
+   "a": "Naturgummi",
+   "b": "Stahl",
+   "mu": 1.46,
+   "quelle": "Forbo DB 3"
+  },
+  {
+   "a": "Naturgummi",
+   "b": "Holz",
+   "mu": 1.25,
+   "quelle": "Forbo DB 3"
+  },
+  {
+   "a": "Naturgummi",
+   "b": "Karton",
+   "mu": 1.14,
+   "quelle": "Forbo DB 3"
+  },
+  {
+   "a": "Naturgummi",
+   "b": "Polyethylen",
+   "mu": 1.2,
+   "quelle": "Forbo DB 3, gegen PE-Folie"
+  },
+  {
+   "a": "Naturgummi",
+   "b": "Naturgummi",
+   "mu": 1.16,
+   "quelle": "Engineering ToolBox, Gummi auf Gummi"
+  },
+  {
+   "a": "Naturgummi",
+   "b": "Nitrilgummi",
+   "mu": 0.62,
+   "quelle": "Engineers Edge, Gummi 60A auf Gummi 40A"
+  },
+  {
+   "a": "Nitrilgummi",
+   "b": "Nitrilgummi",
+   "mu": 0.73,
+   "quelle": "Engineers Edge, Gummi 60A auf 60A"
+  },
+  {
+   "a": "Nitrilgummi",
+   "b": "PU",
+   "mu": 0.67,
+   "quelle": "Engineers Edge, Gummi 60A auf Urethan"
+  },
+  {
+   "a": "Nitrilgummi",
+   "b": "Glas",
+   "mu": 1.27,
+   "quelle": "Forbo DB 1, NBR 55 Shore A"
+  },
+  {
+   "a": "Nitrilgummi",
+   "b": "Stahl",
+   "mu": 1.13,
+   "quelle": "Forbo DB 1"
+  },
+  {
+   "a": "Nitrilgummi",
+   "b": "Aluminium",
+   "mu": 1.07,
+   "quelle": "Forbo DB 1"
+  },
+  {
+   "a": "Nitrilgummi",
+   "b": "Holz",
+   "mu": 0.99,
+   "quelle": "Forbo DB 1"
+  },
+  {
+   "a": "Nitrilgummi",
+   "b": "Karton",
+   "mu": 0.81,
+   "quelle": "Forbo DB 1"
+  },
+  {
+   "a": "Nitrilgummi",
+   "b": "Polyethylen",
+   "mu": 0.9,
+   "quelle": "Forbo DB 1, gegen PE-Folie"
+  },
+  {
+   "a": "Silikon",
+   "b": "Stahl",
+   "mu": 0.98,
+   "quelle": "Forbo DB 26, 35 Shore A"
+  },
+  {
+   "a": "Silikon",
+   "b": "Aluminium",
+   "mu": 0.88,
+   "quelle": "Forbo DB 26"
+  },
+  {
+   "a": "Silikon",
+   "b": "Glas",
+   "mu": 0.84,
+   "quelle": "Forbo DB 26"
+  },
+  {
+   "a": "Silikon",
+   "b": "Holz",
+   "mu": 0.63,
+   "quelle": "Forbo DB 26"
+  },
+  {
+   "a": "Silikon",
+   "b": "Karton",
+   "mu": 0.62,
+   "quelle": "Forbo DB 26"
+  },
+  {
+   "a": "Silikon",
+   "b": "Polyethylen",
+   "mu": 1.09,
+   "quelle": "Forbo DB 26, gegen PE-Folie"
+  },
+  {
+   "a": "PU",
+   "b": "Stahl",
+   "mu": 1.2,
+   "quelle": "Forbo DB 4, PU 85 Shore A glatt"
+  },
+  {
+   "a": "PU",
+   "b": "Aluminium",
+   "mu": 1.01,
+   "quelle": "Forbo DB 4"
+  },
+  {
+   "a": "PU",
+   "b": "Holz",
+   "mu": 0.66,
+   "quelle": "Forbo DB 4"
+  },
+  {
+   "a": "PU",
+   "b": "Karton",
+   "mu": 0.49,
+   "quelle": "Forbo DB 4"
+  },
+  {
+   "a": "PU",
+   "b": "Polyethylen",
+   "mu": 0.64,
+   "quelle": "Forbo DB 4, gegen PE-Folie"
+  },
+  {
+   "a": "TPU",
+   "b": "Stahl",
+   "mu": 0.3,
+   "quelle": "Weerg, TPU auf Metall 0,3 bis 0,6"
+  },
+  {
+   "a": "TPU",
+   "b": "Aluminium",
+   "mu": 0.3,
+   "quelle": "Weerg, TPU auf Metall 0,3 bis 0,6"
+  },
+  {
+   "a": "Leder",
+   "b": "Stahl",
+   "mu": 0.4,
+   "quelle": "Engineering ToolBox 0,4; Engineers Edge 0,6"
+  },
+  {
+   "a": "Leder",
+   "b": "Aluminium",
+   "mu": 0.3,
+   "quelle": "Engineering ToolBox, Lederfaser auf Aluminium"
+  },
+  {
+   "a": "Leder",
+   "b": "Holz",
+   "mu": 0.3,
+   "quelle": "Engineering ToolBox und Engineers Edge, 0,3 bis 0,4"
+  },
+  {
+   "a": "Holz",
+   "b": "Holz",
+   "mu": 0.25,
+   "quelle": "Engineering ToolBox und Engineers Edge, 0,25 bis 0,5"
+  },
+  {
+   "a": "Holz",
+   "b": "Stahl",
+   "mu": 0.2,
+   "quelle": "Engineering ToolBox 0,2 bis 0,6; Dorn 2021 glatter Stahl 0,1 bis 0,3"
+  },
+  {
+   "a": "Holz",
+   "b": "Aluminium",
+   "mu": 0.2,
+   "quelle": "Engineering ToolBox, Holz auf Metall 0,2 bis 0,6"
+  },
+  {
+   "a": "Glas",
+   "b": "Glas",
+   "mu": 0.9,
+   "quelle": "Engineering ToolBox 0,9 bis 1,0; Schoolphysics 0,94"
+  },
+  {
+   "a": "Glas",
+   "b": "Stahl",
+   "mu": 0.5,
+   "quelle": "Engineering ToolBox und Engineers Edge, 0,5 bis 0,7",
+   "sperre": true
+  },
+  {
+   "a": "Glas",
+   "b": "Aluminium",
+   "mu": 0.5,
+   "quelle": "Engineering ToolBox, Glas auf Metall 0,5 bis 0,7",
+   "sperre": true
+  },
+  {
+   "a": "Stahl",
+   "b": "Stahl",
+   "mu": 0.15,
+   "quelle": "chemie.de und Weber 1965: 0,15; Labor 0,5 bis 0,8"
+  },
+  {
+   "a": "Stahl",
+   "b": "Aluminium",
+   "mu": 0.61,
+   "quelle": "Engineering ToolBox, Engineers Edge, Schoolphysics"
+  },
+  {
+   "a": "Aluminium",
+   "b": "Aluminium",
+   "mu": 1.05,
+   "quelle": "Engineering ToolBox 1,05 bis 1,35; Engineers Edge 1,10 bis 1,35"
+  },
+  {
+   "a": "Plexiglas",
+   "b": "Stahl",
+   "mu": 0.4,
+   "quelle": "Engineering ToolBox und eMachineShop, 0,4 bis 0,5"
+  },
+  {
+   "a": "Plexiglas",
+   "b": "Plexiglas",
+   "mu": 0.8,
+   "quelle": "Engineering ToolBox"
+  },
+  {
+   "a": "Polyamid",
+   "b": "Stahl",
+   "mu": 0.35,
+   "quelle": "Wieleba 2009 PA6 0,35; Engineering ToolBox 0,4"
+  },
+  {
+   "a": "Polyamid",
+   "b": "Polyamid",
+   "mu": 0.15,
+   "quelle": "Engineering ToolBox, 0,15 bis 0,25"
+  },
+  {
+   "a": "POM",
+   "b": "Stahl",
+   "mu": 0.17,
+   "quelle": "Wieleba 2009 0,17; Professional Plastics 0,2 bis 0,35"
+  },
+  {
+   "a": "Polystyrol",
+   "b": "Stahl",
+   "mu": 0.3,
+   "quelle": "Engineering ToolBox, 0,3 bis 0,35"
+  },
+  {
+   "a": "Polystyrol",
+   "b": "Polystyrol",
+   "mu": 0.5,
+   "quelle": "Engineering ToolBox"
+  },
+  {
+   "a": "Polyethylen",
+   "b": "Stahl",
+   "mu": 0.2,
+   "quelle": "Engineering ToolBox 0,2; Professional Plastics HDPE 0,29"
+  },
+  {
+   "a": "Polyethylen",
+   "b": "Polyethylen",
+   "mu": 0.2,
+   "quelle": "Engineering ToolBox"
+  },
+  {
+   "a": "PP",
+   "b": "Stahl",
+   "mu": 0.1,
+   "quelle": "Professional Plastics, 0,1 bis 0,3"
+  },
+  {
+   "a": "PTFE",
+   "b": "Stahl",
+   "mu": 0.05,
+   "quelle": "Engineering ToolBox 0,05; Wieleba 0,07; eMachineShop 0,04",
+   "sperre": true
+  },
+  {
+   "a": "PTFE",
+   "b": "PTFE",
+   "mu": 0.04,
+   "quelle": "Engineering ToolBox",
+   "sperre": true
+  },
+  {
+   "a": "PLA",
+   "b": "Stahl",
+   "mu": 0.22,
+   "quelle": "Popovici 2024, 3D-Druck, 0,22 bis 0,38 je Last"
+  },
+  {
+   "a": "PETG",
+   "b": "Stahl",
+   "mu": 0.25,
+   "quelle": "Popovici 2024, 3D-Druck, 0,25 bis 0,40 je Last"
+  },
+  {
+   "a": "ABS",
+   "b": "Stahl",
+   "mu": 0.3,
+   "quelle": "Popovici 2024, 3D-Druck, 0,30 bis 0,48; Professional Plastics 0,5"
+  },
+  {
+   "a": "PC",
+   "b": "Stahl",
+   "mu": 0.31,
+   "quelle": "Professional Plastics 0,31; Tecanat 0,38 dynamisch"
+  }
+ ],
+ "zustand": {
+  "gummi_rau": {
+   "name": "Gummi, Silikon, PU auf rauer oder poröser Fläche",
+   "nass": 0.7,
+   "oelig": 0.2,
+   "staubig": 0.5,
+   "annahme": [
+    "oelig",
+    "staubig"
+   ]
+  },
+  "gummi_glatt": {
+   "name": "Gummi, Silikon, PU auf glatter Fläche",
+   "nass": 0.4,
+   "oelig": 0.2,
+   "staubig": 0.5,
+   "annahme": [
+    "staubig"
+   ]
+  },
+  "metall_metall": {
+   "name": "Metall auf Metall",
+   "nass": 0.5,
+   "oelig": 0.25,
+   "staubig": 1.0,
+   "annahme": [
+    "nass"
+   ]
+  },
+  "metall_glas": {
+   "name": "Metall auf Glas",
+   "nass": 0.5,
+   "oelig": 0.4,
+   "staubig": 1.0,
+   "annahme": [
+    "nass"
+   ]
+  },
+  "leder_metall": {
+   "name": "Leder auf Metall",
+   "nass": 0.5,
+   "oelig": 0.5,
+   "staubig": 1.0,
+   "annahme": [
+    "nass"
+   ]
+  },
+  "hart_stahl": {
+   "name": "Harte Kunststoffe auf Stahl",
+   "nass": 1.0,
+   "oelig": 1.0,
+   "staubig": 1.0,
+   "annahme": [
+    "nass"
+   ]
+  },
+  "holz_metall": {
+   "name": "Holz auf Metall",
+   "nass_fest": 0.2,
+   "oelig_fest": 0.2,
+   "staubig": 1.0,
+   "annahme": [
+    "oelig"
+   ]
+  },
+  "sonst": {
+   "name": "übrige Paarungen",
+   "nass": 0.5,
+   "oelig": 0.2,
+   "staubig": 1.0,
+   "annahme": [
+    "nass",
+    "oelig"
+   ]
+  }
+ },
+ "feuchte_karton": [
+  [
+   50,
+   1.0
+  ],
+  [
+   70,
+   0.6
+  ],
+  [
+   85,
+   0.6
+  ],
+  [
+   101,
+   0.5
+  ]
+ ],
+ "belastbarkeit": [
+  {
+   "id": "sehr",
+   "name": "Sehr empfindlich",
+   "kpa": 25,
+   "wie": "Erdbeeren, Himbeeren, reife Tomaten, Pfirsiche"
+  },
+  {
+   "id": "empf",
+   "name": "Empfindlich",
+   "kpa": 100,
+   "wie": "Äpfel, Birnen, Kiwis, Gurken, Paprika"
+  },
+  {
+   "id": "normal",
+   "name": "Normal",
+   "kpa": 300,
+   "wie": "Milchkartons, Kartons, leere Kunststoffflaschen, Weichholz",
+   "annahme": true
+  },
+  {
+   "id": "fest",
+   "name": "Fest",
+   "kpa": 2000,
+   "wie": "massive Kunststoffteile, Gehäuse, Hartholz",
+   "annahme": true
+  },
+  {
+   "id": "frei",
+   "name": "Unbegrenzt",
+   "kpa": null,
+   "wie": "Stahl, Aluminium, Guss, Glas mit Belag, bestätigte Siegelnaht"
+  }
+ ],
+ "belastbarkeit_schaetzung": {
+  "Glas": "frei",
+  "Stahl": "frei",
+  "Aluminium": "frei",
+  "Holz": "fest",
+  "Karton": "normal",
+  "Polyethylen": "normal",
+  "Naturgummi": "fest",
+  "Nitrilgummi": "fest",
+  "Silikon": "fest",
+  "PU": "fest",
+  "TPU": "fest",
+  "Leder": "fest",
+  "*hart": "fest"
+ },
+ "sperrregeln": [
+  {
+   "stufe": "gesperrt",
+   "belag_gruppe": "metall",
+   "produkt": [
+    "Glas"
+   ],
+   "grund": "Bruch- und Kratzgefahr durch harte Kanten und Punktlast",
+   "vorschlag": "Gummi, Silikon oder Vakuum"
+  },
+  {
+   "stufe": "gesperrt",
+   "belag_gruppe": "metall",
+   "belastbarkeit": [
+    "sehr",
+    "empf"
+   ],
+   "grund": "Druckstellen auf druckempfindlichen Lebensmitteln",
+   "vorschlag": "Silikon oder Softgreifer"
+  },
+  {
+   "stufe": "gesperrt",
+   "belag": [
+    "PTFE"
+   ],
+   "nur_reibschluss": true,
+   "grund": "μ um 0,05, das Teil rutscht",
+   "vorschlag": "nur mit Formschluss (Prismen-, Kontur- oder Kegelbacke)"
+  },
+  {
+   "stufe": "warnung",
+   "belag_gruppe": "metall",
+   "produkt": [
+    "Holz",
+    "Karton"
+   ],
+   "grund": "Abdrücke und Kratzer",
+   "vorschlag": "Belag aus Gummi oder PU"
+  },
+  {
+   "stufe": "warnung",
+   "fehlender_wert": true,
+   "grund": "Reibwert unbekannt",
+   "vorschlag": "Versuch empfohlen"
+  },
+  {
+   "stufe": "warnung",
+   "belag_gruppe": "gummi",
+   "glatt": true,
+   "zustand": [
+    "oelig"
+   ],
+   "grund": "Reibwert bricht ein",
+   "vorschlag": "profilierter Belag, Formschluss oder Vakuum"
+  }
+ ],
+ "vakuum_mu": {
+  "rau": 0.6,
+  "trocken": 0.5,
+  "nass": 0.25,
+  "oelig": 0.1
+ }
+}

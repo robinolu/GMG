@@ -531,7 +531,7 @@ export function initSimulator(K) {
     const make = () => { const m = new THREE.Mesh(pg.geo, pmat); m.scale.setScalar(P.f); m.castShadow = m.receiveShadow = true; m.userData.keepGeo = P.typ === 'eigen'; m.userData.slot = 'produkt'; world.add(m); return m; };
     const pool = []; const take = (i) => { while (pool.length <= i) pool.push(make()); return pool[i]; };
     // höchste Kante, über die das Teil hinweg muss: die Teile auf den Bändern
-    A = { P, src, tgt, device, g, pickX, placeX, zLine, take, pool, clear: BAND_TOP + P.size[1] };
+    A = { P, src, tgt, device, g, pickX, placeX, zLine, take, pool, clear: BAND_TOP + P.size[1], by: 0 };
     // Kamera nur nachführen, wenn sich die Anlage selbst ändert (nicht bei jedem Regler)
     const layout = [S.produkt.typ, S.s1 && S.s1.modul, S.s2 && S.s2.modul, S.s3 && S.s3.modul].join();
     if (layout !== lastLayout) { lastLayout = layout; fitCamera(); }
@@ -596,9 +596,16 @@ export function initSimulator(K) {
     // Konfigurator (Höhe, links/rechts, vorne/hinten, innen/außen, Schließgrad)
     off0.set(0, P.size[1] - depth, 0);
     const pose = P.typ === 'eigen' && K.part() ? K.part().pose : null;
+    // Greifstelle aus der Greifberechnung: Teil um die Hochachse gedreht (Schließrichtung → Z), Backen auf dem Flächenpaar
+    const by = pose && pose.state === 'pro' ? pose.yaw || 0 : 0;
+    A.by = by;
     if (pose) {
-      off0.set(pose.x, pose.y, pose.z).multiplyScalar(P.f);
+      off0.set(pose.x, pose.y, pose.z).multiplyScalar(P.f).applyAxisAngle(UP, by);
       inside = pose.inside;
+      if (pose.state === 'pro' && r.aussen) {
+        const hub = new THREE.Vector3().fromArray(pose.kontakt.A).distanceTo(new THREE.Vector3().fromArray(pose.kontakt.B)) * P.f;
+        tGrip = clamp((r.aussen[1] - hub) / Math.max(1, r.aussen[1] - r.aussen[0]), 0, 1);
+      }
       if (pose.state === 'gegriffen' && pose.gripper === g.id) tGrip = pose.t;
       else if (inside && r.innen) tGrip = clamp((r.innen[1] - P.griff) / Math.max(1, r.innen[1] - r.innen[0]), 0, 1);
     }
@@ -637,12 +644,12 @@ export function initSimulator(K) {
     for (let k = (p >= 0.24 ? 1 : 0); k < 6; k++) {
       const s = sourcePos(n, k, arrive);
       if (!s) break;
-      const m = A.take(used++); m.visible = true; m.position.copy(s.p); m.rotation.set(0, s.yaw, 0);
+      const m = A.take(used++); m.visible = true; m.position.copy(s.p); m.rotation.set(0, s.yaw + A.by, 0);
     }
     // gegriffenes Teil
     if (held) {
       const m = A.take(used++); m.visible = true;
-      m.position.copy(tcp).sub(off(yaw, pN)); m.rotation.set(0, yaw, 0);
+      m.position.copy(tcp).sub(off(yaw, pN)); m.rotation.set(0, yaw + A.by, 0);
     }
     // abgelegte Teile fahren auf dem Abführband weg
     const vT = speedOf(S.s3.band) * 260;   // mm/s auf dem Band
@@ -650,7 +657,7 @@ export function initSimulator(K) {
       const age = (placed ? (p - 0.8) * T : (p + 0.2) * T) + (k - (placed ? 0 : 1)) * T;
       const xx = A.placeX + age * vT;
       if (xx > A.placeX + tgt.x1 - 100) break;
-      const m = A.take(used++); m.visible = true; m.position.set(xx, tgt.top, A.zLine); m.rotation.set(0, dreh, 0);
+      const m = A.take(used++); m.visible = true; m.position.set(xx, tgt.top, A.zLine); m.rotation.set(0, dreh + A.by, 0);
     }
     for (let i = used; i < A.pool.length; i++) A.pool[i].visible = false;
     // Bänder laufen genau so weit wie die Teile darauf – und stehen, wenn die Teile stehen
@@ -670,7 +677,21 @@ export function initSimulator(K) {
     const ready = S.s1 && S.s2 && S.s3;
     $('#sim-run').disabled = !ready; tempo.disabled = !ready;
     if (!ready) { lastEval = null; $('#sim-takt').textContent = $('#sim-stunde').textContent = '–'; return; }
-    const tph = S.tph || kennzahlen(S.s2).stunde;
+    let tph = S.tph || kennzahlen(S.s2).stunde;
+    // Grenzwerte aus der Greifberechnung: Beschleunigung der Fahrt (Dreieckprofil über die Strecke zwischen den Bändern)
+    const pose = K.part() && K.part().pose, box = $('#sim-grenze');
+    box.hidden = true;
+    if (pose && pose.state === 'pro' && pose.grenzen && pose.grenzen.a && A) {
+      const s = Math.abs(A.placeX - A.pickX) / 1000, tMove = (t) => 0.24 * 3600 / t;
+      const aSim = 4 * s / tMove(tph) ** 2;
+      if (aSim > pose.grenzen.a * 1.001) {
+        const tphMax = 3600 / (Math.sqrt(4 * s / pose.grenzen.a) / 0.24);
+        box.hidden = false;
+        box.innerHTML = `Möglich, aber die Greifkraft muss neu berechnet werden: ${fmt(Math.round(tph))} Teile/h brauchen ca. ${fmt(aSim, 1)} m/s², berechnet ist Greifstelle V${pose.version} bis ${fmt(pose.grenzen.a, 1)} m/s². Bis dahin fährt die Simulation mit ${fmt(Math.round(tphMax))} Teilen/h. <button type="button" class="btn btn--primary btn--xs" id="sim-neu">Neu berechnen</button>`;
+        box.querySelector('#sim-neu').addEventListener('click', () => K.neuBerechnen && K.neuBerechnen(aSim));
+        tph = tphMax;
+      }
+    }
     const e = lastEval = { takt: 3600 / tph, stunde: tph };
     if (document.activeElement !== tempo) tempo.value = fromTph(tph);
     $('#sim-takt').textContent = `${fmt(e.takt, e.takt < 10 ? 1 : 0)} s`;
@@ -701,7 +722,7 @@ export function initSimulator(K) {
       <span class="sim__num">${num}</span><span><span class="sim__ct">${title}</span><strong>${val || 'Modul wählen'}</strong><small>${info || ''}</small></span></button>`;
     $('#sim-slots').innerHTML =
       card('produkt', '◆', 'Produkt', P.name, `${fmt(P.size[0])} × ${fmt(P.size[1])} × ${fmt(P.size[2])} mm` +
-        (P.typ === 'eigen' ? (K.part() && K.part().pose ? ' · Greifpunkt aus dem Konfigurator' : ' · Greifpunkt: mittig von oben') : '')) +
+        (P.typ === 'eigen' ? (K.part() && K.part().pose ? (K.part().pose.state === 'pro' ? ` · Greifstelle V${K.part().pose.version} aus der Greifberechnung` : ' · Greifpunkt aus dem Konfigurator') : ' · Greifpunkt: mittig von oben') : '')) +
       card('slot1', '1', 'Zuführband', S.s1 && QUELLEN[S.s1.modul].name, S.s1 && QUELLEN[S.s1.modul].info) +
       card('slot2', '2', 'Roboter', S.s2 && GERAETE_UI[S.s2.modul].name, S.s2 && `${K.active().code} am Roboter, fest montiert`) +
       card('slot3', '3', 'Abführband', S.s3 && ZIELE[S.s3.modul].name, S.s3 && ZIELE[S.s3.modul].info);

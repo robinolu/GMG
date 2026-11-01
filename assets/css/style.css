@@ -637,3 +637,41 @@ button.kfg__card { font: inherit; text-align: left; cursor: pointer; width: 100%
 .pro__hinweise .is-gelb { background: #fdf2dc; color: #855a06; }
 .pro__hinweise .is-info { background: var(--bg-alt); color: var(--text); }
 @media (max-width: 640px) { .pro__grid, .pro__row { grid-template-columns: 1fr; } }
+
+/* Greifberechnung: Info-Symbol und Info-Fenster */
+.info { display: inline-grid; place-items: center; width: 17px; height: 17px; margin-left: 6px; border-radius: 50%; border: 0; padding: 0;
+  background: #e07b1f; color: #fff; font: 700 11px/1 system-ui, sans-serif; cursor: pointer; vertical-align: 1px; transition: transform .12s, box-shadow .12s; }
+.info:hover, .info:focus-visible { transform: scale(1.15); box-shadow: 0 0 0 3px rgba(224,123,31,.25); outline: none; }
+.info--demo { cursor: default; }
+.info-modal { position: fixed; inset: 0; z-index: 200; background: rgba(19,23,29,.45); display: grid; place-items: center; padding: 16px; }
+.info-modal[hidden] { display: none; }
+.info-modal__box { position: relative; width: min(680px, 100%); max-height: calc(100vh - 32px); overflow: auto; background: #fff; border-radius: 12px; padding: 24px 24px 20px; box-shadow: 0 20px 60px rgba(16,24,40,.3); }
+.info-modal__box h3 { margin: 0 32px 4px 0; }
+.info-modal__satz { margin: 0 0 14px; color: var(--muted); }
+.info-modal__x { position: absolute; right: 12px; top: 10px; border: 0; background: none; font-size: 20px; cursor: pointer; color: var(--muted); padding: 6px; }
+.info-modal__bilder { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 14px; }
+.info-modal__bilder figure { margin: 0; }
+.info-modal__bilder img { width: 100%; height: auto; border: 1px solid var(--line); border-radius: 8px; }
+.info-modal__bilder figcaption { font-size: .82rem; color: var(--muted); margin-top: 4px; text-align: center; }
+.info-modal__text { margin: 0 0 10px; font-size: .95rem; }
+.info-modal__legende { margin: 0 0 12px; padding-left: 0; list-style: none; counter-reset: lg; display: grid; gap: 4px; font-size: .9rem; }
+.info-modal__legende li { counter-increment: lg; display: flex; gap: 8px; align-items: center; }
+.info-modal__legende li::before { content: counter(lg); display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 50%; background: #e07b1f; color: #fff; font-size: 11px; font-weight: 700; flex: none; }
+.info-modal__tipp { margin: 0; padding: 10px 12px; border-radius: 8px; background: #fdf2dc; color: #855a06; font-size: .9rem; }
+@media (max-width: 560px) { .info-modal__bilder { grid-template-columns: 1fr; } }
+.pro__lab { font-size: .82rem; font-weight: 600; color: var(--ink); display: flex; align-items: center; }
+.pro__mark { display: flex; gap: 8px; align-items: end; flex-wrap: wrap; }
+.pro__mark [aria-pressed="true"] { background: #fdf2dc; border-color: #e07b1f; color: #855a06; }
+.pro__mark select { max-width: 170px; }
+.pro__sub { display: grid; gap: 10px; padding: 10px; border-radius: 8px; background: var(--bg-alt); }
+.pro__sub[hidden] { display: none; }
+.pro__go { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+.pro__ergebnis.is-stale > :not(.pro__neu) { opacity: .45; filter: grayscale(1); }
+.sim__grenze { margin: 0; padding: 10px 12px; border-radius: 8px; background: #fdf2dc; color: #855a06; font-size: .9rem; flex-basis: 100%; }
+.sim__grenze .btn { margin-left: 8px; }
+.field[hidden] { display: none; }
+.kfg.is-profi .kfg__badge { display: none; }
+.pro__row[hidden] { display: none; }
+.pro__set .check { display: flex; gap: 8px; align-items: center; justify-content: flex-start; text-align: left; font-size: .9rem; }
+.pro__set .check input { width: auto; flex: none; }
+.pro__mark select { padding: 6px 8px; border: 1px solid var(--line); border-radius: 6px; font: inherit; font-size: .85rem; background: #fff; }

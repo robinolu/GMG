@@ -126,7 +126,13 @@ function pose(phi) {
 let baseGeo = null;          // Teil in Rohmaßen der Datei
 let fileKind = null;         // 'step' | 'stl' | 'muster'
 let turns = { x: 0, y: 0, z: 0 };  // Vierteldrehungen
-let part = null, partBVH = null, box = new THREE.Box3(), partCog = new THREE.Vector3();
+let part = null, partBVH = null, box = new THREE.Box3(), partCog = new THREE.Vector3(), partArea = 0;
+function flaecheVon(geo) {
+  const p = geo.attributes.position, idx = geo.index, a = new THREE.Vector3(), b = new THREE.Vector3(), c = new THREE.Vector3();
+  let A = 0; const n = idx ? idx.count : p.count;
+  for (let i = 0; i < n; i += 3) { a.fromBufferAttribute(p, idx ? idx.getX(i) : i); b.fromBufferAttribute(p, idx ? idx.getX(i + 1) : i + 1); c.fromBufferAttribute(p, idx ? idx.getX(i + 2) : i + 2); A += b.sub(a).cross(c.sub(a)).length() / 2; }
+  return A;
+}
 const partMat = new THREE.MeshStandardMaterial({ color: 0xd9a441, metalness: 0.2, roughness: 0.55 });
 
 function unitFactor() {
@@ -173,6 +179,7 @@ function placePart(autoOrient) {
   if (mode === 'innen' && !innerWidth) setMode('aussen');
   $('#kfg-griff-innen').disabled = !innerWidth || !A.range.innen;
   partCog = schwerpunkt(geo);
+  partArea = flaecheVon(geo);
   fitScene();
   updateFacts();
   suggest();
@@ -764,7 +771,11 @@ function setGrip(g) {
   const box = $('#kfg-greifpunkt').parentElement, info = $('#kfg-gp-info');
   box.classList.toggle('is-set', !!g);
   gpMarker.visible = !!g;
-  if (g) {
+  if (g && g.state === 'pro') {
+    gpMarker.position.set(g.x, g.y + g.kontakt.bh / 2, g.z); gpMarker.scale.setScalar(Math.max(12, g.kontakt.bw));
+    info.innerHTML = `<strong>Greifstelle V${g.version} aus der Greifberechnung übergeben</strong> (${fmt(g.kraft)} N je Backe, Ampel ${g.ampel === 'gruen' ? 'Grün' : 'Gelb'}). Der <a href="#simulator">Simulator</a> fährt damit.`;
+    $('#kfg-greifpunkt').textContent = '⊕ Greifpunkt neu festlegen';
+  } else if (g) {
     const bb = new THREE.Vector3(); part.geometry.boundingBox.getSize(bb);
     gpMarker.position.set(g.x, g.y, g.z); gpMarker.scale.setScalar(Math.max(12, A.reach * 0.22));
     const where = `${g.inside ? 'innen' : 'außen'}, ${fmt(Math.max(0, bb.y - g.y))} mm unter der Oberkante` + (Math.abs(g.x) > 1 || Math.abs(g.z) > 1 ? `, ${fmt(g.x)} / ${fmt(g.z)} mm aus der Mitte` : ', mittig');
@@ -811,12 +822,28 @@ initSimulator({
   restore: () => { A.set(0); if (part) update(); },
   part: () => part && facts ? { geo: part.geometry, size: facts.s.clone(), mass: facts.mass, soft: facts.soft, label: partLabel, grip: facts.grip, inside: mode === 'innen', pose: savedGrip } : null,
   onPart: (f) => partListeners.push(f),
+  neuBerechnen: (a) => pro && pro.neuBerechnen(a),
 });
 // Profi-Modus: Greifberechnung (Greifzone, Sperrzonen, Lastfälle)
 const pro = initPro({
-  $, root, scene, camera, controls, canvas,
-  part: () => part && facts ? { mesh: part, geo: part.geometry, bvh: partBVH, box, cog: partCog, mass: facts.mass } : null,
+  base: BASE, $, root, scene, camera, controls, canvas,
+  part: () => part && facts ? { mesh: part, geo: part.geometry, bvh: partBVH, box, cog: partCog, mass: facts.mass, vol: facts.vol, flaeche: partArea } : null,
   showGripper: (v) => { A.root.visible = v; },
   onPlace: (f) => placeListeners.push(f),
+  // Steifigkeitskarte: grün steif, rot weich (Farbe je Eckpunkt)
+  partColors: (st) => {
+    if (!part) return;
+    const g = part.geometry;
+    if (!st) { partMat.vertexColors = false; partMat.color.set(0xd9a441); partMat.needsUpdate = true; return; }
+    const col = new Float32Array(g.attributes.position.count * 3), c = new THREE.Color();
+    for (let i = 0; i < st.K.length; i++) { const v = Math.pow(st.K[i] / st.max, 0.25); c.setRGB(0.85 - 0.65 * v, 0.25 + 0.55 * v, 0.2); col.set([c.r, c.g, c.b], i * 3); }
+    g.setAttribute('color', new THREE.BufferAttribute(col, 3));
+    partMat.vertexColors = true; partMat.color.set(0xffffff); partMat.needsUpdate = true;
+  },
+  // Ergebnis der Greifberechnung als festen Datensatz an die Simulation geben
+  uebergabe: (d) => {
+    setGrip(d);
+    document.querySelector('#simulator')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  },
 });
-window.__kfg = { pro,  sample, update, setMode, selectGripper, gripper: () => A.id, move: (x, z) => { $('#kfg-x').value = x; $('#kfg-z').value = z; update(); }, set: (h, z) => { $('#kfg-hoehe').value = h; $('#kfg-zu').value = z; update(); }, status: () => $('#kfg-status').textContent };
+window.__kfg = { pro, sample, update, setMode, selectGripper, gripper: () => A.id, move: (x, z) => { $('#kfg-x').value = x; $('#kfg-z').value = z; update(); }, set: (h, z) => { $('#kfg-hoehe').value = h; $('#kfg-zu').value = z; update(); }, status: () => $('#kfg-status').textContent };
