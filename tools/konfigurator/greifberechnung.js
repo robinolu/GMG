@@ -724,11 +724,13 @@ export function initPro(K) {
 
   // ---------- Info-Fenster: „!“ neben jedem Feld, Inhalte aus data/info_texte.json ----------
   let INFO = null, zuletzt = null;
+  // Versionsnummer des Skripts anhängen, damit Browser nie altes Skript mit neuen Texten mischen
+  const VERSION = (() => { const sc = document.querySelector('script[src*="konfigurator.js"]'); const v = sc && new URL(sc.src, location.href).searchParams.get('v'); return v ? '?v=' + v : ''; })();
   const modal = $('#info-modal');
   const esc = (x) => String(x).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
   const zahl = (x) => String(x).replace('.', ',');
   async function infoOeffnen(key, btn) {
-    if (!INFO) { try { INFO = Object.fromEntries((await (await fetch(K.base + 'data/info_texte.json')).json()).map((t) => [t.id, t])); } catch (e) { INFO = {}; } }
+    if (!INFO) { try { INFO = Object.fromEntries((await (await fetch(K.base + 'data/info_texte.json' + VERSION)).json()).map((t) => [t.id, t])); } catch (e) { INFO = null; return; } }
     const t = INFO[key]; if (!t) return;
     zuletzt = btn;
     const q = (s) => modal.querySelector(s);
