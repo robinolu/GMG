@@ -11,6 +11,7 @@ import { RenderPass } from 'three/examples/jsm/postprocessing/RenderPass.js';
 import { GTAOPass } from 'three/examples/jsm/postprocessing/GTAOPass.js';
 import { OutputPass } from 'three/examples/jsm/postprocessing/OutputPass.js';
 import { kennzahlen } from './sim-regeln.js';
+import { backenModell, flaechen, dreiecke } from './backen.js';
 
 const fmt = (v, d = 0) => v.toLocaleString('de-DE', { maximumFractionDigits: d, minimumFractionDigits: d });
 const clamp = THREE.MathUtils.clamp;
@@ -575,6 +576,39 @@ export function initSimulator(K) {
   }
   const speedOf = (v) => ({ langsam: 0.6, mittel: 1, schnell: 1.6 }[v] || 1);
 
+  // ---------- Backen aus der Greifberechnung (Flach, Prisma, Kontur, Kegel) am Greifer ----------
+  // Im Greifer-Koordinatensystem: Schließrichtung Z, Teilmitte bei x = z = 0, Belag von y = 0 bis bh (Fingerspitze = 0).
+  const FARBE_BELAG = { Naturgummi: 0x7a5a32, Nitrilgummi: 0x25282c, Silikon: 0xc8462e, PU: 0xd99a2b, TPU: 0x2f6fd6, Leder: 0x8b5a2b,
+    Stahl: 0x9aa1a8, Polyamid: 0xe8e2d0, POM: 0xf2f2ee, Polyethylen: 0xf4f6f8, PP: 0xeef0f2, PTFE: 0xf7f7f7 };
+  const FARBE_BACKE = { Aluminium: 0xc9ced4, Stahl: 0x9aa1a8, TPU: 0x2f6fd6 };
+  // Backengeometrie aus backen.js (dieselbe wie im STEP-Export), skaliert auf die Szene
+  const modellVon = (pose) => { const k = pose.kontakt; return backenModell({ backen: pose.backen, hub: k.hub, radius: k.radius, rund: k.rund, bw: k.bw, bh: k.bh, alpha: pose.alpha, U: pose.U, gamma: pose.gamma }); };
+  // Abstand der Backenrückseite (= Fingerinnenseite) von der Teilmitte: so weit müssen die Finger offen bleiben
+  function backenGeometrie(pose, f) { const m = modellVon(pose); return { form: m.form, ruecken: m.ruecken * f }; }
+  function koerperMesh(k, f, mat) {
+    const pos = [];
+    for (const fl of flaechen(k)) for (const tri of dreiecke(k, fl)) for (const q of tri) pos.push(q[0] * f, q[1] * f, q[2] * f);
+    const geo = new THREE.BufferGeometry(); geo.setAttribute('position', new THREE.Float32BufferAttribute(pos, 3)); geo.computeVertexNormals();
+    return new THREE.Mesh(geo, mat);
+  }
+  function backenBauen(pose, f) {
+    const metall = pose.backe === 'Aluminium' || pose.backe === 'Stahl';
+    const matBacke = new THREE.MeshStandardMaterial({ color: FARBE_BACKE[pose.backe] ?? 0x3d4650, metalness: metall ? 0.6 : 0, roughness: metall ? 0.35 : 0.6, side: THREE.DoubleSide });
+    const matBelag = new THREE.MeshStandardMaterial({ color: FARBE_BELAG[pose.belag] ?? 0x25282c, roughness: 0.85, side: THREE.DoubleSide });
+    const m = modellVon(pose), seite = new THREE.Group();
+    seite.add(koerperMesh(m.koerper, f, matBacke), koerperMesh(m.belag, f, matBelag));
+    seite.traverse((o) => { if (o.isMesh) o.castShadow = true; });
+    const andere = seite.clone(); andere.rotation.y = Math.PI;      // gegenüberliegende Backe
+    const gruppe = new THREE.Group(); gruppe.add(seite, andere);
+    return { gruppe, seite, andere };
+  }
+  function backenEntfernen(g) {
+    if (!g.backen) return;
+    g.holder.remove(g.backen.gruppe);
+    g.backen.gruppe.traverse((o) => { if (o.isMesh) { o.geometry.dispose(); o.material.dispose(); } });
+    g.backen = null;
+  }
+
   function frameState(c) {
     if (!A) return;
     const { src, tgt, device, g, P } = A;
@@ -603,8 +637,8 @@ export function initSimulator(K) {
       off0.set(pose.x, pose.y, pose.z).multiplyScalar(P.f).applyAxisAngle(UP, by);
       inside = pose.inside;
       if (pose.state === 'pro' && r.aussen) {
-        const hub = new THREE.Vector3().fromArray(pose.kontakt.A).distanceTo(new THREE.Vector3().fromArray(pose.kontakt.B)) * P.f;
-        tGrip = clamp((r.aussen[1] - hub) / Math.max(1, r.aussen[1] - r.aussen[0]), 0, 1);
+        const finger = 2 * backenGeometrie(pose, P.f).ruecken;   // Finger halten die Backen, nicht direkt das Teil
+        tGrip = clamp((r.aussen[1] - finger) / Math.max(1, r.aussen[1] - r.aussen[0]), 0, 1);
       }
       if (pose.state === 'gegriffen' && pose.gripper === g.id) tGrip = pose.t;
       else if (inside && r.innen) tGrip = clamp((r.innen[1] - P.griff) / Math.max(1, r.innen[1] - r.innen[0]), 0, 1);
@@ -629,7 +663,17 @@ export function initSimulator(K) {
       x = THREE.MathUtils.lerp(QQ.x, NN.x, back); z = THREE.MathUtils.lerp(QQ.z, NN.z, back);
       y = safe; yaw = THREE.MathUtils.lerp(dreh, nx.yaw, back);
     }
-    g.set(inside ? 1 - (1 - tGrip) * close * (1 - open) : tGrip * close * (1 - open));
+    const gv = inside ? 1 - (1 - tGrip) * close * (1 - open) : tGrip * close * (1 - open);
+    g.set(gv);
+    // Backen der Greifberechnung: sitzen geschlossen genau auf den Kontaktflächen, öffnen mit den Fingern
+    const bkey = pose && pose.state === 'pro' ? `${pose.version}|${P.f}|${g.id}` : '';
+    if (g.backen && g.backen.key !== bkey) backenEntfernen(g);
+    if (bkey && !g.backen) { g.backen = { key: bkey, ...backenBauen(pose, P.f) }; g.holder.add(g.backen.gruppe); }
+    if (g.backen && r.aussen) {
+      const breite = (t) => r.aussen[1] - t * (r.aussen[1] - r.aussen[0]);
+      const auf = Math.max(0, (breite(gv) - breite(tGrip)) / 2);
+      g.backen.seite.position.z = auf; g.backen.andere.position.z = -auf;
+    }
     flange.set(x, y + g.length, z);
     device.reach(flange);
     // Greifer hängt fest am Flansch, so wie das Gerät tatsächlich steht (auch am Rand der Reichweite)
@@ -681,6 +725,7 @@ export function initSimulator(K) {
     // Grenzwerte aus der Greifberechnung: Beschleunigung der Fahrt (Dreieckprofil über die Strecke zwischen den Bändern)
     const pose = K.part() && K.part().pose, box = $('#sim-grenze');
     box.hidden = true;
+    proInfo(pose);
     if (pose && pose.state === 'pro' && pose.grenzen && pose.grenzen.a && A) {
       const s = Math.abs(A.placeX - A.pickX) / 1000, tMove = (t) => 0.24 * 3600 / t;
       const aSim = 4 * s / tMove(tph) ** 2;
@@ -697,6 +742,26 @@ export function initSimulator(K) {
     $('#sim-takt').textContent = `${fmt(e.takt, e.takt < 10 ? 1 : 0)} s`;
     $('#sim-stunde').textContent = fmt(tph >= 1000 ? Math.round(tph / 10) * 10 : Math.round(tph));
     mail(produkt(), e);
+  }
+  // Was aus der Greifberechnung in der Simulation steckt – und ob der Greifer die Greifbreite schafft
+  const BACKEN_NAME = { flach: 'Flachbacken', prisma: 'Prismenbacken', kontur: 'Konturbacken', konus: 'Kegelbacken' };
+  function proInfo(pose) {
+    const el = $('#sim-pro');
+    if (!pose || pose.state !== 'pro' || !A || S.produkt.typ !== 'eigen') { el.hidden = true; return; }
+    const k = pose.kontakt, f = A.P.f, r = A.g.range, breite = k.hub * f, finger = 2 * backenGeometrie(pose, f).ruecken;
+    let form = BACKEN_NAME[pose.backen] || pose.backen;
+    if ((pose.backen === 'prisma' || pose.backen === 'kontur') && !k.rund) form = 'Flachbacken (Fläche ist nicht rund)';
+    else if (pose.backen === 'prisma') form += ` α ${fmt(pose.alpha)}°`;
+    else if (pose.backen === 'kontur') form += ` ${fmt(pose.U)} % Umschließung`;
+    else if (pose.backen === 'konus') form += ` γ ${fmt(pose.gamma)}°`;
+    const zone = { senkrecht: 'senkrechte Zone', waagerecht: 'waagerechte Zone', auto: 'Zone automatisch' }[pose.zone] || '';
+    const drehung = ((Math.round(THREE.MathUtils.radToDeg(-pose.yaw || 0)) % 180) + 180) % 180;
+    let t = `<strong>Greifstelle V${pose.version} aus der Greifberechnung:</strong> ${zone}, Greifhöhe ${fmt((pose.hoehe ?? pose.y) * f)} mm über der Unterkante, ` +
+      `Greifbreite ${fmt(breite)} mm, ${form}, Belag ${k.bw} × ${k.bh} mm ${pose.belag}, Backe ${pose.backe}, ${fmt(pose.kraft)} N je Backe` +
+      (drehung ? `. Das Teil liegt um ${drehung}° gedreht auf dem Band, damit der Greifer quer zur Greifrichtung schließt.` : '.');
+    if (r.aussen && (finger < r.aussen[0] - 0.5 || finger > r.aussen[1] + 0.5))
+      t += ` <span class="is-warn">Mit den Backen brauchen die Finger ${fmt(finger)} mm Abstand, ${A.g.code} öffnet aber nur ${fmt(r.aussen[0])} bis ${fmt(r.aussen[1])} mm. Im Konfigurator einen passenden Greifer wählen.</span>`;
+    el.innerHTML = t; el.hidden = false;
   }
   function mail(P, e) {
     const L = (o, list, lib) => o ? `${lib[o.modul].name} (` + list.filter((p) => !p.when || p.when(o.modul, o)).map((p) => `${p.label}: ${label(p, o[p.k])}`).join(', ') + ')' : '–';
@@ -853,5 +918,5 @@ export function initSimulator(K) {
     const io = new IntersectionObserver((e) => { if (e[0].isIntersecting) { io.disconnect(); open(); } }, { rootMargin: '600px 0px' });
     io.observe(sec);
   }
-  window.__sim = { dbg: () => ({ renderer, scene, composer }), open, S, belts: () => ({ src: A.src.tex ? A.src.tex.offset.x : A.src.rollers && A.src.rollers[0] ? A.src.rollers[0].rotation.y : null, tgt: A.tgt.tex ? A.tgt.tex.offset.x : null }), frame: (t) => { cyc = t / cycleLen(); running = false; }, eval: () => lastEval, A: () => A, gap: () => { const v = new THREE.Vector3(); A.device.tip(v); const bb = new THREE.Box3().setFromObject(A.g.holder); return { top: bb.max.y - v.y, dx: Math.hypot((bb.min.x + bb.max.x) / 2 - v.x, (bb.min.z + bb.max.z) / 2 - v.z), want: v.toArray().map(Math.round) }; }, build: () => { build(); renderPanels(); } };
+  window.__sim = { dbg: () => ({ renderer, scene, composer, camera, controls }), open, S, belts: () => ({ src: A.src.tex ? A.src.tex.offset.x : A.src.rollers && A.src.rollers[0] ? A.src.rollers[0].rotation.y : null, tgt: A.tgt.tex ? A.tgt.tex.offset.x : null }), frame: (t) => { cyc = t / cycleLen(); running = false; }, eval: () => lastEval, A: () => A, gap: () => { const v = new THREE.Vector3(); A.device.tip(v); const bb = new THREE.Box3().setFromObject(A.g.holder); return { top: bb.max.y - v.y, dx: Math.hypot((bb.min.x + bb.max.x) / 2 - v.x, (bb.min.z + bb.max.z) / 2 - v.z), want: v.toArray().map(Math.round) }; }, build: () => { build(); renderPanels(); } };
 }

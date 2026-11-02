@@ -3,7 +3,7 @@
 // tools/greifberechnung/daten.py), nicht im Programmcode. Info-Texte: data/info_texte.json, Bilder: assets/img/info/ (aus tools/greifberechnung/quelle über info.py).
 // Einheiten: Längen in mm, Masse in kg, Kräfte in N, Druck in kPa.
 import * as THREE from 'three';
-import { STLExporter } from 'three/examples/jsm/exporters/STLExporter.js';
+import { backenModell, stepDatei, stlDatei } from './backen.js';
 import D from '../../data/greifberechnung.json';
 
 const G = 9.81;
@@ -374,7 +374,7 @@ export function initPro(K) {
     K.showGripper(!profi);
     K.root.querySelectorAll('[data-modus]').forEach((b) => b.setAttribute('aria-pressed', String((b.dataset.modus === 'profi') === profi)));
     K.root.classList.toggle('is-profi', profi);
-    if (profi) { syncProdukt(); zeichneZone(); hohlUI(); }
+    if (profi) { autoVorschau(); syncProdukt(); zeichneZone(); hohlUI(); }
     K.partColors(profi && steif && $('#pro-karte').checked ? steif : null);
   }
   K.root.querySelectorAll('[data-modus]').forEach((b) => b.addEventListener('click', () => modus(b.dataset.modus === 'profi')));
@@ -487,19 +487,82 @@ export function initPro(K) {
 
   // Produktwerkstoff folgt dem Werkstoff oben, solange der Nutzer ihn nicht selbst wählt
   const sync = () => { const k = K.$('#kfg-material').selectedOptions[0].dataset.pro; if (k && W[k]) $('#pro-produkt').value = k; };
-  K.$('#kfg-material').addEventListener('change', () => { sync(); syncProdukt(); alt(); });
+  K.$('#kfg-material').addEventListener('change', () => { sync(); autoVorschau(); syncProdukt(); alt(); });
   sync();
+  // ---------- Automatische Auslegung: Backenform, Belag, Backenkörper, Belagmaße ----------
+  // Jedes dieser Felder rechnet das Programm selbst aus. Ändert der Nutzer ein Feld, gilt es als eigene Angabe,
+  // „auto“ daneben schaltet es zurück.
+  const AUTO = ['pro-backen', 'pro-alpha', 'pro-umschl', 'pro-gamma', 'pro-belag', 'pro-backe', 'pro-bw', 'pro-bh'];
+  const manuell = new Set();
+  const istAuto = (id) => !manuell.has(id);
+  const zahlText = (v) => String(Math.round(v * 10) / 10).replace('.', ',');
+  for (const id of AUTO) {
+    const lab = box.querySelector(`label[for="${id}"]`);
+    const chip = document.createElement('button'); chip.type = 'button'; chip.className = 'pro__auto'; chip.dataset.autoFor = id;
+    chip.addEventListener('click', (ev) => { ev.preventDefault(); if (!manuell.has(id)) return; manuell.delete(id); autoUI(); autoVorschau(); alt(); });
+    lab.appendChild(chip);
+  }
+  const markieren = (ev) => { const id = ev.target.id; if (AUTO.includes(id)) { manuell.add(id); autoUI(); } };
+  box.addEventListener('input', markieren, true); box.addEventListener('change', markieren, true);
+  function autoUI() {
+    for (const id of AUTO) {
+      const a = istAuto(id), chip = box.querySelector(`[data-auto-for="${id}"]`);
+      $('#' + id).classList.toggle('is-auto', a);
+      chip.classList.toggle('is-manuell', !a);
+      chip.textContent = a ? 'auto' : 'eigener Wert ↺';
+      chip.title = a ? 'Wird automatisch berechnet. Einfach überschreiben, um einen eigenen Wert vorzugeben.' : 'Eigene Angabe. Klicken, um wieder automatisch rechnen zu lassen.';
+    }
+  }
+  function setzeAuto(id, v) { if (istAuto(id)) $('#' + id).value = typeof v === 'number' ? zahlText(v) : v; }
+  // Belag: höchster Reibwert auf dem Produkt, ohne Sperre, ohne Ersatzwert, temperaturfest; Beläge ohne Warnung zuerst
+  function belagWahl(E, pS = 0) {
+    const liste = Object.keys(W).filter((n) => W[n].rollen.includes('belag')).map((n) => {
+      const r = reibwert(n, E.prod, E.zustand), sp = sperren({ ...E, belag: n, rw: r });
+      const temp = temperatur('Belag', n, E.tUmg, E.tProd, pS, E.takt);
+      return { n, mu: r.mu, ersatz: !!r.ersatz, gesperrt: sp.some((x) => x.stufe === 'gesperrt'), warn: sp.length > 0 || temp.some((h) => h[0] === 'gelb'), heiss: temp.some((h) => h[0] === 'rot') };
+    }).filter((v) => !v.gesperrt && !v.heiss && !v.ersatz).sort((a, b) => (a.warn - b.warn) || (b.mu - a.mu));
+    return liste[0] || null;
+  }
+  // Backenkörper: Flach-, Prismen-, Kegelbacke gefräst, Konturbacke gedruckt; erster Werkstoff, der die Temperatur hält
+  function backeWahl(E, form, pS = 0) {
+    const kand = form === 'kontur' ? ['PETG', 'ASA', 'PC', 'Polyamid'] : ['Aluminium', 'Stahl', 'POM', 'Polyamid'];
+    return kand.find((n) => W[n] && !temperatur('Backe', n, E.tUmg, E.tProd, pS, E.takt).some((h) => h[0] === 'rot')) || kand[0];
+  }
+  // Belagmaße: von groß nach klein, die größte Fläche, die an einer gültigen Greifstelle voll anliegt, gewinnt
+  function groessen(t, E) {
+    const s = t.box.getSize(new THREE.Vector3());
+    const wRef = zone.art === 'senkrecht' ? Math.min(Math.max(s.x, s.z), 3 * s.y) : Math.min(s.x, s.z);
+    const r5 = (v) => Math.max(5, Math.round(THREE.MathUtils.clamp(v, 5, 60) / 5) * 5);
+    const out = [];
+    for (const f of [0.6, 0.45, 0.3, 0.2, 0.12]) {
+      const bw = istAuto('pro-bw') ? r5(f * wRef) : E.bw, bh = istAuto('pro-bh') ? r5(f * s.y) : E.bh;
+      if (!out.some((o) => o[0] === bw && o[1] === bh)) out.push([bw, bh]);
+    }
+    return out;
+  }
+  // schnelle Vorbelegung ohne Abtasten (beim Laden des Teils und bei jeder Änderung)
+  function autoVorschau() {
+    const t = teil(); if (!t) return;
+    const E = eingaben();
+    if (E.prod === 'Backware') return;
+    const b = belagWahl(E); if (b) setzeAuto('pro-belag', b.n);
+    if (!ergebnis) { const g = groessen(t, E), [bw, bh] = g[1] || g[0]; setzeAuto('pro-bw', bw); setzeAuto('pro-bh', bh); }
+    setzeAuto('pro-alpha', 90); setzeAuto('pro-umschl', Math.min(70, F.umschliessung_max)); setzeAuto('pro-gamma', 15);
+    setzeAuto('pro-backe', backeWahl(E, $('#pro-backen').value));
+  }
+
   // jede Eingabe macht das Ergebnis veraltet
   box.querySelectorAll('.pro__grid input, .pro__grid select').forEach((el) => el.addEventListener(el.type === 'checkbox' || el.tagName === 'SELECT' ? 'change' : 'input', () => {
     if (el.id === 'pro-backen') formUI();
     if (el.id === 'pro-hohl' || el.id === 'pro-wand' || el.id === 'pro-karte') hohlUI();
+    autoVorschau();
     syncProdukt(); alt();
   }));
   function formUI() {
     const f = $('#pro-backen').value;
     $('#pro-alpha-feld').hidden = f !== 'prisma'; $('#pro-umschl-feld').hidden = f !== 'kontur'; $('#pro-gamma-feld').hidden = f !== 'konus';
   }
-  formUI();
+  formUI(); autoUI();
 
   // ---------- Berechnen ----------
   function eingaben() {
@@ -535,21 +598,57 @@ export function initPro(K) {
     }
     return { f, stuetz };
   }
+  // Rechenfunktion für eine Position; Prismen- und Konturbacke nur auf runden Flächen, sonst Flachbacke
+  const rechneMit = (E) => (k) => {
+    const fm = fmaxAn(E, k);
+    const form = (E.form === 'prisma' || E.form === 'kontur') && !k.rund ? 'flach' : E.form;
+    const c = { m: E.m, mu: E.mu, n: E.n, S: E.S, az: E.az, ax: E.ax, aN: E.aN, form, alpha: E.alpha, U: E.U, gamma: E.gamma,
+      quer: k.quer, e: k.e, rk: Math.sqrt(k.flaeche / Math.PI) * 2 / 3, fmaxN: fm.f };
+    const r = lastfaelle(c);
+    r.stuetz = fm.stuetz; r.aMax = aMax(c); r.zuweit = E.hubMax > 0 && k.hub > E.hubMax;
+    return r;
+  };
+  const AUFSCHLAG = { flach: 0, prisma: 0.1, kontur: 0.25, konus: 0.2 };   // Formbacken nur, wenn sie spürbar weniger Kraft brauchen
   function rechnen() {
     const t = teil(); if (!t) return;
-    const E = eingaben();
+    let E = eingaben();
     if (E.prod === 'Backware') { ergebnis = { backware: true, E, version: ++version }; veraltet = false; zeige(); return; }
-    const belag = { w: E.bw, h: E.bh };
-    const ctx = { bvh: t.bvh, box: t.box, cog: t.cog, R: t.box.getSize(new THREE.Vector3()).length() + 50, belag, zonen };
-    const kand = abtasten(ctx, { ...zone }, E.schritt);
-    const res = bewerten(kand, (k) => {
-      const fm = fmaxAn(E, k);
-      const c = { m: E.m, mu: E.mu, n: E.n, S: E.S, az: E.az, ax: E.ax, aN: E.aN, form: E.form, alpha: E.alpha, U: E.U, gamma: E.gamma,
-        quer: k.quer, e: k.e, rk: Math.sqrt(k.flaeche / Math.PI) * 2 / 3, fmaxN: fm.f };
-      const r = lastfaelle(c);
-      r.stuetz = fm.stuetz; r.aMax = aMax(c); r.zuweit = E.hubMax > 0 && k.hub > E.hubMax;
-      return r;
-    });
+    const aus = [];
+    // 1. Belag
+    if (istAuto('pro-belag')) { const b = belagWahl(E); if (b) { setzeAuto('pro-belag', b.n); E = eingaben(); aus.push(`Belag <strong>${b.n}</strong>: höchster Reibwert auf ${E.prod} (μ ${fmt(b.mu, 2)}) ohne Sperre und temperaturfest`); } }
+    // 2. Belagmaße und Backenform: je Größe einmal abtasten, jede Form bewerten
+    const formen = istAuto('pro-backen') ? ['flach', 'prisma', 'kontur'] : [E.form];
+    const winkel = { alpha: istAuto('pro-alpha') ? 90 : E.alpha, U: istAuto('pro-umschl') ? Math.min(70, F.umschliessung_max) : E.U, gamma: istAuto('pro-gamma') ? 15 : E.gamma };
+    let wahl = null, letzte = null; const versucht = [], jeForm = {};
+    for (const [bw, bh] of groessen(t, E)) {
+      if (formen.every((f) => jeForm[f])) break;                             // jede Form hat schon ihre größte passende Fläche
+      const ctx = { bvh: t.bvh, box: t.box, cog: t.cog, R: t.box.getSize(new THREE.Vector3()).length() + 50, belag: { w: bw, h: bh }, zonen };
+      const kand = abtasten(ctx, { ...zone }, E.schritt);
+      versucht.push(`${bw} × ${bh}`);
+      for (const form of formen) {
+        const Ef = { ...E, ...winkel, form, bw, bh };
+        const res = bewerten(kand, rechneMit(Ef));
+        letzte = letzte || { res, form, bw, bh };
+        if (!res.best.length) continue;
+        const k = res.best[0], wirksam = (form === 'prisma' || form === 'kontur') && !k.rund ? 'flach' : form;
+        if (wirksam !== form && formen.length > 1) continue;                  // Formbacke ohne runde Fläche bringt nichts
+        if (!jeForm[form]) jeForm[form] = { sc: k.r.fmin * (1 + AUFSCHLAG[form]), res, form, bw, bh };
+      }
+      if (formen.some((f) => jeForm[f]) && !formen.some((f) => f !== 'flach' && !jeForm[f] && jeForm.flach && jeForm.flach.res.best[0].rund)) break;
+    }
+    for (const f of formen) if (jeForm[f] && (!wahl || jeForm[f].sc < wahl.sc)) wahl = jeForm[f];
+    const w = wahl || letzte;
+    if (istAuto('pro-backen')) setzeAuto('pro-backen', w.form);
+    setzeAuto('pro-bw', w.bw); setzeAuto('pro-bh', w.bh);
+    setzeAuto('pro-alpha', winkel.alpha); setzeAuto('pro-umschl', winkel.U); setzeAuto('pro-gamma', winkel.gamma);
+    formUI();
+    E = eingaben();
+    const res = w.res;
+    if (istAuto('pro-bw') || istAuto('pro-bh')) aus.push(`Belagfläche <strong>${fmt(E.bw)} × ${fmt(E.bh)} mm</strong>: ${wahl ? 'die größte geprüfte Fläche, die an einer gültigen Greifstelle anliegt' : 'keine geprüfte Größe passt'}${versucht.length > 1 ? ` (geprüft: ${versucht.join(', ')} mm)` : ''}`);
+    if (istAuto('pro-backen')) aus.push(`Backenform <strong>${{ flach: 'Flachbacke', prisma: `Prismenbacke α ${fmt(E.alpha)}°`, kontur: `Konturbacke ${fmt(E.U)} % Umschließung`, konus: 'Kegelbacke' }[E.form]}</strong>: ${E.form === 'flach' ? (res.best[0] && res.best[0].rund ? 'Formbacken bringen hier keinen deutlichen Vorteil' : 'die Greiffläche ist eben') : 'braucht an der runden Greiffläche deutlich weniger Greifkraft als Klemmen'}`);
+    // 3. Backenkörper (Temperatur mit der tatsächlichen Pressung)
+    const b0 = res.best[0], pS0 = b0 ? b0.r.fmin / Math.max(b0.flaeche, 1) * E.S : 0;
+    if (istAuto('pro-backe')) { const bk = backeWahl(E, E.form, pS0); setzeAuto('pro-backe', bk); E = eingaben(); aus.push(`Backenkörper <strong>${bk}</strong>: ${E.form === 'kontur' ? '3D-Druck, ' : ''}hält ${fmt(Math.max(E.tUmg, E.tProd))} °C`); }
     // Hinweise und Sperren
     const H = [];
     const sp = sperren(E);
@@ -572,7 +671,7 @@ export function initPro(K) {
       const heiss = temperatur('Belag', n, E.tUmg, E.tProd, 0, E.takt).some((h) => h[0] === 'rot');
       return { n, mu: r.mu, ersatz: !!r.ersatz, gesperrt, heiss };
     }).filter((v) => !v.gesperrt && !v.heiss && !v.ersatz).sort((a, b) => b.mu - a.mu).slice(0, 3);
-    ergebnis = { ...res, E, H, vorschlag, version: ++version };
+    ergebnis = { ...res, E, H, vorschlag, aus, version: ++version };
     gewaehlt = 0; veraltet = false;
     zeige();
   }
@@ -649,6 +748,7 @@ export function initPro(K) {
       html += `<p class="kfg__status is-bad">${A[1]}. In dieser Greifzone ist keine Position gültig (${fmt(geprueft)} geprüft). Was helfen würde: anderer Belag, Prismen- oder Konturbacke, eine andere oder größere Greifzone oder weniger Beschleunigung.</p>`;
     } else {
       const k = best[gewaehlt], r = k.r;
+      if (ergebnis.aus && ergebnis.aus.length) html += `<div class="pro__auslegung"><strong>Automatisch ausgelegt</strong> (eigene Werte in den Feldern haben Vorrang):<ul>${ergebnis.aus.map((a) => `<li>${a}</li>`).join('')}</ul></div>`;
       const aM = r.aMax, vM = aM != null ? Math.sqrt(aM * E.strecke / 1000) : null;
       html += `<p class="kfg__status is-${A[0]}">${A[1]}. Nötige Greifkraft <strong>${kraft(r.fmin)} je Backe</strong>${isFinite(r.fmax) ? `, zulässig bis ${kraft(r.fmax)}` : ''}.</p>
       <dl class="kfg__facts pro__facts">
@@ -667,14 +767,17 @@ export function initPro(K) {
         <tr><td>7. Produkt nicht beschädigen${k.zone ? ` (Bereich: ${k.zone.name})` : ` (${E.belast.name})`}</td><td>${isFinite(r.fmax) ? 'max. ' + kraft(r.fmax) : 'keine Grenze'}</td></tr>
       </tbody></table>`;
       if (best.length > 1) html += `<div class="pro__alt"><span class="muted">Greifstellen:</span>${best.map((b, i) => `<button type="button" class="btn btn--xs ${i === gewaehlt ? 'btn--primary' : 'btn--ghost'}" data-alt="${i}">${i === 0 ? 'Gewählt' : 'Alternative ' + i}: ${fmt(b.hoehe)} mm, ${kraft(b.r.fmin)}</button>`).join('')}</div>`;
-      if (E.form === 'kontur' && k.rund) html += `<div class="pro__alt"><button type="button" class="btn btn--ghost btn--xs" id="pro-stl">⤓ Konturbacke als STL (${Math.round(E.U)} % Umschließung)</button><span class="kfg__small muted">Backenkörper aus PETG, ASA, PA oder PC, Kontaktfläche mit TPU-Belag.</span></div>`;
+      const bm = backenFuer(k, E);
+      html += `<div class="pro__cad"><strong>Backe als CAD-Modell:</strong> ${bm.text}, Belag ${fmt(E.bw)} × ${fmt(E.bh)} mm ${E.belag}, Körper ${E.backe}
+        <span class="pro__cad-knopf"><button type="button" class="btn btn--primary btn--xs" data-cad="step">⤓ STEP</button><button type="button" class="btn btn--ghost btn--xs" data-cad="stl">⤓ STL</button></span>
+        <span class="kfg__small muted">Eine Backe mit zwei Körpern (Backe und Belag 2 mm), Teilmitte im Ursprung, Schließrichtung Z, Fingerspitze bei Y = 0. Die zweite Backe ist um die Hochachse gedreht. Befestigung am Finger bitte im CAD ergänzen.</span></div>`;
     }
     if (ergebnis.vorschlag.length) html += `<p class="kfg__small"><strong>Belagsvorschlag für ${E.prod}:</strong> ${ergebnis.vorschlag.map((v, i) => `${i + 1}. ${v.n} (μ ${fmt(v.mu, 2)})`).join(' · ')}</p>`;
     if (H.length) html += `<ul class="pro__hinweise">${H.map(([c, t, gesperrt]) => `<li class="is-${c}">${t}${gesperrt ? ` <a class="btn btn--ghost btn--xs" href="mailto:info@gmg-system.com?subject=${encodeURIComponent('Technische Prüfung anfragen: ' + t.slice(0, 80))}">Technische Prüfung anfragen</a>` : ''}</li>`).join('')}</ul>`;
     html += '<p class="kfg__small muted">Der Konfigurator gibt eine Empfehlung, keine Freigabe. Reibwerte sind vorsichtige Rechenwerte aus der Literatur; für die Auslegung prüfen wir Ihre Anwendung gern im Versuch.</p>';
     out.innerHTML = html;
     out.querySelectorAll('[data-alt]').forEach((b) => b.addEventListener('click', () => { gewaehlt = Number(b.dataset.alt); zeige(); }));
-    const stl = out.querySelector('#pro-stl'); if (stl) stl.addEventListener('click', konturSTL);
+    out.querySelectorAll('[data-cad]').forEach((b) => b.addEventListener('click', () => backeExport(b.dataset.cad)));
     uebergabeKnopf();
   }
 
@@ -684,8 +787,12 @@ export function initPro(K) {
     const k = ergebnis.best[gewaehlt], E = ergebnis.E, mid = k.A.clone().add(k.B).multiplyScalar(0.5);
     return {
       version: ergebnis.version, ampel: ampel(), x: mid.x, y: mid.y - E.bh / 2, z: mid.z, inside: false, state: 'pro', gripper: null,
-      yaw: THREE.MathUtils.degToRad(k.winkel - 90),                             // Teil so drehen, dass die Schließrichtung in Z liegt
-      kontakt: { A: k.A.toArray(), B: k.B.toArray(), bw: E.bw, bh: E.bh }, backen: E.form, belag: E.belag, kraft: k.r.fmin, S: E.S,
+      // Teil so um die Hochachse drehen, dass die Schließrichtung (A → B) in Z liegt – aus den Kontaktpunkten selbst,
+      // damit es für waagerechte und senkrechte Zonen gleichermaßen stimmt
+      yaw: Math.atan2(-(k.B.x - k.A.x), k.B.z - k.A.z),
+      zone: zone.art === 'senkrecht' ? 'senkrecht' : zone.art === 'waagerecht' ? 'waagerecht' : 'auto', hoehe: k.hoehe,
+      kontakt: { A: k.A.toArray(), B: k.B.toArray(), bw: E.bw, bh: E.bh, hub: k.hub, rund: k.rund, radius: k.radius },
+      backen: E.form, alpha: E.alpha, U: E.U, gamma: E.gamma, belag: E.belag, backe: E.backe, kraft: k.r.fmin, S: E.S,
       grenzen: { a: k.r.aMax ?? Math.max(E.az, E.ax), aN: E.aN, v: k.r.aMax != null ? Math.sqrt(k.r.aMax * E.strecke / 1000) : null },
     };
   }
@@ -696,21 +803,18 @@ export function initPro(K) {
   }
   $('#pro-uebergabe').addEventListener('click', () => { const d = datensatz(); if (d) { K.uebergabe(d); $('#pro-uebergabe-info').textContent = `V${d.version} an die Simulation übergeben.`; } });
 
-  // ---------- Konturbacke als STL ----------
-  function konturSTL() {
-    const k = ergebnis.best[gewaehlt], E = ergebnis.E;
-    const r = (k.radius || k.hub / 2) + 0.3 + 2;                             // Spiel 0,3 mm + 2 mm Belag
-    const phi = THREE.MathUtils.degToRad(Math.min(E.U, F.umschliessung_max) / 100 * 90);
-    const W2 = Math.max(r * Math.sin(phi) + 8, E.bw / 2 + 5), T = r * (1 - Math.cos(phi)) + 12;
-    // Profil: Block von y = −T bis 0, Kontur als Kreisbogen ±φ um die Schließrichtung (Teilmitte bei y = r·cos φ)
-    const arc = [];
-    for (let i = 0; i <= 32; i++) { const a = phi - 2 * phi * i / 32; arc.push(new THREE.Vector2(r * Math.sin(a), r * Math.cos(phi) - r * Math.cos(a))); }
-    const shape = new THREE.Shape([new THREE.Vector2(-W2, 0), new THREE.Vector2(-W2, -T), new THREE.Vector2(W2, -T), new THREE.Vector2(W2, 0), ...arc]);
-    const geo = new THREE.ExtrudeGeometry(shape, { depth: E.bh, bevelEnabled: false });
-    const stl = new STLExporter().parse(new THREE.Mesh(geo), { binary: false });
-    const a = document.createElement('a'); a.download = `Konturbacke_r${Math.round(r)}_${Math.round(E.U)}pct.stl`;
-    a.href = URL.createObjectURL(new Blob([stl], { type: 'model/stl' })); a.click();
-    geo.dispose();
+  // ---------- Backe als STEP oder STL (gleiche Geometrie wie in der Simulation) ----------
+  function backenFuer(k, E) {
+    return backenModell({ backen: E.form, hub: k.hub, radius: k.radius, rund: k.rund, bw: E.bw, bh: E.bh, alpha: E.alpha, U: E.U, gamma: E.gamma });
+  }
+  function backeExport(art) {
+    const k = ergebnis.best[gewaehlt], E = ergebnis.E, m = backenFuer(k, E);
+    const name = `GMG_${{ flach: 'Flachbacke', prisma: 'Prismenbacke', kontur: 'Konturbacke', konus: 'Kegelbacke' }[m.form]}_${Math.round(E.bw)}x${Math.round(E.bh)}_V${ergebnis.version}`;
+    const teile = [{ name: `Backe ${E.backe}`, koerper: m.koerper }, { name: `Belag ${E.belag}`, koerper: m.belag }];
+    const text = art === 'step' ? stepDatei(name, teile) : stlDatei(name, teile);
+    const a = document.createElement('a'); a.download = `${name}.${art === 'step' ? 'step' : 'stl'}`;
+    a.href = URL.createObjectURL(new Blob([text], { type: art === 'step' ? 'model/step' : 'model/stl' })); a.click();
+    setTimeout(() => URL.revokeObjectURL(a.href), 2000);
   }
 
   // ---------- Neu berechnen aus der Simulation ----------
@@ -728,7 +832,7 @@ export function initPro(K) {
   const VERSION = (() => { const sc = document.querySelector('script[src*="konfigurator.js"]'); const v = sc && new URL(sc.src, location.href).searchParams.get('v'); return v ? '?v=' + v : ''; })();
   const modal = $('#info-modal');
   const esc = (x) => String(x).replace(/[&<>"]/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
-  const zahl = (x) => String(x).replace('.', ',');
+  const komma = (x) => String(x).replace('.', ',');
   async function infoOeffnen(key, btn) {
     if (!INFO) { try { INFO = Object.fromEntries((await (await fetch(K.base + 'data/info_texte.json' + VERSION)).json()).map((t) => [t.id, t])); } catch (e) { INFO = null; return; } }
     const t = INFO[key]; if (!t) return;
@@ -743,7 +847,7 @@ export function initPro(K) {
     q('.info-modal__legende').hidden = !(t.legende || []).length;
     let extra = '';
     if (t.stufen) {
-      extra += '<table class="info-modal__stufen"><tr><th>Stufe</th><th>Höchstens</th><th>Etwa wie</th><th>Vergleichbar mit</th></tr>' + t.stufen.map((s) => `<tr><td><b>${esc(s.stufe)}</b></td><td>${s.kPa == null ? 'keine Grenze' : (s.kPa >= 1000 ? zahl(s.kPa / 1000) + ' MPa' : s.kPa + ' kPa') + `<br><small>${zahl(s.N_cm2)} N/cm²</small>`}</td><td>${esc(s.etwa).replace(/ /g, '&nbsp;')}</td><td>${esc(s.vergleich)}</td></tr>`).join('') + '</table>';
+      extra += '<table class="info-modal__stufen"><tr><th>Stufe</th><th>Höchstens</th><th>Etwa wie</th><th>Vergleichbar mit</th></tr>' + t.stufen.map((s) => `<tr><td><b>${esc(s.stufe)}</b></td><td>${s.kPa == null ? 'keine Grenze' : (s.kPa >= 1000 ? komma(s.kPa / 1000) + ' MPa' : s.kPa + ' kPa') + `<br><small>${komma(s.N_cm2)} N/cm²</small>`}</td><td>${esc(s.etwa).replace(/ /g, '&nbsp;')}</td><td>${esc(s.vergleich)}</td></tr>`).join('') + '</table>';
     }
     if (t.pro_eigener_wert) extra += `<p class="info-modal__pro"><b>Pro-Modus:</b> Statt einer Stufe kannst du einen eigenen Wert eingeben, ${esc(t.pro_eigener_wert.replace(/^Eingabe /, 'entweder '))}, z. B. aus einem eigenen Versuch.</p>`;
     q('.info-modal__extra').innerHTML = extra;
@@ -757,7 +861,7 @@ export function initPro(K) {
   modal.addEventListener('click', (e) => { if (e.target === modal || e.target.closest('.info-modal__x')) infoZu(); });
   document.addEventListener('keydown', (e) => { if (e.key === 'Escape' && !modal.hidden) infoZu(); });
 
-  K.onPlace(() => { sync(); markLoeschen(); ergebnis = null; veraltet = false; zeige(); hohlUI(); if (aktiv) { setZone(zone.art); syncProdukt(); } });
+  K.onPlace(() => { sync(); markLoeschen(); ergebnis = null; veraltet = false; zeige(); hohlUI(); if (aktiv) { setZone(zone.art); autoVorschau(); syncProdukt(); } });
   markText(); belastInfo();
   return { modus, rechnen, setZone, zone, neuBerechnen, ergebnis: () => ergebnis, ampel, datensatz,
     markiere: (art, p, r, stufe) => addZone(art === 'sperre' ? { art, p: p.clone(), r } : { art: 'last', p: p.clone(), r, kpa: STUFEN[stufe].kpa, name: STUFEN[stufe].name }) };

@@ -631,6 +631,15 @@ button.kfg__card { font: inherit; text-align: left; cursor: pointer; width: 100%
 .pro__tab td:last-child, .pro__tab th:last-child { text-align: right; white-space: nowrap; }
 .pro__tab tr.is-mass td { font-weight: 700; background: #fdf2dc; }
 .pro__alt { display: flex; gap: 8px; flex-wrap: wrap; align-items: center; }
+.pro__auto { margin-left: 6px; padding: 1px 7px; border: 1px solid #b9d3ea; border-radius: 999px; background: #eaf3fb; color: #0061aa; font: 600 .72rem/1.4 inherit; cursor: default; vertical-align: 1px; }
+.pro__auto.is-manuell { background: #fff; border-color: var(--line); color: var(--muted, #5b6470); cursor: pointer; }
+.pro__auto.is-manuell:hover { color: #0061aa; border-color: #0061aa; }
+.pro__grid .is-auto { background-color: #f3f8fd; border-color: #b9d3ea; }
+.pro__hinweis-auto { margin: 0 0 4px; }
+.pro__auslegung { padding: 10px 14px; border-radius: 6px; background: #eaf3fb; font-size: .9rem; }
+.pro__auslegung ul { margin: 6px 0 0; padding-left: 18px; display: grid; gap: 3px; }
+.pro__cad { display: grid; gap: 6px; padding: 10px 14px; border: 1px solid var(--line); border-radius: 6px; background: #fff; font-size: .92rem; }
+.pro__cad-knopf { display: flex; gap: 8px; }
 .pro__hinweise { margin: 0; padding: 0; list-style: none; display: grid; gap: 6px; }
 .pro__hinweise li { padding: 8px 12px; border-radius: 6px; font-size: .9rem; }
 .pro__hinweise .is-rot { background: #fbe4e2; color: #9b2a21; }
@@ -676,6 +685,8 @@ button.kfg__card { font: inherit; text-align: left; cursor: pointer; width: 100%
 .pro__ergebnis.is-stale > :not(.pro__neu) { opacity: .45; filter: grayscale(1); }
 .sim__grenze { margin: 0; padding: 10px 12px; border-radius: 8px; background: #fdf2dc; color: #855a06; font-size: .9rem; flex-basis: 100%; }
 .sim__grenze .btn { margin-left: 8px; }
+.sim__pro { margin: 0; padding: 10px 12px; border-radius: 8px; background: #eef4fc; border-left: 4px solid #2f6fd6; color: #2b3440; font-size: .9rem; flex-basis: 100%; }
+.sim__pro .is-warn { color: #a3470a; font-weight: 600; }
 .field[hidden] { display: none; }
 .kfg.is-profi .kfg__badge { display: none; }
 .pro__row[hidden] { display: none; }

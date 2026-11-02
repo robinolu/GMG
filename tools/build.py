@@ -842,6 +842,7 @@ def configurator_block(r):
           <div class="field"><label for="pro-strecke">Fahrstrecke für die Geschwindigkeit (mm)</label><input id="pro-strecke" type="text" inputmode="decimal" value="1000"></div>
         </fieldset>
         <fieldset class="pro__set"><legend>Backe und Belag</legend>
+          <p class="kfg__small muted pro__hinweis-auto">Felder mit <span class="pro__auto">auto</span> rechnet das Programm beim Berechnen selbst aus: Belag nach Reibwert, Temperatur und Sperren, Belagfläche nach Teil und Greifstelle, Backenform nach Greifkraft, Backenkörper nach Temperatur. Wer einen eigenen Wert einträgt, überschreibt die Automatik für dieses Feld.</p>
           <div class="pro__row">
             <div class="field"><label for="pro-backen">Backenform<button type="button" class="info" data-info="backenform" aria-label="Erklärung">!</button></label><select id="pro-backen"><option value="flach">Flachbacke (Klemmen)</option><option value="prisma">Prismenbacke</option><option value="kontur">Konturbacke (3D-Druck)</option><option value="konus">Kegelbacke</option></select></div>
             <div class="field" id="pro-alpha-feld" hidden><label for="pro-alpha">Öffnungswinkel α (°)<button type="button" class="info" data-info="oeffnungswinkel" aria-label="Erklärung">!</button></label><input id="pro-alpha" type="text" inputmode="decimal" value="90"></div>
@@ -920,6 +921,7 @@ def simulator_block():
         <div class="sim__tempo-scale"><span>langsamer</span><span>schneller</span></div>
         <div id="sim-tempo-wert" class="sim__kpi"><span><strong id="sim-stunde">–</strong> Teile pro Stunde</span><span>Taktzeit <strong id="sim-takt">–</strong></span></div>
       </div>
+      <p class="sim__pro" id="sim-pro" hidden></p>
       <p class="sim__grenze" id="sim-grenze" hidden></p>
       <p class="sim__note muted" id="sim-hinweis">Die Simulation zeigt den Ablauf. Ob und wie sicher ein Greifer Ihr Teil hält, klären wir gern persönlich.</p>
       <div class="sim__cta">
